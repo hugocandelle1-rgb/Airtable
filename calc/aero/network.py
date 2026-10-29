@@ -132,7 +132,9 @@ def main():
         sp = load_json("setpoints.json")
         ps_lo = sp["envelope"]["ps_min_Pa"]
         ps_hi = sp["envelope"]["ps_max_Pa"]
-    except FileNotFoundError:
+    except (FileNotFoundError, KeyError):
+        # setpoints.json absent ou d'un autre format : bornes provisoires
+        # (0,9·ps(2 g) et 1,1·ps(10 g) du modèle axisymétrique à h = 120 µm)
         ps_lo, ps_hi = 0.9 * 50.0, 1.1 * 330.0
     ps = np.linspace(5, 1.4 * ps_hi, 200)
     Qh = np.array([N * float(q_free(p, cfg)) for p in ps])

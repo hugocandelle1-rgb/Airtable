@@ -1,0 +1,199 @@
+{
+  "config": {
+    "d": 0.0004,
+    "L": 0.001,
+    "pitch": 0.005,
+    "pattern": "hex",
+    "D_cb": 0.002,
+    "t": 0.025,
+    "K_c": 0.5,
+    "model": "lichtarowicz",
+    "cone_inlet": false
+  },
+  "n_holes_zone": 6017,
+  "ps_range_Pa": [
+    45.0,
+    363.00000000000006
+  ],
+  "operating_min": {
+    "ps": 45.0,
+    "Q_m3s": 0.003572954815335381,
+    "Q_m3h": 12.86263733520737,
+    "dp_fan_total": 49.08636866164865,
+    "losses": {
+      "filtre d'aspiration": 1.9278853912598624,
+      "buse d'entrée": 0.23120987463781634,
+      "adaptateur rect.→rond": 0.12547160293358092,
+      "diffuseur conique": 0.42230520438259905,
+      "manchon souple": 0.04562502208109326,
+      "conduit + coude": 0.09885421450903539,
+      "entrée plenum + déflecteur": 0.4562502208109326,
+      "tôle de distribution": 0.2251067774177075,
+      "nappe de média": 0.5536603536160197
+    },
+    "leak_m3h": 0.037292817679558
+  },
+  "operating_max": {
+    "ps": 363.00000000000006,
+    "Q_m3s": 0.012892381643493272,
+    "Q_m3h": 46.41257391657578,
+    "dp_fan_total_dirty": 406.2391471891544,
+    "dp_fan_total_clean": 392.32627366365784,
+    "losses_dirty": {
+      "filtre d'aspiration": 20.8693102882448,
+      "buse d'entrée": 3.0103544669004743,
+      "adaptateur rect.→rond": 1.6336413007962838,
+      "diffuseur conique": 5.498417229800032,
+      "manchon souple": 0.5940381622515161,
+      "conduit + coude": 1.287082684878285,
+      "entrée plenum + déflecteur": 5.9403816225151616,
+      "tôle de distribution": 2.4081350220694198,
+      "nappe de média": 1.9977864116983373
+    },
+    "losses_clean": {
+      "filtre d'aspiration": 6.956436762748267,
+      "buse d'entrée": 3.0103544669004743,
+      "adaptateur rect.→rond": 1.6336413007962838,
+      "diffuseur conique": 5.498417229800032,
+      "manchon souple": 0.5940381622515161,
+      "conduit + coude": 1.287082684878285,
+      "entrée plenum + déflecteur": 5.9403816225151616,
+      "tôle de distribution": 2.4081350220694198,
+      "nappe de média": 1.9977864116983373
+    },
+    "leak_m3h": 0.30082872928176796
+  },
+  "fan_spec": {
+    "margin_Q": 1.15,
+    "margin_dp": 1.15,
+    "max_point": {
+      "Q_m3h": 53.37446000406214,
+      "dp_total_Pa": 467.1750192675275
+    },
+    "min_point": {
+      "Q_m3h": 11.184902030615106,
+      "dp_total_Pa": 42.68379883621622
+    },
+    "shaft_power_max_W": 15.392107642463953,
+    "air_power_max_W": 6.926448439108779,
+    "specific_speed_at_max": 0.4375478211076282,
+    "speed_ratio_generic_fan": 3.1636207473427675,
+    "speed_ratio_quadratic_estimate": 2.8768050571724126,
+    "n_rel_min": 0.28478608741895167,
+    "n_rel_max_clean": 0.892820029892616,
+    "n_rel_max_dirty": 0.9009551747131667,
+    "system_exponent_range": [
+      1.4964627807944897,
+      1.7359364433942466
+    ]
+  },
+  "plenum": {
+    "volume_m3": 0.031050619298297468,
+    "tau_s_at_ps_max": 0.01072257750031888,
+    "tau_s_at_ps_min": 0.0041548749807104705,
+    "plate_pressure_load_N_at_ps_max": 70.27680000000001,
+    "uniformity_at_ps_min": {
+      "v_settling": 0.018455345120533994,
+      "dyn_settling_rel": 4.556467947507705e-06,
+      "v_sheet_jet": 0.32559888127782294,
+      "Re_sheet_jet": 43.317243431878325,
+      "sheet_jet_residual_rel_laminar": 1.4618202684812071e-05,
+      "sheet_jet_residual_rel_turbulent": 3.191040407830032e-05,
+      "ratio_sheet_dp_over_upstream_dyn": 139.9207545474426,
+      "sheet_flow_nonuniformity": 0.0010329250821608136,
+      "ratio_orifice_dp_over_plenum_dyn": 219468.23976825722,
+      "ratio_orifice_dp_over_duct_dyn": 147.9451338785688,
+      "estimated_nonuniformity_pct": 0.0019174670632319776
+    },
+    "uniformity_at_ps_max": {
+      "v_settling": 0.06659288038994458,
+      "dyn_settling_rel": 7.35436984742407e-06,
+      "v_sheet_jet": 1.1748665340269973,
+      "Re_sheet_jet": 156.30268585287345,
+      "sheet_jet_residual_rel_laminar": 0.0003072008297190953,
+      "sheet_jet_residual_rel_turbulent": 5.150500700897843e-05,
+      "ratio_sheet_dp_over_upstream_dyn": 114.96433812039264,
+      "sheet_flow_nonuniformity": 0.00237711912553453,
+      "ratio_orifice_dp_over_plenum_dyn": 135973.58043534597,
+      "ratio_orifice_dp_over_duct_dyn": 91.66077780865844,
+      "estimated_nonuniformity_pct": 0.03145551995665194
+    }
+  },
+  "nozzle": {
+    "throat_mm": 45.0,
+    "dp_at_Qmin_Pa": 3.1635126110646,
+    "dp_at_Qmax_Pa": 41.188960180581674,
+    "Re_at_Qmin": 6724.701957488106,
+    "Re_at_Qmax": 24264.909173374177
+  },
+  "diffuser": {
+    "D_in_mm": 50.0,
+    "D_out_mm": 80.0,
+    "AR": 2.5600000000000005,
+    "total_angle_deg": 7.0,
+    "length_mm": 245.24783214149508,
+    "L_over_R1": 9.809913285659803,
+    "Re_in_at_Qmax": 21838.418256036755,
+    "criterion": "2θ ≤ 8° et L/R1 ≈ 5–20 : sous la ligne de premier décrochement (Sovran & Klomp 1967) ; Cp attendu ≈ η·(1 − 1/AR²)"
+  },
+  "deflector": {
+    "D_mm": 200.0,
+    "gap_mm": 25.0,
+    "area_ratio_entry": 1.2499999999999998,
+    "v_edge_at_Qmax": 0.8207545067156671
+  },
+  "sheet": {
+    "open_ratio": 0.05668123013231931,
+    "zeta": 826.9727086339725
+  },
+  "design": {
+    "filter_face_mm": [
+      287.0,
+      287.0
+    ],
+    "filter_depth_mm": 48.0,
+    "filter_dp_ref_Pa": 120.0,
+    "filter_v_ref": 2.7,
+    "filter_dirty_factor": 3.0,
+    "intake_box_mm": [
+      320.0,
+      320.0,
+      220.0
+    ],
+    "nozzle_throat_mm": 45.0,
+    "nozzle_alpha": 0.98,
+    "nozzle_K": 0.04,
+    "fan_inlet_mm": 50.0,
+    "fan_outlet_mm": [
+      50.0,
+      35.0
+    ],
+    "adapter_round_mm": 50.0,
+    "adapter_len_mm": 60.0,
+    "adapter_K": 0.05,
+    "diffuser_out_mm": 80.0,
+    "diffuser_angle_deg": 7.0,
+    "diffuser_eta": 0.75,
+    "sleeve_len_mm": 100.0,
+    "sleeve_K": 0.15,
+    "duct_mm": 80.0,
+    "duct_len_mm": 400.0,
+    "duct_f": 0.025,
+    "bend_K": 0.2,
+    "inlet_K": 1.5,
+    "plenum_inner_mm": 440.0,
+    "plenum_height_mm": 150.0,
+    "distribution_height_mm": 62.0,
+    "deflector_d_mm": 200.0,
+    "deflector_gap_mm": 25.0,
+    "sheet_t_mm": 1.0,
+    "sheet_hole_mm": 2.0,
+    "sheet_pitch_mm": 8.0,
+    "media_dp_ref_Pa": 3.0,
+    "media_v_ref": 0.1,
+    "settling_height_mm": 80.0,
+    "seam_len_m": 4.0,
+    "seam_gap_um": 50.0,
+    "seam_width_mm": 10.0
+  }
+}
