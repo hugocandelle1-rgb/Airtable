@@ -1,0 +1,2561 @@
+{
+  "meta": {
+    "date": "2026-10-29",
+    "version_params": "V3.0-baseline",
+    "surcharges": {},
+    "cadquery": "2.8.0"
+  },
+  "temps_generation_s": {
+    "construction_pieces_s": 6.28,
+    "csv_dxf_plaque_s": 0.54,
+    "step_stl_pieces_s": 2.94,
+    "assemblage_step_s": 3.11,
+    "svg_s": 31.04,
+    "interferences_s": 2.63,
+    "total_s": 50.9
+  },
+  "plaque": {
+    "nb_trous_reseau": 5739,
+    "nb_trous_dxf_csv": 5739,
+    "nb_trous_temoins_modele_leger": 19,
+    "masse_pleine_sans_percage_kg": 17.982,
+    "masse_plaque_complete_analytique_kg": 16.809,
+    "masse_modele_leger_kg": 17.958,
+    "retrait_trous_kg": 1.153,
+    "volume_retire_par_trou_mm3": 75.524,
+    "zone_percee_mm": 360.0
+  },
+  "plaque_complete": null,
+  "masses_par_groupe_kg": {
+    "aero": 0.617,
+    "bati": 27.618,
+    "nivellement": 2.461,
+    "option": 6.326,
+    "plaque": 16.845,
+    "plenum": 16.144
+  },
+  "masse_totale_kg": 70.011,
+  "boite_englobante_assemblage_mm": [
+    -357.5,
+    -357.5,
+    -900.0,
+    357.5,
+    357.5,
+    565.0
+  ],
+  "dimensions_assemblage_mm": [
+    715.0,
+    715.0,
+    1465.0
+  ],
+  "interferences": {
+    "paires_testees_booleen": 75,
+    "tolerance_mm3": 1.0,
+    "paires_en_interference": []
+  },
+  "verifications": {
+    "toutes_pieces_valides": true,
+    "interferences_nulles": true,
+    "platine_couvre_ventilateur_et_filtre": true,
+    "traverses_platine_au_dessus_du_cadre_bas": true,
+    "colonnes_dans_zone_percee": true,
+    "masse_plaque_coherente_avec_pleine": true,
+    "face_haute_plaque_a_z0": true
+  },
+  "exports": {
+    "step_pieces_et_barres": 56,
+    "stl": 7,
+    "svg": [
+      "plaque_dessus.svg",
+      "plaque_face.svg",
+      "plaque_iso.svg",
+      "plenum_dessus.svg",
+      "plenum_face.svg",
+      "plenum_iso.svg",
+      "aero_dessus.svg",
+      "aero_face.svg",
+      "aero_iso.svg",
+      "bati_dessus.svg",
+      "bati_face.svg",
+      "bati_iso.svg",
+      "assemblage_dessus.svg",
+      "assemblage_face.svg",
+      "assemblage_iso.svg"
+    ],
+    "dxf": "plaque_trous.dxf",
+    "csv_trous": "plaque_centres_trous.csv",
+    "liste_debit": "liste_debit_profiles.csv",
+    "assemblage": "assemblage.step"
+  },
+  "liste_debit": [
+    {
+      "section": "45x45",
+      "longueur_mm": 159.5,
+      "quantite": 1,
+      "pieces": "bati_console_1",
+      "longueur_totale_m": 0.1595,
+      "masse_kg_estimee": 0.295
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 212.0,
+      "quantite": 4,
+      "pieces": "plenum_montant_1 plenum_montant_2 plenum_montant_3 plenum_montant_4",
+      "longueur_totale_m": 0.848,
+      "masse_kg_estimee": 1.569
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 243.5,
+      "quantite": 2,
+      "pieces": "bati_console_2 bati_console_3",
+      "longueur_totale_m": 0.487,
+      "masse_kg_estimee": 0.901
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 327.5,
+      "quantite": 1,
+      "pieces": "portique_bras",
+      "longueur_totale_m": 0.3275,
+      "masse_kg_estimee": 0.606
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 400.0,
+      "quantite": 8,
+      "pieces": "plenum_traverse_haut_Yp plenum_traverse_haut_Xp plenum_traverse_haut_Ym plenum_traverse_haut_Xm plenum_traverse_bas_Yp plenum_traverse_bas_Xp plenum_traverse_bas_Ym plenum_traverse_bas_Xm",
+      "longueur_totale_m": 3.2,
+      "masse_kg_estimee": 5.92
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 595.0,
+      "quantite": 2,
+      "pieces": "portique_montant_1 portique_montant_2",
+      "longueur_totale_m": 1.19,
+      "masse_kg_estimee": 2.201
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 610.0,
+      "quantite": 17,
+      "pieces": "bati_cadre_haut_Xp bati_cadre_haut_Yp bati_cadre_haut_Xm bati_cadre_haut_Ym bati_cadre_bas_Xp bati_cadre_bas_Yp bati_cadre_bas_Xm bati_cadre_bas_Ym bati_cadre_sup_Xp bati_cadre_sup_Yp bati_cadre_sup_Xm bati_cadre_sup_Ym bati_traverse_plenum_p bati_traverse_plenum_m bati_traverse_platine_1 bati_traverse_platine_2 portique_traverse",
+      "longueur_totale_m": 10.37,
+      "masse_kg_estimee": 19.184
+    },
+    {
+      "section": "45x45",
+      "longueur_mm": 810.0,
+      "quantite": 4,
+      "pieces": "bati_montant_1 bati_montant_2 bati_montant_3 bati_montant_4",
+      "longueur_totale_m": 3.24,
+      "masse_kg_estimee": 5.994
+    }
+  ],
+  "profils_catalogue": {
+    "40x40": {
+      "w": 40.0,
+      "h": 40.0,
+      "slot": 8.0,
+      "kg_m": 1.45
+    },
+    "45x45": {
+      "w": 45.0,
+      "h": 45.0,
+      "slot": 10.0,
+      "kg_m": 1.85
+    },
+    "40x80": {
+      "w": 40.0,
+      "h": 80.0,
+      "slot": 8.0,
+      "kg_m": 2.75
+    },
+    "45x90": {
+      "w": 45.0,
+      "h": 90.0,
+      "slot": 10.0,
+      "kg_m": 3.6
+    }
+  },
+  "cotes_derivees_mm": {
+    "plate_top": 0.0,
+    "plate_bot": -25.0,
+    "pl_s": 45.0,
+    "pl_cp": 222.5,
+    "pl_open_half": 200.0,
+    "pl_outer_half": 245.0,
+    "bride_top": -37.0,
+    "bride_bot": -45.0,
+    "rail_top_top": -45.0,
+    "rail_top_bot": -90.0,
+    "cavity_top": -37.0,
+    "cavity_floor": -187.0,
+    "fond_top": -187.0,
+    "fond_bot": -192.0,
+    "rail_bot_c": -189.5,
+    "rail_bot_bot": -212.0,
+    "rail_bot_top": -167.0,
+    "baffle_top": -117.0,
+    "baffle_bot": -119.0,
+    "verin_head_top": -197.0,
+    "console_top": -257.0,
+    "pl_leg": 45.0,
+    "pl_up_bot": -257.0,
+    "dif_top": -192.0,
+    "dif_bot": -517.774,
+    "adp_top": -517.774,
+    "adp_bot": -557.774,
+    "man_top": -557.774,
+    "man_bot": -597.774,
+    "stub_top": -597.774,
+    "fan_top": -603.774,
+    "fan_bot": -700.774,
+    "fan_zc": -652.274,
+    "fan_xc": 30.0,
+    "fan_yc": 0.0,
+    "cale_bot": -706.774,
+    "bell_tube_len": 49.0,
+    "fan_y_min": -65.5,
+    "fan_y_max": 16.5,
+    "pf_cx": 30.0,
+    "pf_cy": -24.5,
+    "pf_top": -706.774,
+    "pf_bot": -714.774,
+    "plot_bot": -734.774,
+    "fs": 45.0,
+    "trav_pf_top": -734.774,
+    "trav_pf_bot": -779.774,
+    "floor": -900.0,
+    "up_bot": -840.0,
+    "top_ring_top": -30.0,
+    "top_ring_bot": -75.0,
+    "low_ring_bot": -840.0,
+    "low_ring_top": -795.0,
+    "cad_sup_top": -257.0,
+    "cad_sup_bot": -302.0,
+    "fr_cp": 327.5,
+    "fr_in_half": 305.0
+  },
+  "diffuseur": {
+    "length": 325.774,
+    "half_angle_deg": 7.0,
+    "d_in": 40.0,
+    "d_out": 120.0
+  },
+  "defaults_utilises": [
+    "aero.adapter_len_mm",
+    "aero.bell_flare_r_mm",
+    "aero.bell_len_mm",
+    "aero.bell_lip_mm",
+    "aero.bell_throat_d_mm",
+    "aero.diffuser_d_in_mm",
+    "aero.diffuser_d_out_mm",
+    "aero.diffuser_flange_extra_mm",
+    "aero.diffuser_flange_t_mm",
+    "aero.diffuser_half_angle_deg",
+    "aero.diffuser_len_mm",
+    "aero.diffuser_wall_mm",
+    "aero.filter_d_mm",
+    "aero.filter_gap_mm",
+    "aero.filter_t_mm",
+    "aero.housing_wall_mm",
+    "aero.manchon_len_mm",
+    "cad.tol_interference_mm3",
+    "fan.mass_kg",
+    "fan.outlet_mm",
+    "fan.outlet_offset_x_mm",
+    "fan.size_mm",
+    "fan.standoff_mm",
+    "fan.stub_h_mm",
+    "fan.wall_mm",
+    "frame.foot_base_d_mm",
+    "frame.foot_base_t_mm",
+    "frame.foot_h_mm",
+    "frame.foot_stud_d_mm",
+    "frame.footprint_mm",
+    "frame.table_height_mm",
+    "frame.top_ring_drop_mm",
+    "gantry.camera_lens_z_mm",
+    "gantry.camera_mass_kg",
+    "gantry.camera_mm",
+    "gantry.enabled",
+    "gantry.lens_d_mm",
+    "gantry.lens_len_mm",
+    "leveling.base_mm",
+    "leveling.body_d_mm",
+    "leveling.console_clear_mm",
+    "leveling.head_gap_mm",
+    "leveling.knob_d_mm",
+    "leveling.motor_offset_mm",
+    "leveling.nema17_mass_kg",
+    "leveling.nema17_mm",
+    "leveling.verin_height_mm",
+    "materials.acier",
+    "materials.alu",
+    "materials.alu_5083",
+    "materials.composite",
+    "materials.epdm",
+    "materials.inox",
+    "materials.media_filtrant",
+    "materials.pla",
+    "materials.pmma",
+    "plate.ball_d_mm",
+    "plate.edge_band_mm",
+    "plate.hole_exclusion_margin_mm",
+    "plate.insert_d_mm",
+    "plate.insert_half_angle_deg",
+    "plate.insert_recess_depth_mm",
+    "plate.insert_t_mm",
+    "plate.pin_d_mm",
+    "plate.pin_depth_mm",
+    "plate.pin_positions_mm",
+    "plate.pocket_d_mm",
+    "plate.pocket_depth_mm",
+    "plate.tap_d_mm",
+    "plate.tap_depth_mm",
+    "plate.tap_half_mm",
+    "plate.tap_per_side",
+    "plate.tap_thread",
+    "plate.witness_holes",
+    "platine.margin_mm",
+    "platine.plot_d_mm",
+    "platine.plot_h_mm",
+    "platine.plot_inset_mm",
+    "platine.size_mm",
+    "platine.t_mm",
+    "plenum.baffle_edge_gap_mm",
+    "plenum.baffle_hole_d_mm",
+    "plenum.baffle_holes",
+    "plenum.baffle_t_mm",
+    "plenum.bride_t_mm",
+    "plenum.column_hole_d_mm",
+    "plenum.membrane_flange_half_mm",
+    "plenum.membrane_fold_dip_mm",
+    "plenum.membrane_gap_mm",
+    "plenum.membrane_inset_mm",
+    "plenum.membrane_t_mm",
+    "plenum.membrane_wall_spacing_mm",
+    "plenum.panel_embed_mm",
+    "plenum.panel_material",
+    "plenum.panel_t_mm",
+    "plenum.profile",
+    "plenum.ring_t_mm",
+    "plenum.ring_wall_clearance_mm",
+    "screen.height_above_plate_mm",
+    "screen.t_mm",
+    "support.angles_deg",
+    "support.column_d_mm",
+    "support.insert_types",
+    "support.radius_mm",
+    "support.roles"
+  ],
+  "pieces": [
+    {
+      "nom": "plaque",
+      "groupe": "plaque",
+      "matiere": "alu_5083",
+      "volume_mm3": 6751055.4,
+      "masse_kg": 16.8087,
+      "bbox_mm": [
+        -260.0,
+        -260.0,
+        -25.01,
+        260.0,
+        260.0,
+        0.0
+      ],
+      "dimensions_mm": [
+        520.0,
+        520.0,
+        25.01
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "modèle light"
+    },
+    {
+      "nom": "insert_cone_1",
+      "groupe": "plaque",
+      "matiere": "acier",
+      "volume_mm3": 1060.1,
+      "masse_kg": 0.0083,
+      "bbox_mm": [
+        -7.95,
+        160.05,
+        -25.0,
+        7.95,
+        175.95,
+        -19.0
+      ],
+      "dimensions_mm": [
+        15.9,
+        15.9,
+        6.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "pastille d'appui cone (acier trempé), collée dans le logement"
+    },
+    {
+      "nom": "bille_1",
+      "groupe": "plaque",
+      "matiere": "acier",
+      "volume_mm3": 523.6,
+      "masse_kg": 0.0041,
+      "bbox_mm": [
+        -5.0,
+        163.0,
+        -32.07,
+        5.0,
+        173.0,
+        -22.07
+      ],
+      "dimensions_mm": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "bille acier/céramique de couplage de Kelvin"
+    },
+    {
+      "nom": "insert_ve_2",
+      "groupe": "plaque",
+      "matiere": "acier",
+      "volume_mm3": 807.5,
+      "masse_kg": 0.0063,
+      "bbox_mm": [
+        -153.44,
+        -91.95,
+        -25.0,
+        -137.54,
+        -76.05,
+        -19.0
+      ],
+      "dimensions_mm": [
+        15.9,
+        15.9,
+        6.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "pastille d'appui ve (acier trempé), collée dans le logement"
+    },
+    {
+      "nom": "bille_2",
+      "groupe": "plaque",
+      "matiere": "acier",
+      "volume_mm3": 523.6,
+      "masse_kg": 0.0041,
+      "bbox_mm": [
+        -150.49,
+        -89.0,
+        -32.07,
+        -140.49,
+        -79.0,
+        -22.07
+      ],
+      "dimensions_mm": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "bille acier/céramique de couplage de Kelvin"
+    },
+    {
+      "nom": "insert_plat_3",
+      "groupe": "plaque",
+      "matiere": "acier",
+      "volume_mm3": 1191.3,
+      "masse_kg": 0.0094,
+      "bbox_mm": [
+        137.54,
+        -91.95,
+        -25.0,
+        153.44,
+        -76.05,
+        -19.0
+      ],
+      "dimensions_mm": [
+        15.9,
+        15.9,
+        6.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "pastille d'appui plat (acier trempé), collée dans le logement"
+    },
+    {
+      "nom": "bille_3",
+      "groupe": "plaque",
+      "matiere": "acier",
+      "volume_mm3": 523.6,
+      "masse_kg": 0.0041,
+      "bbox_mm": [
+        140.49,
+        -89.0,
+        -35.0,
+        150.49,
+        -79.0,
+        -25.0
+      ],
+      "dimensions_mm": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "bille acier/céramique de couplage de Kelvin"
+    },
+    {
+      "nom": "plenum_montant_1",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 241342.9,
+      "masse_kg": 0.3922,
+      "bbox_mm": [
+        200.0,
+        200.0,
+        -257.0,
+        245.0,
+        245.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        212.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 212.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_montant_2",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 241342.9,
+      "masse_kg": 0.3922,
+      "bbox_mm": [
+        -245.0,
+        200.0,
+        -257.0,
+        -200.0,
+        245.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        212.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 212.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_montant_3",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 241342.9,
+      "masse_kg": 0.3922,
+      "bbox_mm": [
+        -245.0,
+        -245.0,
+        -257.0,
+        -200.0,
+        -200.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        212.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 212.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_montant_4",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 241342.9,
+      "masse_kg": 0.3922,
+      "bbox_mm": [
+        200.0,
+        -245.0,
+        -257.0,
+        245.0,
+        -200.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        212.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 212.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_haut_Yp",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        200.0,
+        -200.0,
+        -90.0,
+        245.0,
+        200.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        400.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_haut_Xp",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        -200.0,
+        200.0,
+        -90.0,
+        200.0,
+        245.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        400.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_haut_Ym",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        -245.0,
+        -200.0,
+        -90.0,
+        -200.0,
+        200.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        400.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_haut_Xm",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        -200.0,
+        -245.0,
+        -90.0,
+        200.0,
+        -200.0,
+        -45.0
+      ],
+      "dimensions_mm": [
+        400.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_bas_Yp",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        200.0,
+        -200.0,
+        -212.0,
+        245.0,
+        200.0,
+        -167.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        400.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_bas_Xp",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        -200.0,
+        200.0,
+        -212.0,
+        200.0,
+        245.0,
+        -167.0
+      ],
+      "dimensions_mm": [
+        400.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_bas_Ym",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        -245.0,
+        -200.0,
+        -212.0,
+        -200.0,
+        200.0,
+        -167.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        400.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_traverse_bas_Xm",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 455363.9,
+      "masse_kg": 0.74,
+      "bbox_mm": [
+        -200.0,
+        -245.0,
+        -212.0,
+        200.0,
+        -200.0,
+        -167.0
+      ],
+      "dimensions_mm": [
+        400.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 400.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "plenum_panneau_X+",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 193440.0,
+      "masse_kg": 0.5223,
+      "bbox_mm": [
+        220.0,
+        -208.0,
+        -175.0,
+        225.0,
+        208.0,
+        -82.0
+      ],
+      "dimensions_mm": [
+        5.0,
+        416.0,
+        93.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau plein dans les rainures"
+    },
+    {
+      "nom": "plenum_panneau_X-",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 193440.0,
+      "masse_kg": 0.5223,
+      "bbox_mm": [
+        -225.0,
+        -208.0,
+        -175.0,
+        -220.0,
+        208.0,
+        -82.0
+      ],
+      "dimensions_mm": [
+        5.0,
+        416.0,
+        93.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau plein dans les rainures"
+    },
+    {
+      "nom": "plenum_panneau_Y+",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 193440.0,
+      "masse_kg": 0.5223,
+      "bbox_mm": [
+        -208.0,
+        220.0,
+        -175.0,
+        208.0,
+        225.0,
+        -82.0
+      ],
+      "dimensions_mm": [
+        416.0,
+        5.0,
+        93.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau plein dans les rainures"
+    },
+    {
+      "nom": "plenum_panneau_Y-",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 193440.0,
+      "masse_kg": 0.5223,
+      "bbox_mm": [
+        -208.0,
+        -225.0,
+        -175.0,
+        208.0,
+        -220.0,
+        -82.0
+      ],
+      "dimensions_mm": [
+        416.0,
+        5.0,
+        93.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau plein dans les rainures"
+    },
+    {
+      "nom": "plenum_fond",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 802738.9,
+      "masse_kg": 2.1674,
+      "bbox_mm": [
+        -208.0,
+        -208.0,
+        -192.0,
+        208.0,
+        208.0,
+        -187.0
+      ],
+      "dimensions_mm": [
+        416.0,
+        416.0,
+        5.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "entrée d'air centrale Ø120 (diffuseur), 3 passages de colonnes"
+    },
+    {
+      "nom": "plenum_tole_perforee",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 274966.0,
+      "masse_kg": 0.7424,
+      "bbox_mm": [
+        -219.0,
+        -219.0,
+        -119.0,
+        219.0,
+        219.0,
+        -117.0
+      ],
+      "dimensions_mm": [
+        438.0,
+        438.0,
+        2.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "1034 trous Ø8.0, ouverture visée 30% ; tenue par 4 tasseaux (non modélisés)"
+    },
+    {
+      "nom": "plenum_bride",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 640800.0,
+      "masse_kg": 1.7302,
+      "bbox_mm": [
+        -245.0,
+        -245.0,
+        -45.0,
+        245.0,
+        245.0,
+        -37.0
+      ],
+      "dimensions_mm": [
+        490.0,
+        490.0,
+        8.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "bride plate usinée, repose sur le cadre"
+    },
+    {
+      "nom": "membrane_U",
+      "groupe": "plenum",
+      "matiere": "epdm",
+      "volume_mm3": 364819.3,
+      "masse_kg": 0.4195,
+      "bbox_mm": [
+        -240.0,
+        -240.0,
+        -49.0,
+        240.0,
+        240.0,
+        -25.0
+      ],
+      "dimensions_mm": [
+        480.0,
+        480.0,
+        24.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "membrane EPDM en U : branches h=184/194, fond z=-49, e=1.5"
+    },
+    {
+      "nom": "plenum_bride_plaque",
+      "groupe": "plenum",
+      "matiere": "alu",
+      "volume_mm3": 558149.0,
+      "masse_kg": 1.507,
+      "bbox_mm": [
+        -240.0,
+        -240.0,
+        -32.5,
+        240.0,
+        240.0,
+        -26.5
+      ],
+      "dimensions_mm": [
+        480.0,
+        480.0,
+        6.01
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "bride de serrage de la membrane, vissée (M5) dans les taraudages de la plaque ; vis non modélisées"
+    },
+    {
+      "nom": "ventilateur",
+      "groupe": "aero",
+      "matiere": "composite",
+      "volume_mm3": 311937.0,
+      "masse_kg": 0.15,
+      "bbox_mm": [
+        -18.5,
+        -16.5,
+        -700.77,
+        78.5,
+        16.5,
+        -597.77
+      ],
+      "dimensions_mm": [
+        97.0,
+        33.0,
+        103.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "enveloppe soufflante 97x97x33, sortie 30x26 (réf. TBD)"
+    },
+    {
+      "nom": "cale_ventilateur",
+      "groupe": "aero",
+      "matiere": "alu",
+      "volume_mm3": 11880.0,
+      "masse_kg": 0.0321,
+      "bbox_mm": [
+        0.0,
+        -16.5,
+        -706.77,
+        60.0,
+        16.5,
+        -700.77
+      ],
+      "dimensions_mm": [
+        60.0,
+        33.0,
+        6.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "cale/appui du ventilateur"
+    },
+    {
+      "nom": "manchon_souple",
+      "groupe": "aero",
+      "matiere": "epdm",
+      "volume_mm3": 9600.0,
+      "masse_kg": 0.011,
+      "bbox_mm": [
+        -17.0,
+        -15.0,
+        -597.77,
+        17.0,
+        15.0,
+        -557.77
+      ],
+      "dimensions_mm": [
+        34.0,
+        30.0,
+        40.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "manchon souple rectangulaire (découplage vibratoire)"
+    },
+    {
+      "nom": "adaptateur_rect_rond",
+      "groupe": "aero",
+      "matiere": "pla",
+      "volume_mm3": 10176.9,
+      "masse_kg": 0.0126,
+      "bbox_mm": [
+        -22.43,
+        -22.48,
+        -558.46,
+        22.69,
+        22.48,
+        -517.08
+      ],
+      "dimensions_mm": [
+        45.12,
+        44.96,
+        41.38
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "impression 3D, loft rectangle -> rond"
+    },
+    {
+      "nom": "diffuseur_conique",
+      "groupe": "aero",
+      "matiere": "pla",
+      "volume_mm3": 238110.5,
+      "masse_kg": 0.2953,
+      "bbox_mm": [
+        -75.0,
+        -75.07,
+        -518.11,
+        75.09,
+        75.07,
+        -191.68
+      ],
+      "dimensions_mm": [
+        150.09,
+        150.14,
+        326.42
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "demi-angle 7.00 deg, Ø40->Ø120, L=325.8 mm, bride Ø150"
+    },
+    {
+      "nom": "buse_entree_bellmouth",
+      "groupe": "aero",
+      "matiere": "pla",
+      "volume_mm3": 76115.1,
+      "masse_kg": 0.0944,
+      "bbox_mm": [
+        -20.0,
+        -65.56,
+        -702.32,
+        80.06,
+        -16.44,
+        -602.23
+      ],
+      "dimensions_mm": [
+        100.06,
+        49.12,
+        100.09
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "buse Ø60, rayon 12, avec bride et carter de filtre (impression 3D)"
+    },
+    {
+      "nom": "filtre_aspiration",
+      "groupe": "aero",
+      "matiere": "media_filtrant",
+      "volume_mm3": 143560.7,
+      "masse_kg": 0.0215,
+      "bbox_mm": [
+        -17.8,
+        -63.5,
+        -700.07,
+        77.8,
+        -43.5,
+        -604.47
+      ],
+      "dimensions_mm": [
+        95.6,
+        20.0,
+        95.6
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "média filtrant Ø96x20"
+    },
+    {
+      "nom": "colonne_appui_1",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 33160.9,
+      "masse_kg": 0.2603,
+      "bbox_mm": [
+        -8.0,
+        160.0,
+        -197.0,
+        8.0,
+        176.0,
+        -32.07
+      ],
+      "dimensions_mm": [
+        16.0,
+        16.0,
+        164.93
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "colonne Ø16 traversant le fond et la tôle du plenum (passage étanche non modélisé)"
+    },
+    {
+      "nom": "pivot_fixe_1",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 49556.6,
+      "masse_kg": 0.389,
+      "bbox_mm": [
+        -20.0,
+        148.0,
+        -257.0,
+        20.0,
+        188.0,
+        -197.0
+      ],
+      "dimensions_mm": [
+        40.0,
+        40.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "pivot fixe (hauteur non réglable)"
+    },
+    {
+      "nom": "colonne_appui_2",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 33160.9,
+      "masse_kg": 0.2603,
+      "bbox_mm": [
+        -153.49,
+        -92.0,
+        -197.0,
+        -137.49,
+        -76.0,
+        -32.07
+      ],
+      "dimensions_mm": [
+        16.0,
+        16.0,
+        164.93
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "colonne Ø16 traversant le fond et la tôle du plenum (passage étanche non modélisé)"
+    },
+    {
+      "nom": "verin_2",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 45635.9,
+      "masse_kg": 0.3582,
+      "bbox_mm": [
+        -165.49,
+        -104.0,
+        -257.0,
+        -125.49,
+        -64.0,
+        -197.0
+      ],
+      "dimensions_mm": [
+        40.0,
+        40.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "vérin à vis fin (enveloppe) : course ± 0,25 deg à détailler en phase 2"
+    },
+    {
+      "nom": "moteur_nema17_2",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 71571.6,
+      "masse_kg": 0.28,
+      "bbox_mm": [
+        -166.64,
+        -165.15,
+        -257.0,
+        -124.34,
+        -122.85,
+        -217.0
+      ],
+      "dimensions_mm": [
+        42.3,
+        42.3,
+        40.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "NEMA17 (enveloppe)"
+    },
+    {
+      "nom": "accouplement_2",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 1198.8,
+      "masse_kg": 0.0094,
+      "bbox_mm": [
+        -149.49,
+        -122.85,
+        -236.0,
+        -141.49,
+        -99.0,
+        -228.0
+      ],
+      "dimensions_mm": [
+        8.0,
+        23.85,
+        8.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "accouplement moteur -> vis (schéma)"
+    },
+    {
+      "nom": "colonne_appui_3",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 32572.0,
+      "masse_kg": 0.2557,
+      "bbox_mm": [
+        137.49,
+        -92.0,
+        -197.0,
+        153.49,
+        -76.0,
+        -35.0
+      ],
+      "dimensions_mm": [
+        16.0,
+        16.0,
+        162.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "colonne Ø16 traversant le fond et la tôle du plenum (passage étanche non modélisé)"
+    },
+    {
+      "nom": "verin_3",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 45635.9,
+      "masse_kg": 0.3582,
+      "bbox_mm": [
+        125.49,
+        -104.0,
+        -257.0,
+        165.49,
+        -64.0,
+        -197.0
+      ],
+      "dimensions_mm": [
+        40.0,
+        40.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "vérin à vis fin (enveloppe) : course ± 0,25 deg à détailler en phase 2"
+    },
+    {
+      "nom": "moteur_nema17_3",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 71571.6,
+      "masse_kg": 0.28,
+      "bbox_mm": [
+        124.34,
+        -165.15,
+        -257.0,
+        166.64,
+        -122.85,
+        -217.0
+      ],
+      "dimensions_mm": [
+        42.3,
+        42.3,
+        40.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "NEMA17 (enveloppe)"
+    },
+    {
+      "nom": "accouplement_3",
+      "groupe": "nivellement",
+      "matiere": "acier",
+      "volume_mm3": 1198.8,
+      "masse_kg": 0.0094,
+      "bbox_mm": [
+        141.49,
+        -122.85,
+        -236.0,
+        149.49,
+        -99.0,
+        -228.0
+      ],
+      "dimensions_mm": [
+        8.0,
+        23.85,
+        8.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "accouplement moteur -> vis (schéma)"
+    },
+    {
+      "nom": "bati_montant_1",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 922112.0,
+      "masse_kg": 1.4985,
+      "bbox_mm": [
+        305.0,
+        305.0,
+        -840.0,
+        350.0,
+        350.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        810.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 810.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_montant_2",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 922112.0,
+      "masse_kg": 1.4985,
+      "bbox_mm": [
+        -350.0,
+        305.0,
+        -840.0,
+        -305.0,
+        350.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        810.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 810.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_montant_3",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 922112.0,
+      "masse_kg": 1.4985,
+      "bbox_mm": [
+        -350.0,
+        -350.0,
+        -840.0,
+        -305.0,
+        -305.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        810.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 810.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_montant_4",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 922112.0,
+      "masse_kg": 1.4985,
+      "bbox_mm": [
+        305.0,
+        -350.0,
+        -840.0,
+        350.0,
+        -305.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        810.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 810.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_haut_Xp",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        305.0,
+        -75.0,
+        305.0,
+        350.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_haut_Yp",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        305.0,
+        -305.0,
+        -75.0,
+        350.0,
+        305.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_haut_Xm",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        -350.0,
+        -75.0,
+        305.0,
+        -305.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_haut_Ym",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -350.0,
+        -305.0,
+        -75.0,
+        -305.0,
+        305.0,
+        -30.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_bas_Xp",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        305.0,
+        -840.0,
+        305.0,
+        350.0,
+        -795.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_bas_Yp",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        305.0,
+        -305.0,
+        -840.0,
+        350.0,
+        305.0,
+        -795.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_bas_Xm",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        -350.0,
+        -840.0,
+        305.0,
+        -305.0,
+        -795.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_bas_Ym",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -350.0,
+        -305.0,
+        -840.0,
+        -305.0,
+        305.0,
+        -795.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_sup_Xp",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        305.0,
+        -302.0,
+        305.0,
+        350.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_sup_Yp",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        305.0,
+        -305.0,
+        -302.0,
+        350.0,
+        305.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_sup_Xm",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        -350.0,
+        -302.0,
+        305.0,
+        -305.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_cadre_sup_Ym",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -350.0,
+        -305.0,
+        -302.0,
+        -305.0,
+        305.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_traverse_plenum_p",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        200.0,
+        -305.0,
+        -302.0,
+        245.0,
+        305.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_traverse_plenum_m",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -245.0,
+        -305.0,
+        -302.0,
+        -200.0,
+        305.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        610.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_console_1",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 181576.4,
+      "masse_kg": 0.2951,
+      "bbox_mm": [
+        -22.5,
+        145.5,
+        -302.0,
+        22.5,
+        305.0,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        159.5,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 159.5
+      },
+      "note": "console de l'appui 1 (pivot)"
+    },
+    {
+      "nom": "bati_console_2",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 277202.8,
+      "masse_kg": 0.4505,
+      "bbox_mm": [
+        -167.99,
+        -305.0,
+        -302.0,
+        -122.99,
+        -61.5,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        243.5,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 243.5
+      },
+      "note": "console de l'appui 2 (verin)"
+    },
+    {
+      "nom": "bati_console_3",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 277202.8,
+      "masse_kg": 0.4505,
+      "bbox_mm": [
+        122.99,
+        -305.0,
+        -302.0,
+        167.99,
+        -61.5,
+        -257.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        243.5,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 243.5
+      },
+      "note": "console de l'appui 3 (verin)"
+    },
+    {
+      "nom": "bati_pied_1",
+      "groupe": "bati",
+      "matiere": "acier",
+      "volume_mm3": 38327.4,
+      "masse_kg": 0.3009,
+      "bbox_mm": [
+        297.5,
+        297.5,
+        -900.0,
+        357.5,
+        357.5,
+        -840.0
+      ],
+      "dimensions_mm": [
+        60.0,
+        60.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "pied réglable (embase + tige M16)"
+    },
+    {
+      "nom": "bati_pied_2",
+      "groupe": "bati",
+      "matiere": "acier",
+      "volume_mm3": 38327.4,
+      "masse_kg": 0.3009,
+      "bbox_mm": [
+        -357.5,
+        297.5,
+        -900.0,
+        -297.5,
+        357.5,
+        -840.0
+      ],
+      "dimensions_mm": [
+        60.0,
+        60.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "pied réglable (embase + tige M16)"
+    },
+    {
+      "nom": "bati_pied_3",
+      "groupe": "bati",
+      "matiere": "acier",
+      "volume_mm3": 38327.4,
+      "masse_kg": 0.3009,
+      "bbox_mm": [
+        -357.5,
+        -357.5,
+        -900.0,
+        -297.5,
+        -297.5,
+        -840.0
+      ],
+      "dimensions_mm": [
+        60.0,
+        60.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "pied réglable (embase + tige M16)"
+    },
+    {
+      "nom": "bati_pied_4",
+      "groupe": "bati",
+      "matiere": "acier",
+      "volume_mm3": 38327.4,
+      "masse_kg": 0.3009,
+      "bbox_mm": [
+        297.5,
+        -357.5,
+        -900.0,
+        357.5,
+        -297.5,
+        -840.0
+      ],
+      "dimensions_mm": [
+        60.0,
+        60.0,
+        60.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "pied réglable (embase + tige M16)"
+    },
+    {
+      "nom": "platine_ventilateur",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 416000.0,
+      "masse_kg": 1.1232,
+      "bbox_mm": [
+        -100.0,
+        -124.5,
+        -714.77,
+        160.0,
+        75.5,
+        -706.77
+      ],
+      "dimensions_mm": [
+        260.0,
+        200.0,
+        8.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "platine ventilateur, posée sur 4 plots anti-vibratoires"
+    },
+    {
+      "nom": "platine_plot_1",
+      "groupe": "bati",
+      "matiere": "epdm",
+      "volume_mm3": 9817.5,
+      "masse_kg": 0.0113,
+      "bbox_mm": [
+        -87.5,
+        -112.0,
+        -734.77,
+        -62.5,
+        -87.0,
+        -714.77
+      ],
+      "dimensions_mm": [
+        25.0,
+        25.0,
+        20.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "plot anti-vibratoire (enveloppe)"
+    },
+    {
+      "nom": "platine_plot_2",
+      "groupe": "bati",
+      "matiere": "epdm",
+      "volume_mm3": 9817.5,
+      "masse_kg": 0.0113,
+      "bbox_mm": [
+        122.5,
+        -112.0,
+        -734.77,
+        147.5,
+        -87.0,
+        -714.77
+      ],
+      "dimensions_mm": [
+        25.0,
+        25.0,
+        20.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "plot anti-vibratoire (enveloppe)"
+    },
+    {
+      "nom": "platine_plot_3",
+      "groupe": "bati",
+      "matiere": "epdm",
+      "volume_mm3": 9817.5,
+      "masse_kg": 0.0113,
+      "bbox_mm": [
+        -87.5,
+        38.0,
+        -734.77,
+        -62.5,
+        63.0,
+        -714.77
+      ],
+      "dimensions_mm": [
+        25.0,
+        25.0,
+        20.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "plot anti-vibratoire (enveloppe)"
+    },
+    {
+      "nom": "platine_plot_4",
+      "groupe": "bati",
+      "matiere": "epdm",
+      "volume_mm3": 9817.5,
+      "masse_kg": 0.0113,
+      "bbox_mm": [
+        122.5,
+        38.0,
+        -734.77,
+        147.5,
+        63.0,
+        -714.77
+      ],
+      "dimensions_mm": [
+        25.0,
+        25.0,
+        20.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "plot anti-vibratoire (enveloppe)"
+    },
+    {
+      "nom": "bati_traverse_platine_1",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        -122.0,
+        -779.77,
+        305.0,
+        -77.0,
+        -734.77
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "bati_traverse_platine_2",
+      "groupe": "bati",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        28.0,
+        -779.77,
+        305.0,
+        73.0,
+        -734.77
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "ecran_Yp",
+      "groupe": "option",
+      "matiere": "pmma",
+      "volume_mm3": 439200.0,
+      "masse_kg": 0.5226,
+      "bbox_mm": [
+        -305.0,
+        325.5,
+        -30.0,
+        305.0,
+        329.5,
+        150.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        4.0,
+        180.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau transparent amovible posé sur le cadre haut"
+    },
+    {
+      "nom": "ecran_Xp",
+      "groupe": "option",
+      "matiere": "pmma",
+      "volume_mm3": 439200.0,
+      "masse_kg": 0.5226,
+      "bbox_mm": [
+        325.5,
+        -305.0,
+        -30.0,
+        329.5,
+        305.0,
+        150.0
+      ],
+      "dimensions_mm": [
+        4.0,
+        610.0,
+        180.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau transparent amovible posé sur le cadre haut"
+    },
+    {
+      "nom": "ecran_Ym",
+      "groupe": "option",
+      "matiere": "pmma",
+      "volume_mm3": 439200.0,
+      "masse_kg": 0.5226,
+      "bbox_mm": [
+        -305.0,
+        -329.5,
+        -30.0,
+        305.0,
+        -325.5,
+        150.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        4.0,
+        180.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau transparent amovible posé sur le cadre haut"
+    },
+    {
+      "nom": "ecran_Xm",
+      "groupe": "option",
+      "matiere": "pmma",
+      "volume_mm3": 439200.0,
+      "masse_kg": 0.5226,
+      "bbox_mm": [
+        -329.5,
+        -305.0,
+        -30.0,
+        -325.5,
+        305.0,
+        150.0
+      ],
+      "dimensions_mm": [
+        4.0,
+        610.0,
+        180.0
+      ],
+      "valide": true,
+      "commerce": false,
+      "profil": null,
+      "note": "panneau transparent amovible posé sur le cadre haut"
+    },
+    {
+      "nom": "portique_montant_1",
+      "groupe": "option",
+      "matiere": "alu",
+      "volume_mm3": 677353.9,
+      "masse_kg": 1.1007,
+      "bbox_mm": [
+        305.0,
+        305.0,
+        -30.0,
+        350.0,
+        350.0,
+        565.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        595.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 595.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "portique_montant_2",
+      "groupe": "option",
+      "matiere": "alu",
+      "volume_mm3": 677353.9,
+      "masse_kg": 1.1007,
+      "bbox_mm": [
+        -350.0,
+        305.0,
+        -30.0,
+        -305.0,
+        350.0,
+        565.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        45.0,
+        595.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 595.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "portique_traverse",
+      "groupe": "option",
+      "matiere": "alu",
+      "volume_mm3": 694430.0,
+      "masse_kg": 1.1285,
+      "bbox_mm": [
+        -305.0,
+        305.0,
+        520.0,
+        305.0,
+        350.0,
+        565.0
+      ],
+      "dimensions_mm": [
+        610.0,
+        45.0,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 610.0
+      },
+      "note": ""
+    },
+    {
+      "nom": "portique_bras",
+      "groupe": "option",
+      "matiere": "alu",
+      "volume_mm3": 372829.2,
+      "masse_kg": 0.6059,
+      "bbox_mm": [
+        -22.5,
+        -22.5,
+        520.0,
+        22.5,
+        305.0,
+        565.0
+      ],
+      "dimensions_mm": [
+        45.0,
+        327.5,
+        45.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": {
+        "section": "45x45",
+        "length_mm": 327.5
+      },
+      "note": ""
+    },
+    {
+      "nom": "camera_corps",
+      "groupe": "option",
+      "matiere": "composite",
+      "volume_mm3": 144000.0,
+      "masse_kg": 0.25,
+      "bbox_mm": [
+        -30.0,
+        -30.0,
+        480.0,
+        30.0,
+        30.0,
+        520.0
+      ],
+      "dimensions_mm": [
+        60.0,
+        60.0,
+        40.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "caméra (enveloppe) sous le bras du portique"
+    },
+    {
+      "nom": "camera_objectif",
+      "groupe": "option",
+      "matiere": "composite",
+      "volume_mm3": 21205.8,
+      "masse_kg": 0.05,
+      "bbox_mm": [
+        -15.0,
+        -15.0,
+        450.0,
+        15.0,
+        15.0,
+        480.0
+      ],
+      "dimensions_mm": [
+        30.0,
+        30.0,
+        30.0
+      ],
+      "valide": true,
+      "commerce": true,
+      "profil": null,
+      "note": "objectif (enveloppe)"
+    }
+  ]
+}

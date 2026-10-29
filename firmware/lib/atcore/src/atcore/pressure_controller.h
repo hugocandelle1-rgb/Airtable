@@ -1,8 +1,11 @@
 // Régulation de la pression plenum : consigne → rampe → PI (gains planifiés) + FF p∝N².
 //
-//   consigne ─► rampe ─► ┬─► FF : duty_ff = f⁻¹(p_rampe) ─────────┐
-//                         └─► (−) ◄─ p_mesuré filtré (IIR)         ▼
-//                              └─► PI (Kp,Ki normalisés/G(p)) ─► (+) ─► sat ─► duty PWM
+//   consigne ─► rampe ─┬─► FF : duty_ff = f⁻¹(p_rampe) ───────────────┐
+//                       └─► modèle de référence (lag τ_p) ─► (−)        ▼
+//                              p_mesuré filtré (IIR) ───────┘─► PI ─► (+) ─► sat ─► duty PWM
+//   Le modèle de référence évite que l'intégrale s'accumule pendant les rampes (le procédé
+//   suit la consigne avec un retard τ_p) : pas de dépassement en fin de rampe.
+//   Gains du PI : Kp = kp_norm/G(p), Ki = Kp/ti, G = dp/dduty = n·p/duty (planification).
 #pragma once
 #include "atcore/fan_model.h"
 #include "atcore/filters.h"
@@ -23,6 +26,7 @@ struct PressureControllerConfig {
   float ti_s = 0.8f;              // temps d'intégrale ≈ constante de temps du procédé
   float kp_fixed = 0.0008f;       // [duty/Pa] si gain_schedule = false
   float ki_fixed = 0.0010f;       // [duty/(Pa·s)]
+  float ref_tau_s = 0.8f;         // modèle de référence (≈ constante de temps du procédé) ; 0 = off
   float settle_tol_Pa = 0.3f;     // critère « établi » (pressure_regulation_Pa)
 };
 
@@ -57,6 +61,7 @@ class PressureController {
   Pid pid_;
   RateLimiter ramp_;
   Iir1 meas_;
+  Iir1 ref_;                         // modèle de référence : p_ref = lag(consigne rampée)
   float target_ = 0.0f;
   float duty_ = 0.0f;
   bool enabled_ = false;

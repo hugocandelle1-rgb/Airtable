@@ -181,12 +181,34 @@ def green_matrix(xy: np.ndarray, r_h: float, R=R_PUCK):
     dot = np.sum(x * xi, axis=-1)
     num = rxi2 * rx2 - 2 * R**2 * dot + R**4
     np.fill_diagonal(d2, r_h**2)
-    return np.log(num / (R**2 * d2)) / (4 * np.pi)
+    Gm = np.log(num / (R**2 * d2)) / (4 * np.pi)
+    # trou à moins de r_h/2 du bord : pas de contre-pression propre (jet libre)
+    dg = np.diagonal(Gm).copy()
+    np.fill_diagonal(Gm, np.maximum(dg, 0.0))
+    return Gm
 
 
 def covered_holes(cfg: HoleConfig, center, R=R_PUCK):
-    """Trous couverts (relatifs au centre du palet) : ρ < R − r_h."""
-    return holes_near(cfg, np.asarray(center, float), R - cfg.r_h)
+    """Trous couverts ou partiellement couverts (relatifs au centre du palet).
+
+    Un trou dont le centre est à ρ < R + r_h interagit avec le film. Pour assurer
+    une transition continue lorsqu'un trou passe sous le bord (le jet est
+    progressivement recouvert sur une course d = 2 r_h), les trous de la bande
+    R − r_h < ρ < R + r_h sont placés à la distance effective au bord
+    δ_eff = (R + r_h − ρ)/2 ∈ [0, r_h] (même direction). Leur portance
+    (∝ R² − ρ'²) tend ainsi continûment vers 0 au découvrement.
+    """
+    xy = holes_near(cfg, np.asarray(center, float), R + cfg.r_h)
+    rho = np.hypot(xy[:, 0], xy[:, 1])
+    band = rho > R - cfg.r_h
+    if np.any(band):
+        d_eff = 0.5 * (R + cfg.r_h - rho[band])
+        xy = xy.copy()
+        xy[band] *= ((R - d_eff) / rho[band])[:, None]
+        keep = np.ones(len(xy), bool)
+        keep[np.nonzero(band)[0][d_eff < 1e-3 * cfg.r_h]] = False
+        xy = xy[keep]
+    return xy
 
 
 def solve_sources(Gm, ps, h_i, cfg: HoleConfig, q0=None, dps=None):
@@ -293,14 +315,45 @@ def green_solve_h(cfg, ps, m_kg, center=(0.0, 0.0), hlo=5e-6, hhi=1.5e-3):
 
 
 # ===========================================================================
-# 3. Différences finies 2D, film incliné
+# 3. Différences finies 2D, film incliné (et dégagement de bord optionnel)
 # ===========================================================================
 def _G0(dx, dy, r_min):
     return -0.5 * np.log(np.maximum(dx * dx + dy * dy, r_min * r_min)) / TWO_PI
 
 
+class Relief:
+    """Dégagement périphérique de la face inférieure du palet :
+    e(ρ) = e_max·s^k, s = (ρ − (R − w))/w ∈ [0, 1] (k = 2 : raccordement tangent,
+    k = 1 : chanfrein conique)."""
+
+    def __init__(self, w=0.0, e_max=0.0, k=2, R=R_PUCK):
+        self.w, self.e, self.k, self.R = w, e_max, k, R
+
+    def active(self):
+        return self.w > 0 and self.e > 0
+
+    def _s(self, rho):
+        return np.clip((rho - (self.R - self.w)) / self.w, 0.0, 1.0)
+
+    def value(self, x, y):
+        if not self.active():
+            return 0.0 * x
+        return self.e * self._s(np.hypot(x, y)) ** self.k
+
+    def grad(self, x, y):
+        if not self.active():
+            return 0.0 * x, 0.0 * y
+        rho = np.maximum(np.hypot(x, y), 1e-12)
+        s = self._s(rho)
+        de = self.k * self.e * s ** (self.k - 1) / self.w * ((s > 0) & (s < 1))
+        return de * x / rho, de * y / rho
+
+
+NO_RELIEF = Relief()
+
+
 class FD2D:
-    """Solveur de Reynolds 2D sur le disque, film h = h0 + a x + b y."""
+    """Solveur de Reynolds 2D sur le disque, film h = h0 + a x + b y + e(ρ)."""
 
     def __init__(self, N=150, R=R_PUCK, nsub=4):
         self.R = R
@@ -317,7 +370,6 @@ class FD2D:
         idx[inside] = np.arange(inside.sum())
         self.idx = idx
         self.nn = int(inside.sum())
-        # fractions de surface (sous-échantillonnage 10×10)
         s = (np.arange(10) + 0.5) / 10 - 0.5
         SX, SY = np.meshgrid(s, s)
         frac = np.zeros((N, N))
@@ -325,10 +377,8 @@ class FD2D:
             frac += ((X + ox * D) ** 2 + (Y + oy * D) ** 2 < R**2)
         self.frac = frac / 100.0
         self.wq = self.frac * D * D            # poids de quadrature
-        # sous-points pour la moyenne de cellule du second membre
         so = (np.arange(nsub) + 0.5) / nsub - 0.5
         self.sub = [(ox * D, oy * D) for ox in so for oy in so]
-        # liens : (i_noeud, voisin ou -1, distance, point milieu, point frontière)
         I, J = np.nonzero(inside)
         self.I, self.J = I, J
         links = []
@@ -351,31 +401,37 @@ class FD2D:
                 dist[bnd] = np.where(dj > 0, sq - yn[bnd], yn[bnd] + sq)
                 yb[bnd] = yn[bnd] + dj * dist[bnd]
             dist = np.maximum(dist, 1e-4 * D)
-            links.append(dict(dir=(di, dj), nb=nb, dist=dist, xb=xb, yb=yb,
+            links.append(dict(nb=nb, dist=dist, xb=xb, yb=yb,
                               xm=0.5 * (xn + xb), ym=0.5 * (yn + yb)))
         self.links = links
-        # points frontière (un par lien coupé) et nœuds fantômes extérieurs
         self.ghost_I, self.ghost_J = np.nonzero(~inside)
         gx, gy = X[~inside], Y[~inside]
         rr = np.hypot(gx, gy)
         self.ghost_xb = gx * R / rr
         self.ghost_yb = gy * R / rr
+        self.relief = NO_RELIEF
+
+    # -- géométrie du film ---------------------------------------------------
+    def h_at(self, x, y):
+        return self.h0 + self.a * x + self.b * y + self.relief.value(x, y)
+
+    def grad_h(self, x, y):
+        gx, gy = self.relief.grad(x, y)
+        return self.a + gx, self.b + gy
 
     # -- assemblage de l'opérateur ∇·(h³∇·) -----------------------------------
-    def assemble(self, h0, a, b):
-        I, J = self.I, self.J
-        xn, yn = self.X[I, J], self.Y[I, J]
+    def assemble(self, h0, a, b, relief=None):
+        self.h0, self.a, self.b = h0, a, b
+        self.relief = relief if relief is not None else NO_RELIEF
         rows, cols, vals = [], [], []
         diag = np.zeros(self.nn)
-        bnd = []                  # (ligne, coefficient, xb, yb) pour le second membre
+        bnd = []
         row = np.arange(self.nn)
-        # distances opposées par direction
-        dx_pairs = {(1, 0): 0, (-1, 0): 1, (0, 1): 2, (0, -1): 3}
         Lk = self.links
         for k, lk in enumerate(Lk):
             opp = Lk[k ^ 1]
             span = 0.5 * (lk["dist"] + opp["dist"])
-            hm = h0 + a * lk["xm"] + b * lk["ym"]
+            hm = self.h_at(lk["xm"], lk["ym"])
             coef = hm**3 / (lk["dist"] * span)
             diag -= coef
             inn = lk["nb"] >= 0
@@ -386,20 +442,17 @@ class FD2D:
                           shape=(self.nn, self.nn))
         self.bnd = bnd
         self.lu = spla.splu(A)
-        self.h0, self.a, self.b = h0, a, b
-        self.h_nodes = h0 + a * xn + b * yn
-
-    def h_at(self, x, y):
-        return self.h0 + self.a * x + self.b * y
 
     # -- réponses unitaires w_i (c_i = 1) ---------------------------------------
     def unit_responses(self, xy, r_h):
+        """Partie régulière w_i de la réponse à une source unitaire c_i = 1 :
+        ∇·(h³∇w_i) = −3h²∇h·∇G0_i,  w_i = −G0_i sur le bord."""
         I, J = self.I, self.J
         xn, yn = self.X[I, J], self.Y[I, J]
         nh = len(xy)
         rhs = np.zeros((self.nn, nh))
-        a, b, h0 = self.a, self.b, self.h0
-        if a != 0 or b != 0:
+        tilted = (self.a != 0) or (self.b != 0) or self.relief.active()
+        if tilted:
             acc = np.zeros((self.nn, nh))
             for ox, oy in self.sub:
                 xs = (xn + ox)[:, None]
@@ -407,8 +460,9 @@ class FD2D:
                 dx = xs - xy[None, :, 0]
                 dy = ys - xy[None, :, 1]
                 r2 = np.maximum(dx * dx + dy * dy, r_h * r_h)
-                hs = h0 + a * xs + b * ys
-                acc += 3 * hs**2 * (a * dx + b * dy) / (TWO_PI * r2)
+                hs = self.h_at(xs, ys)
+                gx, gy = self.grad_h(xs, ys)
+                acc += 3 * hs**2 * (gx * dx + gy * dy) / (TWO_PI * r2)
             rhs += acc / len(self.sub)
         for (rr, coef, xb, yb) in self.bnd:
             gb = -_G0(xb[:, None] - xy[None, :, 0], yb[:, None] - xy[None, :, 1], r_h)
@@ -435,21 +489,26 @@ class FD2D:
                 + (1 - tx)[:, None] * ty[:, None] * full[i0, j0 + 1]
                 + tx[:, None] * ty[:, None] * full[i0 + 1, j0 + 1])
 
-    def solve(self, cfg: HoleConfig, ps, xy, h0, a=0.0, b=0.0, q0=None):
-        """Film incliné : retourne q, W, M, Q (méthode « singularité soustraite »)."""
+    def solve(self, cfg: HoleConfig, ps, xy, h0, a=0.0, b=0.0, relief=None, q0=None,
+              want_field=False):
+        """Résout le film ; retourne q, W, M, F (force latérale), Q.
+
+        F = −½∫p∇h dA = −½[(a, b)·W + ∫p∇e dA] (pression + cisaillement).
+        """
         R = self.R
-        self.assemble(h0, a, b)
+        self.assemble(h0, a, b, relief)
         full = self.unit_responses(xy, cfg.r_h)
-        wij = self.interp(full, xy)                 # w_i(x_j) : [j, i]
+        wij = self.interp(full, xy)
         dx = xy[:, None, 0] - xy[None, :, 0]
         dy = xy[:, None, 1] - xy[None, :, 1]
-        G0m = _G0(dx, dy, 0.0 + 1e-30)
-        np.fill_diagonal(G0m, _G0(np.array(cfg.r_h), np.array(0.0), 0.0))
+        G0m = _G0(dx, dy, 1e-30)
+        G0m[np.diag_indices_from(G0m)] = _G0(np.array(cfg.r_h), np.array(0.0), 0.0)
         hi = self.h_at(xy[:, 0], xy[:, 1])
         ci = 12 * MU / hi**3
         Gm = (G0m + wij) * ci[None, :]
+        dg = np.diagonal(Gm).copy()
+        Gm[np.diag_indices_from(Gm)] = np.maximum(dg, 0.0)
         q = solve_sources(Gm, ps, hi, cfg, q0=q0)
-        # intégrales : partie singulière analytique + partie régulière en quadrature
         rho2 = np.sum(xy**2, axis=1)
         IG0 = -R**2 * np.log(R) / 2 + (R**2 - rho2) / 4
         IxG0 = xy * ((R**2 / 2 - rho2 / 4) / 2)[:, None]
@@ -460,37 +519,49 @@ class FD2D:
         cq = ci * q
         W = float(np.sum(cq * (IG0 + Iw)))
         M = np.array([np.sum(cq * (IxG0[:, 0] + Ixw)), np.sum(cq * (IxG0[:, 1] + Iyw))])
-        return dict(q=q, W=W, M=M, Q=float(q.sum()), xy=xy)
+        F = -0.5 * np.array([a, b]) * W
+        out = dict(q=q, W=W, M=M, Q=float(q.sum()), xy=xy, h_i=hi)
+        if self.relief.active() or want_field:
+            G0g = _G0(self.X[:, :, None] - xy[None, None, :, 0],
+                      self.Y[:, :, None] - xy[None, None, :, 1], cfg.r_h)
+            pg = np.sum((G0g + full) * cq[None, None, :], axis=2)
+            gx, gy = self.relief.grad(self.X, self.Y)
+            F = F - 0.5 * np.array([np.sum(pg * gx * self.wq), np.sum(pg * gy * self.wq)])
+            out["p_grid"] = pg
+        out["F"] = F
+        return out
 
-    def ktheta(self, cfg, ps, xy, h0, dth=2e-4 * 1e-3):
+    def ktheta(self, cfg, ps, xy, h0, dth=2e-7, relief=None):
         """k_θ = −dM_x/da (N·m/rad) par différence centrée (a = ±dth rad)."""
-        sp_ = self.solve(cfg, ps, xy, h0, +dth, 0.0)
-        sm_ = self.solve(cfg, ps, xy, h0, -dth, 0.0)
+        sp_ = self.solve(cfg, ps, xy, h0, +dth, 0.0, relief)
+        sm_ = self.solve(cfg, ps, xy, h0, -dth, 0.0, relief)
         return -(sp_["M"][0] - sm_["M"][0]) / (2 * dth), sp_, sm_
 
     def equilibrium(self, cfg, ps, xy, m_kg, x_cg=(0.0, 0.0), h_init=None,
-                    kth=None, kz=None, tol=1e-9, itmax=8):
+                    kth=None, relief=None, tol=1e-7, itmax=8):
         """Équilibre complet (h0, a, b) : W = m g et M = m g·x_cg (Newton)."""
         Wt = m_kg * G
         Mt = Wt * np.asarray(x_cg, float)
         z = np.array([h_init if h_init else 120e-6, 0.0, 0.0])
         if kth is not None:
-            s0 = self.solve(cfg, ps, xy, z[0])
+            s0 = self.solve(cfg, ps, xy, z[0], relief=relief)
             z[1:] = (s0["M"] - Mt) / kth
         hist = []
+        sc = np.array([Wt, Wt * R_PUCK, Wt * R_PUCK])
+        Jm = None
         for it in range(itmax):
-            s = self.solve(cfg, ps, xy, *z)
+            s = self.solve(cfg, ps, xy, *z, relief=relief)
             res = np.array([s["W"] - Wt, *(s["M"] - Mt)])
-            sc = np.array([Wt, Wt * R_PUCK, Wt * R_PUCK])
-            hist.append(np.abs(res / sc).max())
+            hist.append(float(np.abs(res / sc).max()))
             if hist[-1] < tol:
                 break
-            Jm = np.zeros((3, 3))
-            steps = [z[0] * 1e-3, 2e-7, 2e-7]
-            for k in range(3):
-                zz = z.copy()
-                zz[k] += steps[k]
-                s2 = self.solve(cfg, ps, xy, *zz, q0=s["q"])
-                Jm[:, k] = (np.array([s2["W"] - Wt, *(s2["M"] - Mt)]) - res) / steps[k]
+            if Jm is None:
+                Jm = np.zeros((3, 3))
+                steps = [z[0] * 1e-3, 2e-7, 2e-7]
+                for k in range(3):
+                    zz = z.copy()
+                    zz[k] += steps[k]
+                    s2 = self.solve(cfg, ps, xy, *zz, relief=relief, q0=s["q"])
+                    Jm[:, k] = (np.array([s2["W"] - Wt, *(s2["M"] - Mt)]) - res) / steps[k]
             z = z - np.linalg.solve(Jm, res)
-        return dict(h0=z[0], a=z[1], b=z[2], sol=s, hist=hist)
+        return dict(h0=z[0], a=z[1], b=z[2], sol=s, hist=hist, F=s["F"])

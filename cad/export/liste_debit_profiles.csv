@@ -1,0 +1,9 @@
+section;longueur_mm;quantite;longueur_totale_m;masse_kg_estimee;pieces
+45x45;159.5;1;0.1595;0.295;bati_console_1
+45x45;212.0;4;0.848;1.569;plenum_montant_1 plenum_montant_2 plenum_montant_3 plenum_montant_4
+45x45;243.5;2;0.487;0.901;bati_console_2 bati_console_3
+45x45;327.5;1;0.3275;0.606;portique_bras
+45x45;400.0;8;3.2;5.92;plenum_traverse_haut_Yp plenum_traverse_haut_Xp plenum_traverse_haut_Ym plenum_traverse_haut_Xm plenum_traverse_bas_Yp plenum_traverse_bas_Xp plenum_traverse_bas_Ym plenum_traverse_bas_Xm
+45x45;595.0;2;1.19;2.201;portique_montant_1 portique_montant_2
+45x45;610.0;17;10.37;19.184;bati_cadre_haut_Xp bati_cadre_haut_Yp bati_cadre_haut_Xm bati_cadre_haut_Ym bati_cadre_bas_Xp bati_cadre_bas_Yp bati_cadre_bas_Xm bati_cadre_bas_Ym bati_cadre_sup_Xp bati_cadre_sup_Yp bati_cadre_sup_Xm bati_cadre_sup_Ym bati_traverse_plenum_p bati_traverse_plenum_m bati_traverse_platine_1 bati_traverse_platine_2 portique_traverse
+45x45;810.0;4;3.24;5.994;bati_montant_1 bati_montant_2 bati_montant_3 bati_montant_4

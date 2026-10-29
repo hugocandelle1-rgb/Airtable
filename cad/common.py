@@ -493,9 +493,22 @@ def compound_of(parts: list[PartSpec]) -> cq.Workplane:
     return cq.Workplane("XY").newObject([cq.Compound.makeCompound([p.shape.val() for p in parts])])
 
 
-def export_svg(shape: cq.Workplane, path: Path, direction: tuple, size: int = 900, hidden: bool = False):
-    cq.exporters.export(shape, str(path), opt={
-        "projectionDir": direction, "showHidden": hidden, "width": size, "height": size,
+def _oriented(shape: cq.Workplane, view: str) -> cq.Workplane:
+    """Tourne la forme pour que la vue demandée soit une vue « de dessus » (X droite, Y haut) :
+    cadquery choisit lui-même l'axe haut de l'écran pour les directions ≠ +Z."""
+    if view == "dessus":
+        return shape
+    if view == "face":          # caméra en -Y, Z vers le haut de l'écran
+        return shape.rotate((0, 0, 0), (1, 0, 0), -90)
+    if view == "iso":           # caméra en (+X, -Y, +Z), élévation ~35 deg
+        return shape.rotate((0, 0, 0), (0, 0, 1), 45).rotate((0, 0, 0), (1, 0, 0), -54.74)
+    raise ValueError(view)
+
+
+def export_svg(shape: cq.Workplane, path: Path, view: str = "dessus", size: int = 900, hidden: bool = False):
+    """Vue SVG (lignes cachées supprimées) : view = 'dessus' | 'face' | 'iso'."""
+    cq.exporters.export(_oriented(shape, view), str(path), opt={
+        "projectionDir": (0, 0, 1), "showHidden": hidden, "width": size, "height": size,
         "marginLeft": 20, "marginTop": 20, "strokeWidth": 0.6, "showAxes": False})
 
 
@@ -504,3 +517,34 @@ def make_assembly(parts: list[PartSpec], name: str = "table_coussin_air") -> cq.
     for p in parts:
         a.add(p.shape, name=p.name, color=cq.Color(*p.color))
     return a
+
+
+def svg_to_png(svg: Path, png: Path, dpi: int = 110) -> bool:
+    """Rendu PNG d'un SVG de cadquery (chemins M/L uniquement) via matplotlib, sans cairosvg.
+    Retourne False si matplotlib est absent."""
+    try:
+        import re
+
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from matplotlib.collections import LineCollection
+    except Exception:
+        return False
+    txt = Path(svg).read_text(encoding="utf-8")
+    m = re.search(r"scale\(([-\d.eE]+),\s*([-\d.eE]+)\)\s*translate\(([-\d.eE]+),\s*([-\d.eE]+)\)", txt)
+    sx, sy, tx, ty = map(float, m.groups()) if m else (1, -1, 0, 0)
+    segs = []
+    for d in re.findall(r'<path d="([^"]+)"', txt):
+        nums = [tuple(map(float, p.split(","))) for p in re.findall(r"[-\d.eE]+,[-\d.eE]+", d)]
+        for a, b in zip(nums[:-1], nums[1:]):
+            segs.append([((a[0] + tx) * sx, (a[1] + ty) * sy), ((b[0] + tx) * sx, (b[1] + ty) * sy)])
+    fig, ax = plt.subplots(figsize=(9, 9))
+    ax.add_collection(LineCollection(segs, colors="k", linewidths=0.35))
+    ax.autoscale()
+    ax.invert_yaxis()
+    ax.set_aspect("equal")
+    ax.axis("off")
+    fig.savefig(png, dpi=dpi, bbox_inches="tight")
+    plt.close(fig)
+    return True

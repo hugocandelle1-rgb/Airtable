@@ -69,15 +69,18 @@ bool StepGen::tick() {
     if (want != dir_) { dir_ = want; return false; }   // tick d'établissement de DIR
     v_ = vmin_q_;                                      // démarrage
     phase_ = kOne >> 1;                                // première impulsion rapide
-  } else if (want == 0) {
-    // Arrivé alors que la vitesse est non nulle (cible changée / profil arrondi) : arrêt net.
+  }
+
+  if (want == 0 && v_ <= 4 * vmin_q_) {
+    // Arrivée à très basse vitesse (≤ 4·vmin) : arrêt net, sans dépassement.
     v_ = 0;
     phase_ = 0;
     return false;
   }
 
   if (want != dir_) {
-    // Cible de l'autre côté : décélérer jusqu'à l'arrêt, puis repartir en sens inverse.
+    // Cible atteinte, dépassée ou de l'autre côté alors qu'on roule : on décélère sans
+    // changer de sens (jamais d'arrêt brutal), puis on repart en sens inverse si besoin.
     v_ = (v_ > dv_q_ + vmin_q_) ? v_ - dv_q_ : 0;
     if (v_ == 0) { phase_ = 0; return false; }
   } else {

@@ -16,6 +16,7 @@ void PressureController::configure(const PressureControllerConfig& c, const FanM
   pid_.configure(pc);
   ramp_.configure(c.ramp_up_Pa_s, c.ramp_down_Pa_s);
   meas_.setTau(c.meas_tau_s);
+  ref_.setTau(c.ref_tau_s);
   target_ = c.p_min_Pa;
 }
 
@@ -28,6 +29,7 @@ void PressureController::setTarget(float p) {
 void PressureController::enable(float p_meas, float duty_now) {
   meas_.reset(p_meas);
   ramp_.reset(p_meas < cfg_.p_min_Pa ? cfg_.p_min_Pa : p_meas);
+  ref_.reset(ramp_.value());
   // Intégrale initialisée pour que la sortie démarre à la PWM courante (sans à-coup).
   const float ff = fan_.dutyForPressure(ramp_.value());
   pid_.reset(duty_now - ff);
@@ -41,6 +43,7 @@ float PressureController::update(float p_meas, float dt) {
   const float pf = meas_.update(p_meas, dt);
   const float sp = ramp_.update(target_, dt);
   const float ff = fan_.dutyForPressure(sp);
+  const float ref = (cfg_.ref_tau_s > 0.0f) ? ref_.update(sp, dt) : sp;
 
   float kp, ki;
   if (cfg_.gain_schedule) {
@@ -52,7 +55,7 @@ float PressureController::update(float p_meas, float dt) {
     ki = cfg_.ki_fixed;
   }
   pid_.setGains(kp, ki, 0.0f);
-  duty_ = pid_.update(sp, pf, dt, ff);
+  duty_ = pid_.update(ref, pf, dt, ff);
 
   // Adaptation lente du modèle FF quand la boucle est établie.
   const bool steady = ramp_.atTarget(target_, 0.01f) && fabsf(pf - target_) < 3.0f * cfg_.settle_tol_Pa;

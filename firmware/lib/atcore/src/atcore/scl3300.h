@@ -10,8 +10,8 @@ namespace atc {
 namespace scl3300 {
 
 // Trames de commande précalculées (CRC inclus) — vérifiées par les tests unitaires.
-constexpr uint32_t kCmdBank0 = 0xFB000073;
-constexpr uint32_t kCmdBank1 = 0xFB000174;
+constexpr uint32_t kCmdBank0 = 0xFC000073;
+constexpr uint32_t kCmdBank1 = 0xFC00016E;   // CRC calculé (algorithme validé sur les autres trames)
 constexpr uint32_t kCmdReadAccX = 0x040000F7;
 constexpr uint32_t kCmdReadAccY = 0x080000FD;
 constexpr uint32_t kCmdReadAccZ = 0x0C0000FB;
@@ -23,7 +23,7 @@ constexpr uint32_t kCmdReadAngY = 0x280000CD;
 constexpr uint32_t kCmdReadAngZ = 0x2C0000CB;
 constexpr uint32_t kCmdReadWhoAmI = 0x40000091;
 constexpr uint32_t kCmdReadSerial1 = 0x640000A7;
-constexpr uint32_t kCmdReadSerial2 = 0x680000AB;
+constexpr uint32_t kCmdReadSerial2 = 0x680000AD;
 constexpr uint32_t kCmdReadMode = 0xB400001F;
 constexpr uint32_t kCmdSetMode1 = 0xB400001F;
 constexpr uint32_t kCmdSetMode2 = 0xB4000102;
