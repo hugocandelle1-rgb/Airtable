@@ -1,0 +1,24 @@
+# =============================================================================
+#  STRUCTURE — VALEURS RECOMMANDÉES **PROVISOIRES** (arrêt intermédiaire)
+#  Ne remplace pas params/design.toml. Voir docs/reprise/structure.md.
+#  Statut : "provisional" tant que calc/structure/support_study.py n'a pas
+#  tourné en entier (optimisation des positions d'appui non faite).
+# =============================================================================
+
+[meta]
+status = "provisional"
+date = "2026-10-29"
+source = "calc/structure/homogenization.py (vérifié), sondage rapide support_study (provisoire)"
+
+[plate]
+material = "EN AW-5083 coulée détensionnée (ACP 5080R / MIC-6) — à confirmer (point 4 non rédigé)"
+thickness_mm = 30.0                 # provisoire : 25 mm insuffisant en pression (chemin A) et poids propre
+D_ratio_perforated = 0.698          # D_percé / D_plein (stratifié, conservatif ~2 % vs cellule 3D) — vérifié
+E_ratio_perforated_layer = 0.662    # couche percée Ø2/pas 5 hex, cellule 2D convergée — vérifié
+nu_perforated_layer = 0.332         # vérifié
+mass_kg_25 = 16.8                   # masse réelle plaque 520×520×25 percée
+mass_kg_30 = 20.1
+
+[support]
+scheme = "TBD"                      # appuis au bord (cadre, s=242,5 mm) : 25–35 µrad poids propre → hors budget
+radius_ratio = 0.0                  # à optimiser (support_study.py : kelvin_opt / wt9)
