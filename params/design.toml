@@ -1,0 +1,97 @@
+# =============================================================================
+#  TABLE À COUSSIN D'AIR — PARAMÈTRES DE CONCEPTION (source unique de vérité)
+# =============================================================================
+#  Unités SI sauf mention contraire (_mm, _deg, _urad, _Pa, _m3h ...).
+#  Tout script de calcul (calc/), modèle CAO (cad/) et firmware (firmware/)
+#  DOIT lire ses valeurs ici. Toute modification doit être justifiée dans
+#  docs/ (note de calcul correspondante) et reportée dans le CHANGELOG du doc.
+#  Statut : "baseline" = valeur de départ, "verified" = confirmée par calcul.
+# =============================================================================
+
+[meta]
+version = "V3.0-baseline"
+date = "2026-10-29"
+
+# -----------------------------------------------------------------------------
+[environment]
+g = 9.81                 # m/s²
+air_rho = 1.204          # kg/m³ (20 °C, 1013 hPa)
+air_mu = 1.81e-5         # Pa·s
+air_nu = 1.50e-5         # m²/s
+T_lab_C = 20.0
+
+# -----------------------------------------------------------------------------
+[puck]                   # palets-robots cylindriques pleins
+diameter_mm = 30.0
+mass_min_g = 2.0
+mass_max_g = 10.0
+mass_cases_g = [2.0, 3.0, 5.0, 7.5, 10.0]
+bottom_flatness_um = 5.0          # exigence sur la face inférieure des palets
+
+# -----------------------------------------------------------------------------
+[zones]
+working_square_mm = 300.0         # zone de travail : le palet entier reste dedans
+perforated_square_mm = 360.0      # zone percée (300 + 2×15 rayon palet + 2×15 marge)
+working_circle_mm = 424.3         # cercle circonscrit au carré 300 (info)
+
+# -----------------------------------------------------------------------------
+[performance_targets]
+# Accélération parasite due à la pente : a = g·θ (θ en rad)
+residual_slope_peak_urad = 50.0   # pente locale max dans la zone de travail (≈0.0029°)
+residual_slope_goal_urad = 20.0   # objectif
+leveling_resolution_urad = 2.0    # résolution de réglage d'inclinaison par axe (≈0.0001°)
+leveling_range_deg = 0.25         # course de réglage fin ± (le grossier se fait aux pieds)
+tilt_stability_1h_urad = 5.0
+gap_min_um = 80.0                 # entrefer minimal palet/plaque au point de fonctionnement
+gap_max_um = 250.0
+plenum_uniformity_pct = 1.0       # non-uniformité de pression statique ± sur zone percée
+pressure_regulation_Pa = 0.3      # stabilité de la pression régulée
+plate_flatness_um = 6.0           # planéité zone percée (≈ DIN 876 classe 0 sur 360×360)
+plate_local_flatness_um = 2.0     # sur tout carré 100×100 mm
+plate_deflection_var_um = 1.5     # variation de flèche entre p=0 et p=pmax
+thermal_gradient_K = 0.05         # gradient de température max à travers l'épaisseur
+
+# -----------------------------------------------------------------------------
+[plate]                           # plaque de travail perforée (baseline à vérifier)
+material = "EN AW-5083 coulée, détensionnée, rectifiée (type Alimex ACP 5080R / ALCA PLUS / MIC-6)"
+E = 70.0e9
+nu = 0.33
+rho = 2660.0
+alpha_th = 24.0e-6
+outer_square_mm = 520.0
+thickness_mm = 25.0               # candidats 20 / 25 / 30
+orifice_d_mm = 0.40               # orifice calibré débouchant en face supérieure
+orifice_tol_mm = 0.01             # ± (alésage foret carbure neuf, contrôlé par échantillonnage)
+orifice_length_mm = 1.0           # épaisseur du voile restant (longueur de l'orifice)
+counterbore_d_mm = 2.0            # lamage/perçage borgne depuis la face inférieure
+pattern = "hex"                   # "hex" ou "square"
+pitch_mm = 5.0
+
+# -----------------------------------------------------------------------------
+[support]                         # mode de montage de la plaque (à trancher par calcul)
+scheme = "TBD"                    # "3pt-kelvin" | "9pt-whiffletree" | "perimeter"
+radius_ratio = 0.0                # position optimale des appuis (calcul)
+
+# -----------------------------------------------------------------------------
+[plenum]
+inner_square_mm = 440.0
+height_mm = 150.0
+settling_height_mm = 80.0         # chambre de tranquillisation sous la plaque
+baffle_open_area = 0.30           # tôle perforée de distribution
+filter = "média filtrant ISO 16890 ePM10 50% (ex-G4/M5) à l'aspiration"
+
+# -----------------------------------------------------------------------------
+[operating]
+p_plenum_min_Pa = 30.0
+p_plenum_max_Pa = 400.0
+
+# -----------------------------------------------------------------------------
+[fan]
+reference = "TBD"
+count = 1
+pwm_freq_Hz = 25000
+
+# -----------------------------------------------------------------------------
+[frame]
+profile_system = "TBD (item MB / Bosch Rexroth / Misumi — rainure 8 ou 10)"
+profile_main_mm = 45
