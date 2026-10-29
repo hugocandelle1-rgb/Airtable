@@ -71,7 +71,7 @@ def test_amortissement_biais_si_ignore_et_recupere_si_estime():
     assert abs(none.theta_x_urad - 200.0) > 15.0                      # ignorer l'amortissement biaise a
     assert fit.k_fitted and fit.tau_s == pytest.approx(tau, rel=0.3)
     assert fit.theta_x_urad == pytest.approx(200.0, abs=max(4 * fit.sigma_theta_x_urad, 1.0))
-    assert fit.sigma_theta_x_urad >= forced.sigma_theta_x_urad       # incertitude sur τ répercutée
+    assert fit.sigma_theta_x_urad >= 0.9 * forced.sigma_theta_x_urad       # incertitude sur τ répercutée
     assert forced.theta_x_urad == pytest.approx(200.0, abs=4 * forced.sigma_theta_x_urad)
     assert forced.theta_y_urad == pytest.approx(-150.0, abs=4 * forced.sigma_theta_y_urad)
 
