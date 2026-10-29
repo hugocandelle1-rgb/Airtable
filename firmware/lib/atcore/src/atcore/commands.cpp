@@ -37,6 +37,7 @@ bool tokenize(const char* line, Tokens* tk, ParseError* err) {
 bool is(const char* tok, const char* word) { return strcmp(tok, word) == 0; }
 
 ParseError number(const char* tok, float lo, float hi, float* out) {
+  if (strchr(tok, 'X')) return ParseError::BadNumber;   // pas d'hexadécimal (strtod l'accepterait)
   char* end = nullptr;
   const double v = strtod(tok, &end);
   if (end == tok || *end != '\0' || !isfinite(v)) return ParseError::BadNumber;

@@ -33,20 +33,23 @@ void StepGen::setAccel(uint32_t a) {
   if (dv_q_ == 0) dv_q_ = 1;
 }
 
-uint64_t StepGen::stopDistQ32(uint64_t v) const {
-  // v²/(2·dv) : v ≤ 2^31 donc v² ≤ 2^62, pas de débordement.
-  return (v * v) / (2 * dv_q_);
+ATC_IRAM uint32_t StepGen::stopDistSteps(uint64_t v_q32) const {
+  // d = v²/(2a) avec v en pas/s et a en pas/s² : arithmétique 32 bits (pas de division 64 bits
+  // en interruption). v ≤ tick_hz/2 ≤ ~10^4 pas/s donc v² < 2^32.
+  const uint32_t v = static_cast<uint32_t>((v_q32 * tick_hz_) >> 32);
+  const uint32_t two_a = 2u * accel_sps2_;
+  return (v * v + two_a - 1u) / two_a;
 }
 
-uint32_t StepGen::speedSps() const { return static_cast<uint32_t>((v_ * tick_hz_) >> 32); }
+ATC_IRAM uint32_t StepGen::speedSps() const { return static_cast<uint32_t>((v_ * tick_hz_) >> 32); }
 
 void StepGen::stop() {
   if (v_ == 0) { target_ = pos_; return; }
-  const uint64_t d = stopDistQ32(v_) >> 32;
+  const uint32_t d = stopDistSteps(v_);
   target_ = pos_ + (dir_ > 0 ? 1 : -1) * static_cast<int32_t>(d + 1);
 }
 
-void StepGen::emergencyStop() {
+ATC_IRAM void StepGen::emergencyStop() {
   v_ = 0;
   phase_ = 0;
   target_ = pos_;
@@ -59,7 +62,7 @@ bool StepGen::setPosition(int32_t p) {
   return true;
 }
 
-bool StepGen::tick() {
+ATC_IRAM bool StepGen::tick() {
   const int32_t rem = target_ - pos_;
   const int8_t want = rem > 0 ? 1 : (rem < 0 ? -1 : 0);
   const uint32_t absrem = static_cast<uint32_t>(rem > 0 ? rem : -rem);
@@ -84,11 +87,10 @@ bool StepGen::tick() {
     v_ = (v_ > dv_q_ + vmin_q_) ? v_ - dv_q_ : 0;
     if (v_ == 0) { phase_ = 0; return false; }
   } else {
-    const uint64_t rem_q = static_cast<uint64_t>(absrem) << 32;
     const uint64_t vnext = (v_ + dv_q_ > vmax_q_) ? vmax_q_ : v_ + dv_q_;
-    if (rem_q <= stopDistQ32(v_)) {
+    if (absrem <= stopDistSteps(v_)) {
       v_ = (v_ > dv_q_ + vmin_q_) ? v_ - dv_q_ : vmin_q_;      // décélération
-    } else if (v_ < vmax_q_ && rem_q > stopDistQ32(vnext) + kOne) {
+    } else if (v_ < vmax_q_ && absrem > stopDistSteps(vnext) + 1u) {
       v_ = vnext;                                                // accélération
     } else if (v_ > vmax_q_) {
       v_ = (v_ > dv_q_ + vmax_q_) ? v_ - dv_q_ : vmax_q_;      // vitesse max abaissée en cours de route

@@ -136,7 +136,7 @@ constexpr uint32_t SPI_SCL3300_HZ = 4000000;         // 4 MHz max
 constexpr uint32_t SPI_ADXL355_HZ = 4000000;
 constexpr uint32_t SPI_ADS1220_HZ = 2000000;
 constexpr uint32_t TILT_TIMEOUT_MS = 1000;           // sans échantillon valide → invalide
-constexpr float TILT_FILTER_TAU_S = 3.0f;            // IIR sur la pente avant nivellement
+constexpr int TILT_AVG_SAMPLES = 50;                 // moyenne glissante de la pente (50 × 100 ms = 5 s)
 
 // -----------------------------------------------------------------------------
 //  Nivellement : mécanique (valeurs de départ, à remplacer par la CAO)  [À VALIDER]
@@ -158,7 +158,7 @@ constexpr float LEVEL_DEADBAND_URAD = 1.5f * DESIGN_LEVEL_RES_URAD;   // 3 µrad
 constexpr int LEVEL_CONFIRM_N = 5;
 constexpr float LEVEL_GAIN = 0.8f;
 constexpr float LEVEL_MAX_MOVE_URAD = 200.0f;
-constexpr uint32_t LEVEL_SETTLE_MS = 4000;
+constexpr uint32_t LEVEL_SETTLE_MS = 6000;           // > fenêtre de moyenne (5 s) : mesure renouvelée avant tout nouveau mouvement
 
 // -----------------------------------------------------------------------------
 //  Capteurs de déplacement analogiques (option, via ADS1220)   [À VALIDER]
@@ -173,4 +173,4 @@ constexpr float DISP_DIVIDER[NUM_DISP] = {1.0f, 1.0f, 1.0f};    // pont diviseur
 // -----------------------------------------------------------------------------
 constexpr uint32_t SERIAL_BAUD = 115200;             // ignoré en USB CDC natif
 constexpr size_t SERIAL_LINE_MAX = 120;
-constexpr size_t JSON_BUF = 768;
+constexpr size_t JSON_BUF = 1100;

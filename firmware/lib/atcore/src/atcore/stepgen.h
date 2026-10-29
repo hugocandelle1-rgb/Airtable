@@ -8,6 +8,14 @@
 #pragma once
 #include <stdint.h>
 
+// Sur ESP32, les fonctions appelées par l'ISR sont placées en IRAM ; sur PC la macro est vide.
+#if defined(ESP_PLATFORM)
+#include "esp_attr.h"
+#define ATC_IRAM IRAM_ATTR
+#else
+#define ATC_IRAM
+#endif
+
 namespace atc {
 
 class StepGen {
@@ -36,7 +44,7 @@ class StepGen {
   uint32_t estimateMs(uint32_t n_steps) const;
 
  private:
-  uint64_t stopDistQ32(uint64_t v) const;       // v²/(2a) en pas·2^32
+  uint32_t stopDistSteps(uint64_t v_q32) const; // distance d'arrêt (arrondie au pas supérieur), 32 bits
   uint32_t tick_hz_ = 20000;
   uint32_t vmax_sps_ = 4000, accel_sps2_ = 20000, vmin_sps_ = 40;
   uint64_t vmax_q_ = 0, vmin_q_ = 0, dv_q_ = 1;   // pas/tick et pas/tick² en Q32

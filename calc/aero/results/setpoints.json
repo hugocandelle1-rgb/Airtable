@@ -1,0 +1,9 @@
+{
+  "h_target_um": 120.0,
+  "status": "exemple provisoire : 3 points de calc/aero/results/dynamics.json (ps_Pa par masse, entrefer cible 120 um) ; a remplacer par la table finale du calcul aerodynamique",
+  "points": [
+    {"mass_g": 2.0,  "p_Pa": 50.41},
+    {"mass_g": 5.0,  "p_Pa": 136.91},
+    {"mass_g": 10.0, "p_Pa": 304.09}
+  ]
+}

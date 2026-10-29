@@ -253,7 +253,7 @@ def cell3d_abd(p, d, h, t_w, d_o, E=70e9, nu=0.33, nx=20, dz_perf=1.0e-3, dz_web
     Pm = (Pm > 0).astype(float)
     Kp = (Pm.T @ K @ Pm).tocsc()
     keep = np.arange(3, nmd)
-    lu = spla.splu(Kp[keep][:, keep], permc_spec="MMD_AT_PLUS_A")
+    lu = spla.splu(Kp[keep][:, keep], permc_spec="COLAMD")
     # coordonnées nodales
     kk, ii, jj = np.meshgrid(np.arange(nz + 1), np.arange(nx + 1), np.arange(ny + 1), indexing="ij")
     Xn, Yn = (ii * hx).ravel(), (jj * hy).ravel()
@@ -388,23 +388,30 @@ def main():
                           mt=float((1 - hex_porosity(p, dd)) / (1 + 2 * hex_porosity(p, dd)))))
     out["cell2d_vs_mu"] = curve
 
-    # Cellule 3D (h = 25 mm baseline et 30 mm)
+    # Cellule 3D : comparaison au stratifié construit avec E*, ν* de la cellule 2D
+    # au MÊME maillage plan (isole l'effet 3D de l'erreur de discrétisation pixel).
     out["cell3d"] = []
-    for h in (0.020, 0.025, 0.030):
+    for h, nx3, dzp in ((0.020, 12, 1.5e-3), (0.025, 12, 1.5e-3), (0.030, 12, 1.5e-3), (0.025, 16, 1.0e-3)):
         t0 = time.time()
-        ABD, info = cell3d_abd(p, d, h, t_w, d_o, E, nu, nx=16, dz_perf=1.0e-3, dz_web=0.25e-3)
+        ABD, info = cell3d_abd(p, d, h, t_w, d_o, E, nu, nx=nx3, dz_perf=dzp, dz_web=0.25e-3)
         Dr = reduced_bending(ABD)
+        r2 = cell2d(p, d, E, nu, nx3)
+        f_web = hex_porosity(p, d_o)
+        lam = reduced_bending(laminate_abd([(0, h - t_w, E * r2["E_ratio"], r2["nu"]),
+                                            (h - t_w, h, E * (1 - f_web) / (1 + 2 * f_web), nu)], h))
         props = plate_properties(P, h)
         D_solid = E * h**3 / (12 * (1 - nu**2))
-        rec = dict(h_mm=h * 1e3, D_solid=D_solid, D3d=Dr[0, 0], nu3d=Dr[0, 1] / Dr[0, 0],
-                   D3d_ratio=Dr[0, 0] / D_solid, D_lam=props["D_perf"], D_lam_ratio=props["D_ratio"],
-                   nu_lam=props["nu_perf"], ecart_pct=(props["D_perf"] / Dr[0, 0] - 1) * 100,
-                   D66_iso_check=Dr[2, 2] / ((Dr[0, 0] - Dr[0, 1]) / 2), info=info,
+        rec = dict(h_mm=h * 1e3, nx=nx3, D_solid=D_solid, D3d=Dr[0, 0], nu3d=Dr[0, 1] / Dr[0, 0],
+                   D3d_ratio=Dr[0, 0] / D_solid, D_lam_same_mesh_ratio=lam[0, 0] / D_solid,
+                   effet_3d_pct=(Dr[0, 0] / lam[0, 0] - 1) * 100,
+                   D_lam_ratio=props["D_ratio"], nu_lam=props["nu_perf"],
+                   D66_iso_check=Dr[2, 2] / ((Dr[0, 0] - Dr[0, 1]) / 2), ndof=info["ndof"],
                    time_s=time.time() - t0)
         out["cell3d"].append(rec)
-        print(f"cellule 3D h={h*1e3:.0f} mm : D*/D_plein = {rec['D3d_ratio']:.4f} (ν {rec['nu3d']:.3f}) ; "
-              f"stratifié {rec['D_lam_ratio']:.4f} → écart {rec['ecart_pct']:+.2f} % ; "
-              f"isotropie D66 {rec['D66_iso_check']:.3f} ({rec['time_s']:.0f} s, {info['ndof']} ddl)")
+        print(f"cellule 3D h={h*1e3:.0f} mm nx={nx3} : D*/D_plein = {rec['D3d_ratio']:.4f} (ν {rec['nu3d']:.3f}) ; "
+              f"stratifié même maillage {rec['D_lam_same_mesh_ratio']:.4f} → effet 3D {rec['effet_3d_pct']:+.2f} % ; "
+              f"stratifié retenu (2D convergé) {rec['D_lam_ratio']:.4f} ; isotropie D66 {rec['D66_iso_check']:.3f} "
+              f"({rec['time_s']:.0f} s, {info['ndof']} ddl)")
 
     # Propriétés pour chaque épaisseur
     out["plate_properties"] = []

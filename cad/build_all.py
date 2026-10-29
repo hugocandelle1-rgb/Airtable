@@ -21,8 +21,10 @@ import cadquery as cq
 
 from cad import assembly
 from cad.common import (EXPORT_DIR, PROFILES, PartSpec, check_interferences, compound_of, cut_list,
-                        defaults_used, export_svg, get_params, levels, make_assembly)
+                        defaults_used, export_svg, get_params, levels, make_assembly, section_compound,
+                        svg_to_png)
 from cad.parts import plate as plate_mod
+from cad.parts import plenum as plenum_mod
 
 VIEWS = ("dessus", "face", "iso")
 
@@ -58,9 +60,9 @@ def _full_plate_worker(overrides: dict, out_dir: str, q) -> None:
         q.put({"ok": False, "erreur": repr(e), "t_s": time.time() - t0})
 
 
-def build_full_plate(overrides: dict, timeout_s: float) -> dict:
+def build_full_plate(overrides: dict, timeout_s: float, out_dir: Path) -> dict:
     q: mp.Queue = mp.Queue()
-    pr = mp.Process(target=_full_plate_worker, args=(overrides, str(EXPORT_DIR), q))
+    pr = mp.Process(target=_full_plate_worker, args=(overrides, str(out_dir), q))
     t0 = time.time()
     pr.start()
     pr.join(timeout_s)
@@ -70,7 +72,9 @@ def build_full_plate(overrides: dict, timeout_s: float) -> dict:
         return {"ok": False, "abandonne": True, "delai_s": timeout_s,
                 "note": "génération complète abandonnée (> délai) : le modèle léger est conservé"}
     res = q.get() if not q.empty() else {"ok": False, "erreur": "pas de résultat"}
-    res["t_total_s"] = time.time() - t0
+    res["t_total_s"] = round(time.time() - t0, 1)
+    if res.get("ok"):
+        res["masse_cad_kg"] = round(res["volume_mm3"] * 1e-9 * get_params(overrides)["plate"]["rho"], 3)
     return res
 
 
@@ -79,11 +83,13 @@ def main(argv=None) -> dict:
     ap.add_argument("--full", action="store_true", help="génère aussi la plaque complète (≈5700 trous)")
     ap.add_argument("--full-timeout", type=float, default=600.0, help="délai max plaque complète (s)")
     ap.add_argument("--no-svg", action="store_true")
+    ap.add_argument("--out", default=None, help="dossier de sortie (défaut cad/export)")
     ap.add_argument("--no-interference", action="store_true")
     ap.add_argument("--set", action="append", default=[], metavar="section.cle=valeur")
     args = ap.parse_args(argv)
 
-    EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+    OUT = Path(args.out) if args.out else EXPORT_DIR
+    OUT.mkdir(parents=True, exist_ok=True)
     ov = _parse_overrides(args.set)
     P = get_params(ov)
     L = levels(P)
@@ -99,13 +105,13 @@ def main(argv=None) -> dict:
 
     # ---- exports FAO plaque -------------------------------------------------------------------
     t = time.time()
-    n_csv = plate_mod.export_csv(P, EXPORT_DIR / "plaque_centres_trous.csv")
-    dxf = plate_mod.export_dxf(P, EXPORT_DIR / "plaque_trous.dxf")
+    n_csv = plate_mod.export_csv(P, OUT / "plaque_centres_trous.csv")
+    dxf = plate_mod.export_dxf(P, OUT / "plaque_trous.dxf")
     T["csv_dxf_plaque_s"] = round(time.time() - t, 2)
 
     # ---- liste de débit -----------------------------------------------------------------------------
     cl = cut_list(parts)
-    with open(EXPORT_DIR / "liste_debit_profiles.csv", "w", newline="") as f:
+    with open(OUT / "liste_debit_profiles.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["section", "longueur_mm", "quantite", "longueur_totale_m",
                                           "masse_kg_estimee", "pieces"], delimiter=";")
         w.writeheader()
@@ -113,8 +119,8 @@ def main(argv=None) -> dict:
 
     # ---- STEP / STL des pièces ---------------------------------------------------------------------------
     t = time.time()
-    (EXPORT_DIR / "pieces").mkdir(exist_ok=True)
-    (EXPORT_DIR / "barres").mkdir(exist_ok=True)
+    (OUT / "pieces").mkdir(exist_ok=True)
+    (OUT / "barres").mkdir(exist_ok=True)
     seen_bars = set()
     n_step = n_stl = 0
     for p in parts:
@@ -126,14 +132,14 @@ def main(argv=None) -> dict:
             # barre exportée une fois, le long de Z à l'origine (pièce de débit)
             from cad.common import profile
             bar = profile(k[1], k[0])
-            cq.exporters.export(bar, str(EXPORT_DIR / "barres" / f"profile_{k[0]}_L{k[1]:g}.step"))
+            cq.exporters.export(bar, str(OUT / "barres" / f"profile_{k[0]}_L{k[1]:g}.step"))
             n_step += 1
             continue
         if "step" in p.formats:
-            cq.exporters.export(p.shape, str(EXPORT_DIR / "pieces" / f"{p.name}.step"))
+            cq.exporters.export(p.shape, str(OUT / "pieces" / f"{p.name}.step"))
             n_step += 1
         if "stl" in p.formats:
-            cq.exporters.export(p.shape, str(EXPORT_DIR / "pieces" / f"{p.name}.stl"), tolerance=0.05,
+            cq.exporters.export(p.shape, str(OUT / "pieces" / f"{p.name}.stl"), tolerance=0.05,
                                 angularTolerance=0.2)
             n_stl += 1
     T["step_stl_pieces_s"] = round(time.time() - t, 2)
@@ -141,12 +147,13 @@ def main(argv=None) -> dict:
     # ---- assemblage STEP --------------------------------------------------------------------------------------
     t = time.time()
     assy = make_assembly(parts)
-    assy.export(str(EXPORT_DIR / "assemblage.step"))
+    assy.export(str(OUT / "assemblage.step"))
     T["assemblage_step_s"] = round(time.time() - t, 2)
 
     # ---- vues SVG ----------------------------------------------------------------------------------------------------
     t = time.time()
     svg_done = []
+    png_done = []
     if not args.no_svg:
         groups = {
             "plaque": [p for p in parts if p.group == "plaque"],
@@ -157,12 +164,23 @@ def main(argv=None) -> dict:
         }
         for gname, gp in groups.items():
             comp = compound_of(gp)
-            for vname in VIEWS:
+            views = list(VIEWS) + (["dessous"] if gname == "plaque" else [])
+            for vname in views:
                 tt = time.time()
-                f = EXPORT_DIR / f"{gname}_{vname}.svg"
+                f = OUT / f"{gname}_{vname}.svg"
                 export_svg(comp, f, vname, size=1000)
                 svg_done.append(f.name)
                 print(f"  svg {f.name}: {time.time() - tt:.1f}s", flush=True)
+        # coupe longitudinale (plan y = 0) du plenum et de l'assemblage
+        for gname, gp in (("plenum", groups["plenum"] + [p for p in parts if p.group == "nivellement"]),
+                          ("assemblage", parts)):
+            f = OUT / f"{gname}_coupe_y0.svg"
+            export_svg(section_compound(gp), f, "face", size=1000)
+            svg_done.append(f.name)
+        # PNG de contrôle (matplotlib) des vues d'assemblage
+        for f in sorted(OUT.glob("assemblage_*.svg")):
+            if svg_to_png(f, f.with_suffix(".png")):
+                png_done.append(f.with_suffix(".png").name)
     T["svg_s"] = round(time.time() - t, 2)
 
     # ---- vérifications ---------------------------------------------------------------------------------------------------
@@ -192,6 +210,14 @@ def main(argv=None) -> dict:
         "volume_retire_par_trou_mm3": round(hv["v_per_hole_mm3"], 3),
         "zone_percee_mm": P["zones"]["perforated_square_mm"],
     }
+    pn = P["plenum"]
+    hb = plenum_mod.baffle_hole_centers(P, L)
+    cross = (2 * (L["pl_cp"] - pn["panel_t_mm"] / 2 - pn["baffle_edge_gap_mm"])) ** 2 - 4 * (
+        (L["pl_cp"] - pn["panel_t_mm"] / 2 - pn["baffle_edge_gap_mm"] - L["pl_open_half"]) ** 2)
+    baffle_report = {"nb_trous": len(hb) if pn["baffle_holes"] else 0, "diametre_mm": pn["baffle_hole_d_mm"],
+                     "pas_hex_mm": round(plenum_mod.baffle_hole_pitch(P), 2),
+                     "taux_ouverture_vise": pn["baffle_open_area"],
+                     "taux_ouverture_realise": round(len(hb) * 3.14159265 * (pn["baffle_hole_d_mm"] / 2) ** 2 / cross, 3)}
     # masse d'assemblage : on remplace la plaque légère par la masse complète analytique
     pieces = []
     gm: dict = {}
@@ -224,6 +250,13 @@ def main(argv=None) -> dict:
         "colonnes_dans_zone_percee": all(abs(s["x"]) < P["zones"]["perforated_square_mm"] / 2
                                          and abs(s["y"]) < P["zones"]["perforated_square_mm"] / 2
                                          for s in plate_mod.support_points(P)),
+        "trous_dans_zone_percee_hors_bande_bord": all(
+            max(abs(x), abs(y)) <= P["zones"]["perforated_square_mm"] / 2 - pl["edge_band_mm"] + 1e-9
+            for x, y in plate_mod.hole_centers(P)),
+        "trous_hors_logements_d_appui": all(
+            min(((x - s_["x"]) ** 2 + (y - s_["y"]) ** 2) ** 0.5 for s_ in plate_mod.support_points(P))
+            > pl["pocket_d_mm"] / 2 + pl["counterbore_d_mm"] / 2
+            for x, y in plate_mod.hole_centers(P)),
         "masse_plaque_coherente_avec_pleine": bool(0.9 * m_naive < m_full < m_naive),
         "face_haute_plaque_a_z0": abs(byname['plaque'].bbox()[5]) < 1e-3,
     }
@@ -232,7 +265,7 @@ def main(argv=None) -> dict:
     full = None
     if args.full:
         t = time.time()
-        full = build_full_plate(ov, args.full_timeout)
+        full = build_full_plate(ov, args.full_timeout, OUT)
         T["plaque_complete_s"] = round(time.time() - t, 1)
 
     T["total_s"] = round(time.time() - t_all, 1)
@@ -242,6 +275,7 @@ def main(argv=None) -> dict:
         "temps_generation_s": T,
         "plaque": plate_report,
         "plaque_complete": full,
+        "tole_perforee": baffle_report,
         "masses_par_groupe_kg": {k: round(v, 3) for k, v in sorted(gm.items())},
         "masse_totale_kg": round(total, 3),
         "boite_englobante_assemblage_mm": [round(x, 1) for x in abb],
@@ -249,7 +283,7 @@ def main(argv=None) -> dict:
         "interferences": {"paires_testees_booleen": n_tested, "tolerance_mm3": P["cad"]["tol_interference_mm3"],
                           "paires_en_interference": interf},
         "verifications": checks,
-        "exports": {"step_pieces_et_barres": n_step, "stl": n_stl, "svg": svg_done,
+        "exports": {"step_pieces_et_barres": n_step, "stl": n_stl, "svg": svg_done, "png": png_done,
                     "dxf": "plaque_trous.dxf", "csv_trous": "plaque_centres_trous.csv",
                     "liste_debit": "liste_debit_profiles.csv", "assemblage": "assemblage.step"},
         "liste_debit": cl,
@@ -259,7 +293,7 @@ def main(argv=None) -> dict:
         "defaults_utilises": defaults_used(),
         "pieces": pieces,
     }
-    with open(EXPORT_DIR / "rapport_cao.json", "w", encoding="utf-8") as f:
+    with open(OUT / "rapport_cao.json", "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
     print(json.dumps({"temps": T, "masse_totale_kg": report["masse_totale_kg"], "masses": report["masses_par_groupe_kg"],
                       "plaque": plate_report, "verifications": checks, "interferences": len(interf)},

@@ -498,6 +498,8 @@ def _oriented(shape: cq.Workplane, view: str) -> cq.Workplane:
     cadquery choisit lui-même l'axe haut de l'écran pour les directions ≠ +Z."""
     if view == "dessus":
         return shape
+    if view == "dessous":       # caméra en -Z (image miroir en Y)
+        return shape.rotate((0, 0, 0), (1, 0, 0), 180)
     if view == "face":          # caméra en -Y, Z vers le haut de l'écran
         return shape.rotate((0, 0, 0), (1, 0, 0), -90)
     if view == "iso":           # caméra en (+X, -Y, +Z), élévation ~35 deg
@@ -505,8 +507,15 @@ def _oriented(shape: cq.Workplane, view: str) -> cq.Workplane:
     raise ValueError(view)
 
 
+def section_compound(parts: list[PartSpec], exclude_groups: tuple = ("option",)) -> cq.Workplane:
+    """Coupe par le plan y = 0 : on retire la moitié y < 0 (à regarder depuis -Y avec la vue « face »)."""
+    box = cq.Workplane("XY").box(4000, 2000, 4000, centered=(True, False, True)).translate((0, -2000, -400))
+    solids = [p.shape.cut(box).val() for p in parts if p.group not in exclude_groups]
+    return cq.Workplane("XY").newObject([cq.Compound.makeCompound(solids)])
+
+
 def export_svg(shape: cq.Workplane, path: Path, view: str = "dessus", size: int = 900, hidden: bool = False):
-    """Vue SVG (lignes cachées supprimées) : view = 'dessus' | 'face' | 'iso'."""
+    """Vue SVG (lignes cachées supprimées) : view = 'dessus' | 'dessous' | 'face' | 'iso'."""
     cq.exporters.export(_oriented(shape, view), str(path), opt={
         "projectionDir": (0, 0, 1), "showHidden": hidden, "width": size, "height": size,
         "marginLeft": 20, "marginTop": 20, "strokeWidth": 0.6, "showAxes": False})

@@ -1,0 +1,199 @@
+{
+  "config": {
+    "d": 0.0004,
+    "L": 0.001,
+    "pitch": 0.005,
+    "pattern": "hex",
+    "D_cb": 0.002,
+    "t": 0.025,
+    "K_c": 0.5,
+    "model": "lichtarowicz",
+    "cone_inlet": false
+  },
+  "h_target_um": 120.0,
+  "H_puck_assumed_mm": 10.0,
+  "V_pocket_top_m3": 3.141592653589793e-12,
+  "V_pocket_bottom_m3": 7.539822368615503e-08,
+  "cases": [
+    {
+      "mass_g": 2.0,
+      "ps_Pa": 50.40869684372527,
+      "kz_N_m": 110.2760787216714,
+      "ktheta_Nm_rad": 0.0072362847670029845,
+      "f_heave_quasistatic_Hz": 37.37195275790952,
+      "f_tilt_quasistatic_Hz": 37.67061671140521,
+      "zeta_squeeze_nofeed": 2.660451547055086,
+      "heave_top": {
+        "eig_puck": [
+          -199.30379676613447,
+          -124.36011530139002
+        ],
+        "max_real_all": -199.30379676613447,
+        "f_Hz": 19.792527073694274,
+        "zeta": 0.8483898052755952,
+        "min_Kimag_over_omega": 0.7966701557939722,
+        "stable": true
+      },
+      "tilt_top": {
+        "eig_puck": [
+          -104.02561663221809,
+          212.63626255744515
+        ],
+        "max_real_all": -104.02561663221809,
+        "f_Hz": 33.8421122666035,
+        "zeta": 0.43944915928973777,
+        "stable": true
+      },
+      "heave_bottom": {
+        "eig_puck": [
+          -201.87244635430454,
+          -124.4531240194386
+        ],
+        "max_real_all": -201.87244635430454,
+        "f_Hz": 19.807329870922345,
+        "zeta": 0.8512365819895725,
+        "min_Kimag_over_omega": 0.7919196933228951,
+        "stable": true
+      },
+      "tilt_bottom": {
+        "eig_puck": [
+          -103.87178221310087,
+          -213.58452354406384
+        ],
+        "max_real_all": -103.87178221310087,
+        "f_Hz": 33.99303268996506,
+        "zeta": 0.4373492673172659,
+        "stable": true
+      },
+      "dh_dps_um_per_Pa": 3.313580256484208,
+      "c_lateral_Ns_m": 0.0001066178006812036,
+      "tau_lateral_s": 18.758593660923207,
+      "tau_rotation_s": 18.758593660923207,
+      "drag_side_at_50mm_s_N": 4.5150000000000004e-07,
+      "couette_at_50mm_s_N": 5.33089003406018e-06,
+      "V_pocket_critical_m3": 1.2989817913797907e-05,
+      "V_pocket_critical_over_bore": 172.28281090371573,
+      "V_pocket_critical_over_top": 4134787.4616891774
+    },
+    {
+      "mass_g": 5.0,
+      "ps_Pa": 136.91370048158242,
+      "kz_N_m": 368.41421592785406,
+      "ktheta_Nm_rad": 0.0213476510202403,
+      "f_heave_quasistatic_Hz": 43.201946963345286,
+      "f_tilt_quasistatic_Hz": 40.92134960743178,
+      "zeta_squeeze_nofeed": 0.9205721178780042,
+      "heave_top": {
+        "eig_puck": [
+          -97.23908332432087,
+          253.53132802373287
+        ],
+        "max_real_all": -97.23908332432087,
+        "f_Hz": 40.350764083629855,
+        "zeta": 0.3581032104039521,
+        "min_Kimag_over_omega": 0.97202475502735,
+        "stable": true
+      },
+      "tilt_top": {
+        "eig_puck": [
+          -47.28848796783553,
+          252.74593254809582
+        ],
+        "max_real_all": -47.28848796783553,
+        "f_Hz": 40.22576451140021,
+        "zeta": 0.18390766002920214,
+        "stable": true
+      },
+      "heave_bottom": {
+        "eig_puck": [
+          -96.27403291619072,
+          -255.51846837754962
+        ],
+        "max_real_all": -96.27403291619072,
+        "f_Hz": 40.66702729355717,
+        "zeta": 0.3525826533180959,
+        "min_Kimag_over_omega": 0.9519580733264019,
+        "stable": true
+      },
+      "tilt_bottom": {
+        "eig_puck": [
+          -46.284470258609176,
+          -253.3772560727941
+        ],
+        "max_real_all": -46.284470258609176,
+        "f_Hz": 40.32624277104614,
+        "zeta": 0.17969669147366962,
+        "stable": true
+      },
+      "dh_dps_um_per_Pa": 0.8695765169153472,
+      "c_lateral_Ns_m": 0.0001066178006812036,
+      "tau_lateral_s": 46.89648415230802,
+      "tau_rotation_s": 46.89648415230803,
+      "drag_side_at_50mm_s_N": 4.5150000000000004e-07,
+      "couette_at_50mm_s_N": 5.33089003406018e-06,
+      "V_pocket_critical_m3": 3.6996906097749983e-06,
+      "V_pocket_critical_over_bore": 49.06867070469662,
+      "V_pocket_critical_over_top": 1177648.0969127188
+    },
+    {
+      "mass_g": 10.0,
+      "ps_Pa": 304.08701418293134,
+      "kz_N_m": 953.6723898156037,
+      "ktheta_Nm_rad": 0.048317392637314736,
+      "f_heave_quasistatic_Hz": 49.14957155030294,
+      "f_tilt_quasistatic_Hz": 43.53230352289445,
+      "zeta_squeeze_nofeed": 0.40458651579288135,
+      "heave_top": {
+        "eig_puck": [
+          -59.36876962538847,
+          303.1651227016456
+        ],
+        "max_real_all": -59.36876962538847,
+        "f_Hz": 48.25022785102787,
+        "zeta": 0.1921795052892168,
+        "min_Kimag_over_omega": 1.1871471437937897,
+        "stable": true
+      },
+      "tilt_top": {
+        "eig_puck": [
+          -26.382314677087656,
+          272.25655893009787
+        ],
+        "max_real_all": -26.382314677087656,
+        "f_Hz": 43.330977142914975,
+        "zeta": 0.09645062134749231,
+        "stable": true
+      },
+      "heave_bottom": {
+        "eig_puck": [
+          -56.50694540674415,
+          -304.98816077009053
+        ],
+        "max_real_all": -56.50694540674415,
+        "f_Hz": 48.540373371065584,
+        "zeta": 0.18217546588049688,
+        "min_Kimag_over_omega": 1.1212714078309576,
+        "stable": true
+      },
+      "tilt_bottom": {
+        "eig_puck": [
+          -24.91954830277627,
+          -272.68012069010075
+        ],
+        "max_real_all": -24.91954830277627,
+        "f_Hz": 43.39838909072414,
+        "zeta": 0.09100823194594013,
+        "stable": true
+      },
+      "dh_dps_um_per_Pa": 0.28474313508932103,
+      "c_lateral_Ns_m": 0.0001066178006812036,
+      "tau_lateral_s": 93.79296830461604,
+      "tau_rotation_s": 93.79296830461605,
+      "drag_side_at_50mm_s_N": 4.5150000000000004e-07,
+      "couette_at_50mm_s_N": 5.33089003406018e-06,
+      "V_pocket_critical_m3": 1.3558952342084526e-06,
+      "V_pocket_critical_over_bore": 17.9831190699182,
+      "V_pocket_critical_over_top": 431594.85767803673
+    }
+  ]
+}

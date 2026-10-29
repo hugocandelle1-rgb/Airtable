@@ -6,13 +6,14 @@
     "cadquery": "2.8.0"
   },
   "temps_generation_s": {
-    "construction_pieces_s": 6.28,
-    "csv_dxf_plaque_s": 0.54,
-    "step_stl_pieces_s": 2.94,
-    "assemblage_step_s": 3.11,
-    "svg_s": 31.04,
-    "interferences_s": 2.63,
-    "total_s": 50.9
+    "construction_pieces_s": 6.14,
+    "csv_dxf_plaque_s": 0.56,
+    "step_stl_pieces_s": 2.77,
+    "assemblage_step_s": 2.97,
+    "svg_s": 41.21,
+    "interferences_s": 2.6,
+    "plaque_complete_s": 600.2,
+    "total_s": 660.9
   },
   "plaque": {
     "nb_trous_reseau": 5739,
@@ -25,7 +26,12 @@
     "volume_retire_par_trou_mm3": 75.524,
     "zone_percee_mm": 360.0
   },
-  "plaque_complete": null,
+  "plaque_complete": {
+    "ok": false,
+    "abandonne": true,
+    "delai_s": 600.0,
+    "note": "génération complète abandonnée (> délai) : le modèle léger est conservé"
+  },
   "masses_par_groupe_kg": {
     "aero": 0.617,
     "bati": 27.618,
@@ -69,6 +75,7 @@
       "plaque_dessus.svg",
       "plaque_face.svg",
       "plaque_iso.svg",
+      "plaque_dessous.svg",
       "plenum_dessus.svg",
       "plenum_face.svg",
       "plenum_iso.svg",
@@ -80,7 +87,15 @@
       "bati_iso.svg",
       "assemblage_dessus.svg",
       "assemblage_face.svg",
-      "assemblage_iso.svg"
+      "assemblage_iso.svg",
+      "plenum_coupe_y0.svg",
+      "assemblage_coupe_y0.svg"
+    ],
+    "png": [
+      "assemblage_coupe_y0.png",
+      "assemblage_dessus.png",
+      "assemblage_face.png",
+      "assemblage_iso.png"
     ],
     "dxf": "plaque_trous.dxf",
     "csv_trous": "plaque_centres_trous.csv",

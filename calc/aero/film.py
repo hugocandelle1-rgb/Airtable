@@ -188,7 +188,10 @@ def green_matrix(xy: np.ndarray, r_h: float, R=R_PUCK):
     return Gm
 
 
-def covered_holes(cfg: HoleConfig, center, R=R_PUCK):
+RIM_MODEL = "smooth"       # "smooth" (transition continue) ou "abrupt" (ρ < R − r_h)
+
+
+def covered_holes(cfg: HoleConfig, center, R=R_PUCK, rim=None):
     """Trous couverts ou partiellement couverts (relatifs au centre du palet).
 
     Un trou dont le centre est à ρ < R + r_h interagit avec le film. Pour assurer
@@ -198,6 +201,8 @@ def covered_holes(cfg: HoleConfig, center, R=R_PUCK):
     δ_eff = (R + r_h − ρ)/2 ∈ [0, r_h] (même direction). Leur portance
     (∝ R² − ρ'²) tend ainsi continûment vers 0 au découvrement.
     """
+    if (rim or RIM_MODEL) == "abrupt":
+        return holes_near(cfg, np.asarray(center, float), R - cfg.r_h)
     xy = holes_near(cfg, np.asarray(center, float), R + cfg.r_h)
     rho = np.hypot(xy[:, 0], xy[:, 1])
     band = rho > R - cfg.r_h
@@ -292,14 +297,46 @@ def rim_outflow(sol: dict, R=R_PUCK, nphi=720):
     return phi, ker @ q
 
 
-def momentum_force(sol: dict, h: float, R=R_PUCK, share=0.5):
-    """Force sur le palet due au flux de quantité de mouvement sortant au bord
-    (profil de Poiseuille, facteur 6/5), part `share` attribuée au palet."""
-    phi, qn = rim_outflow(sol, R)
+def momentum_force(sol: dict, h: float, cfg: HoleConfig, R=R_PUCK, share=0.5):
+    """Force sur le palet due au flux de quantité de mouvement sortant au bord,
+    profil de Poiseuille (facteur 6/5), part `share` attribuée au palet.
+
+    Régularisation : pour un trou à une distance δ du bord, le noyau de Poisson
+    concentre la sortie sur un arc ~δ et ∮q_n² diverge en 1/δ ; hors du domaine
+    de la lubrification (δ ≲ max(d, 2h)) on borne donc δ à δ_min = max(d, 2h),
+    ce qui ramène l'effort d'un trou de bord à ~0,3·(d/h)·ρqV, cohérent avec le
+    flux de quantité de mouvement du jet. Les effets propres aux jets de bord
+    (déviation par l'arête, Coanda) sont estimés à part par `rim_jet_force`."""
+    xy = sol["xy"]
+    rho = np.maximum(np.hypot(xy[:, 0], xy[:, 1]), 1e-12)
+    rho_reg = np.minimum(rho, R - d_min(cfg, h))
+    sub = dict(xy=xy * (rho_reg / rho)[:, None], q=sol["q"])
+    phi, qn = rim_outflow(sub, R)
     n = np.stack([np.cos(phi), np.sin(phi)], axis=1)
     flux = 1.2 * RHO * qn**2 / h
-    F = -share * np.sum(flux[:, None] * n, axis=0) * R * (TWO_PI / len(phi))
-    return F
+    return -share * np.sum(flux[:, None] * n, axis=0) * R * (TWO_PI / len(phi))
+
+
+def d_min(cfg: HoleConfig, h: float) -> float:
+    return max(cfg.d, 2 * h)
+
+
+def rim_jet_force(cfg: HoleConfig, center, ps, beta=0.1, R=R_PUCK):
+    """Estimation (ordre de grandeur) de l'effort horizontal des jets des trous
+    situés dans la bande |ρ − R| < d autour du bord du palet (jet partiellement
+    recouvert, déviation par l'arête, effet Coanda sur la face latérale) :
+    F = −β·Σ w_i·ρ q V·n̂_i, poids en triangle w_i = 1 − |ρ_i − R|/d."""
+    from calc.aero.orifice import q_free
+    xy = holes_near(cfg, np.asarray(center, float), R + cfg.d)
+    rho = np.hypot(xy[:, 0], xy[:, 1])
+    band = np.abs(rho - R) < cfg.d
+    if not np.any(band):
+        return np.zeros(2)
+    qf = float(q_free(ps, cfg))
+    J = RHO * qf * qf / cfg.A
+    w = 1 - np.abs(rho[band] - R) / cfg.d
+    nhat = xy[band] / rho[band][:, None]
+    return -beta * J * np.sum(w[:, None] * nhat, axis=0)
 
 
 def green_solve_h(cfg, ps, m_kg, center=(0.0, 0.0), hlo=5e-6, hhi=1.5e-3):
@@ -565,3 +602,57 @@ class FD2D:
                     Jm[:, k] = (np.array([s2["W"] - Wt, *(s2["M"] - Mt)]) - res) / steps[k]
             z = z - np.linalg.solve(Jm, res)
         return dict(h0=z[0], a=z[1], b=z[2], sol=s, hist=hist, F=s["F"])
+
+
+# ===========================================================================
+# 4. Crantage : statistiques sur une cellule du réseau
+# ===========================================================================
+def magic_pitches(pattern="hex", R=R_PUCK, kmax=12):
+    """Pas « magiques » annulant le premier anneau du réseau réciproque pour le
+    moment de portance d'un débit uniforme (zéros de J3 : |G1|·R = j3,k)."""
+    from scipy.special import jn_zeros
+    j = jn_zeros(3, kmax)
+    if pattern == "hex":
+        return 4 * np.pi * R / (np.sqrt(3) * j)
+    return 2 * np.pi * R / j
+
+
+def cogging_stats(cfg: HoleConfig, ps: float, h: float, kth: float, kz: float,
+                  n=10, R=R_PUCK, rim=None, momentum=False, positions=None):
+    """Portance, moment, basculement et force latérale sur la cellule primitive.
+
+    Retourne un dict de tableaux (positions, W, M, tilt, slope_vec) et de
+    statistiques. La pente équivalente est F_lat/W avec F_lat = −½W·θ
+    (+ terme de quantité de mouvement si momentum=True)."""
+    from calc.aero.common import unit_cell_positions
+    pos = unit_cell_positions(cfg, n) if positions is None else positions
+    W = np.zeros(len(pos))
+    M = np.zeros((len(pos), 2))
+    Fm = np.zeros((len(pos), 2))
+    Fj = np.zeros((len(pos), 2))
+    nh = np.zeros(len(pos), int)
+    for k, c in enumerate(pos):
+        xy = covered_holes(cfg, c, R, rim)
+        s = green_solve(cfg, ps, h, xy=xy, R=R)
+        W[k], M[k], nh[k] = s["W"], s["M"], s["n"]
+        if momentum:
+            Fm[k] = momentum_force(s, h, cfg, R)
+            Fj[k] = rim_jet_force(cfg, c, ps, R=R)
+    rms = lambda v: float(np.sqrt(np.mean(np.sum(v**2, 1))))
+    tilt = M / kth
+    slope_tilt = -0.5 * tilt                  # mécanisme de basculement
+    slope = slope_tilt + Fm / W[:, None]      # + quantité de mouvement du film
+    sl = np.hypot(slope[:, 0], slope[:, 1])
+    slope_all = slope + Fj / W[:, None]       # + estimation jets de bord
+    sla = np.hypot(slope_all[:, 0], slope_all[:, 1])
+    return dict(pos=pos, W=W, M=M, tilt=tilt, slope=slope, Fmom=Fm, Fjet=Fj, n_holes=nh,
+                slope_tilt=slope_tilt, slope_tilt_rms=rms(slope_tilt),
+                slope_all=slope_all, slope_all_rms=float(np.sqrt(np.mean(sla**2))),
+                slope_all_max=float(sla.max()),
+                Fjet_rms_over_W=rms(Fj / W[:, None]),
+                W_mean=float(W.mean()), W_ripple_pp=float((W.max() - W.min()) / W.mean()),
+                W_std_rel=float(W.std() / W.mean()), dh_pp=float((W.max() - W.min()) / kz),
+                slope_rms=float(np.sqrt(np.mean(sl**2))), slope_max=float(sl.max()),
+                tilt_rms=float(np.sqrt(np.mean(np.sum(tilt**2, 1)))),
+                Fmom_rms_over_W=rms(Fm / W[:, None]),
+                n_min=int(nh.min()), n_max=int(nh.max()))
