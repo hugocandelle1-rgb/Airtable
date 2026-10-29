@@ -1,0 +1,16 @@
+{
+  "config": {
+    "d": 0.0003,
+    "L": 0.0012,
+    "pitch": 0.00294,
+    "pattern": "hex",
+    "D_cb": 0.002,
+    "t": 0.025,
+    "K_c": 0.5,
+    "model": "lichtarowicz",
+    "cone_inlet": false
+  },
+  "h_target_um": 100.0,
+  "J_urad": 45.090807311304005,
+  "note": "écrit par optimize.py"
+}

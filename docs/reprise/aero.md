@@ -94,7 +94,7 @@ de pression provisoires 45–363 Pa) **[P]**
 | `calc/aero/jets.py` | **non commencé** |
 | `calc/aero/thermal.py` | **non commencé** |
 | `calc/aero/run_all.py` | **non commencé** |
-| `calc/aero/results/recommended_params.toml` | provisoire (écrit à l'arrêt) |
+| `calc/aero/results/recommended_params.toml` | **non écrit** (valeurs provisoires au § f) |
 | `docs/02_aeraulique.md` | **non commencé** |
 
 ## (c) Étapes restantes (ordre conseillé)
@@ -150,4 +150,15 @@ Pour des essais hors module : `OPENBLAS_NUM_THREADS=1 PYTHONPATH=. python3 scrip
 
 ## (e) Valeurs recommandées provisoires
 
-Voir `calc/aero/results/recommended_params.toml` (provisoire) et § (f).
+Voir § (f) ; `recommended_params.toml` reste à écrire.
+
+## (f) Résultat de l'optimisation (exécution terminée, 706 s, CPU partagé) **[P]**
+
+- 1150 configurations, 840 admissibles, crantage calculé sur 444.
+- Retenu : **d = 0,30 mm, L = 1,20 mm, maille hexagonale, pas 2,94 mm, h cible 100 µm**,
+  J (pente équivalente RMS, pire masse) = 45 µrad. Écrit dans `results/recommended_hole.json`
+  et `results/optimization.json` (robustesse et étude de h incluses, non encore relues).
+- À vérifier à la reprise : ~17 000 trous (coût d'usinage), débit max ≈ 48 m³/h, J reste
+  proche du budget de 50 µrad. Comparer avec hex 4,23 mm / d 0,30 (≈ 8 300 trous).
+  `dynamics.py` et `network.py` n'ont **pas** été relancés avec cette configuration.
+- Lamage provisoire : Ø2,0 mm (perte 0,8 %, Ø1,5 → −1 % de débit).
