@@ -30,125 +30,155 @@ EXPORT_DIR = CAD_DIR / "export"
 
 # =============================================================================
 #  VALEURS PAR DÉFAUT (clés absentes de params/design.toml)
-#  >>> Ce bloc est ce que la phase 2 devra figer (ou déplacer dans le TOML). <<<
+#  Phase 2 : cotes figées d'après les notes de calcul ; la source est citée en commentaire.
+#  Références : [02] docs/02_aeraulique.md §13 ; [03] docs/03_structure_plaque.md §8 ;
+#  [04] docs/04_usinage_tolerances.md §7 ; [05] docs/05_nivellement.md §7.
+#  Repère CAD : z = 0 sur la face supérieure de la plaque ; z_CAD = z_notes - plate_top_height_mm.
 # =============================================================================
 DEFAULTS: dict = {
     # masses volumiques kg/m3 (ordres de grandeur usuels ; plate.rho vient du TOML)
     "materials": {
         "alu": 2700.0, "alu_5083": 2660.0, "acier": 7850.0, "inox": 7900.0,
         "pmma": 1190.0, "epdm": 1150.0, "pla": 1240.0, "media_filtrant": 150.0,
-        "composite": 1000.0,
+        "composite": 1000.0, "xps": 35.0, "ptfe": 2200.0, "bronze": 8800.0,
     },
     "plate": {
-        "edge_band_mm": 2.5,            # bande exclue au bord de la zone percée (centres des trous)
-        "witness_holes": 19,            # modèle léger : nb de trous témoins (amas central)
-        "pocket_d_mm": 16.0,            # logement d'insert (dessous)
-        "pocket_depth_mm": 6.0,
-        "hole_exclusion_margin_mm": 2.0,  # trous supprimés autour d'un logement d'appui
-        "insert_d_mm": 15.9,            # pastille d'appui (vé / cône / plat)
-        "insert_t_mm": 6.0,
-        "insert_recess_depth_mm": 5.0,  # profondeur du cône / vé dans la pastille
-        "insert_half_angle_deg": 45.0,
-        "ball_d_mm": 10.0,              # bille de contact (couplage de Kelvin)
-        "tap_thread": "M5",
-        "tap_d_mm": 4.2,                # avant-trou taraudage
-        "tap_depth_mm": 12.0,
-        "tap_half_mm": 228.0,           # demi-côté du carré de vis de la bride plaque/plenum
-        "tap_per_side": 6,              # vis par côté, coins inclus
-        "pin_d_mm": 6.0,                # pions de référence (reprise d'usinage)
-        "pin_depth_mm": 10.0,           # borgne depuis le dessous
-        "pin_positions_mm": [[-250.0, -250.0], [250.0, 250.0]],
+        "edge_band_mm": 1.0,             # [04] trous à >= 1 mm du bord de zone -> 5 935 trous
+        "chamfer_mm": 1.0,               # [04] chanfreins 1 x 45 deg
+        "cone_angle_deg": 118.0,         # [02] fond conique du lamage
+        "witness_holes": 19,             # modèle léger : amas central de trous témoins
+        "datum_B_mm": [-240.0, 0.0],     # [04] alésage Ø6 H7 débouchant
+        "datum_C_mm": [240.0, 0.0],      # [04] lumière 6 H7 x 10, grand axe selon x
+        "datum_d_mm": 6.0,
+        "datum_C_len_mm": 10.0,
+        "ball_pocket_d_mm": 25.4,        # [03] logement Ø25,4 H8 x 10,7
+        "ball_pocket_depth_mm": 10.7,
+        "ball_center_below_mm": 2.0,     # [03] centre de bille à 2,0 sous la face inférieure
+        "tap_thread": "M5",              # [04] attache du caisson : 32 x M5 prof. 10
+        "tap_d_mm": 4.2,
+        "tap_depth_mm": 10.0,
+        "tap_half_mm": 208.0,
+        "tap_per_side": 8,
+        "adxl_hole_d_mm": 3.3,           # [04] 3 x M4 prof. 8 sur Ø40 (avant-trou)
+        "adxl_depth_mm": 8.0,
+        "adxl_pcd_mm": 40.0,
+        "handling_d_mm": 8.5,            # [04] 4 x M10 prof. 20 sur les chants (avant-trou)
+        "handling_depth_mm": 20.0,
+        # [04] dit « milieu de chaque côté » mais (±260 ; 0) recoupe les datums B/C (±240 ; 0) :
+        # les deux positions sur ±x sont décalées à y = -100 (à arbitrer par la structure).
+        "handling_positions_mm": [[0.0, 260.0], [0.0, -260.0], [260.0, -100.0], [-260.0, -100.0]],
     },
-    "support": {                         # schéma d'appui : TOML support.scheme = "TBD"
-        "radius_mm": 168.0,              # ~0,645 x 260 (optimum disque, à recalculer)
-        "angles_deg": [90.0, 210.0, 330.0],
-        "insert_types": ["cone", "ve", "plat"],   # Kelvin : cône / vé / plat
-        "roles": ["pivot", "verin", "verin"],     # 1 pivot fixe + 2 vérins
-        "column_d_mm": 16.0,             # colonne d'appui traversant le plenum
-    },
-    "plenum": {
-        "profile": "45x45",
-        "panel_t_mm": 5.0,
-        "panel_embed_mm": 8.0,           # pénétration du panneau dans la rainure
-        "panel_material": "alu",
-        "bride_t_mm": 8.0,               # bride supérieure du plenum
-        "membrane_gap_mm": 12.0,         # dessous plaque -> dessus bride
-        "membrane_t_mm": 1.5,
-        "membrane_fold_dip_mm": 12.0,    # profondeur du U sous la bride
-        "membrane_wall_spacing_mm": 10.0,  # écart entre les deux branches du U
-        "membrane_flange_half_mm": 240.0,  # demi-largeur extérieure des collerettes
-        "membrane_inset_mm": 6.0,        # branche extérieure du U = ouverture bride - inset
-        "ring_t_mm": 6.0,                # bride de serrage sous la plaque
-        "ring_wall_clearance_mm": 1.0,
-        "baffle_t_mm": 2.0,
-        "baffle_hole_d_mm": 8.0,
-        "baffle_edge_gap_mm": 1.0,
-        "baffle_holes": True,            # perforation réelle (False = tôle pleine)
-        "column_hole_d_mm": 20.0,        # passage des colonnes (fond + tôle)
+    "support": {
+        "roller_len_mm": 30.0,           # [03] rouleaux Ø20 x 30 h6
+        "vee_block_mm": [40.0, 30.0, 20.0],   # [05] bloc de vé 40 (axe) x 30 x 20
+        "roller_axis_above_base_mm": 12.0,
+        "vee_half_angle_deg": 45.0,      # vé à 90 deg
+        "clamp_pad_d_mm": 10.0,          # [05] patin PTFE Ø10
+        "clamp_pad_t_mm": 5.0,
+        "clamp_arm_t_mm": 10.0,
+        "clamp_post_mm": [9.5, 30.0],    # (épaisseur radiale, largeur) du montant d'étrier (dans le cadre 45)
     },
     "leveling": {
-        "verin_height_mm": 60.0,         # console -> tête du vérin
-        "head_gap_mm": 5.0,              # tête vérin / dessous du fond du plenum
-        "base_mm": [40.0, 40.0, 8.0],
-        "body_d_mm": 30.0,
-        "knob_d_mm": 22.0,
-        "nema17_mm": [42.3, 42.3, 40.0],
+        "housing_mm": [90.0, 30.0],      # [05] boîtier 90 (le long du cadre) x 30 (radial)
+        "wedge_mm": [60.0, 24.0],        # [05] coin 60 x 24
+        "wedge_travel_mm": 12.1,         # [05] course du coin +/- 12,1
+        "head_u_mm": 40.0,               # tête (le long du cadre)
+        "screw_d_mm": 6.0,               # [05] M6 x 0,25
+        "nema17_mm": [42.0, 42.0, 40.0],  # [05] corps ; 40 = longueur le long de l'arbre
         "nema17_mass_kg": 0.28,
-        "motor_offset_mm": 60.0,         # moteur / axe vérin le long de la console
-        "console_clear_mm": 22.5,        # la console dépasse l'axe du vérin de cette valeur
+        "knob_d_mm": 40.0,               # [05] bouton gradué Ø40, 100 divisions
+        "knob_t_mm": 12.0,
+        "coupling_len_mm": 10.0,
+        "wedge_floor_mm": 6.0,           # fond de la cavité du boîtier
     },
-    "fan": {                             # TOML fan.reference = "TBD"
-        "size_mm": [97.0, 97.0, 33.0],   # face x face x épaisseur (axe d'aspiration)
-        "outlet_mm": [30.0, 26.0],       # sortie rectangulaire (selon X, selon Y)
-        "outlet_offset_x_mm": -30.0,     # position de la sortie / centre du carter
+    "tilt_sensors": {
+        "foot_d_mm": 8.0,                # [05] 3 pieds Ø8 x 12 (8 dans la plaque, 4 apparents)
+        "foot_visible_mm": 4.0,
+        "plateau_d_mm": 50.0,            # [05] plateau Ø50, 3 billes Ø4 sur R18, 6 vés à 60 deg
+        "plateau_t_mm": 6.0,
+        "ball_d_mm": 4.0,
+        "ball_r_mm": 18.0,
+        "capot_mm": [80.0, 80.0, 45.0],  # [05] capot XPS 80 x 80 x 45, parois 10
+        "capot_wall_mm": 10.0,
+        "capot_top_mm": 8.0,
+        "pcb_mm": [20.0, 20.0, 2.0],
+    },
+    "plenum": {
+        "gasket_mm": [6.0, 2.0],         # [03] joint plat EPDM 6 x 2
+        "angle_mm": [15.0, 3.0],         # [03] cornière intérieure 15 x 15 x 3 (jambe, épaisseur)
+        "media_t_mm": 10.0,              # [02] nappe média polyester 10 mm
+        "baffle_t_mm": 1.0,              # [02] tôle inox ép. 1
+        "baffle_pitch_mm": 8.0,          # [02] trous Ø2 pas 8 en quinconce
+        "baffle_holes_full": False,      # True : perforation réelle (~3 270 trous, lent)
+        "baffle_edge_gap_mm": 1.0,
+        "inlet_d_mm": 80.0,              # [02] conduit Ø80 central par le fond
+        "deflector_t_mm": 2.0,
+        "deflector_posts_d_mm": 6.0,
+        "deflector_posts_r_mm": 70.0,
+        "tap_d_mm": 4.0,                 # [02] 4 piquages Ø4 en chambre de tranquillisation
+        "wall_material": "alu",
+    },
+    "fan": {                             # [02] San Ace 9BMC24P2G001, 97 x 95 x 33, 200 g
+        "size_mm": [97.0, 95.0, 33.0],   # face X, face Z, épaisseur Y (axe d'aspiration)
+        "outlet_mm": [42.0, 30.0],       # ATTENTION : sortie non documentée (fiche constructeur à lire)
+        "outlet_offset_x_mm": -15.0,
         "stub_h_mm": 6.0,
         "wall_mm": 2.0,
-        "standoff_mm": 6.0,              # cale sous le ventilateur
-        "mass_kg": 0.15,
+        "standoff_mm": 6.0,
+        "mass_kg": 0.2,
     },
     "aero": {
-        "manchon_len_mm": 40.0,
-        "adapter_len_mm": 40.0,
-        "diffuser_half_angle_deg": 7.0,
-        "diffuser_d_in_mm": 40.0,
-        "diffuser_d_out_mm": 120.0,
-        "diffuser_len_mm": 0.0,          # 0 = déduit du demi-angle
+        "manchon_len_mm": 100.0,         # [02] manchon souple L100
+        "adapter_len_mm": 40.0,          # adaptateur sortie -> Ø50
+        "diffuser_half_angle_deg": 3.5,  # [02] 2 theta = 7 deg
+        "diffuser_d_in_mm": 50.0,        # [02] Ø50 -> Ø80
+        "diffuser_d_out_mm": 80.0,
+        "diffuser_len_mm": 0.0,          # 0 = déduit du demi-angle (-> 245,2 mm)
         "diffuser_wall_mm": 2.0,
-        "diffuser_flange_extra_mm": 30.0,   # Ø bride = d_out + extra
-        "diffuser_flange_t_mm": 6.0,
-        "bell_throat_d_mm": 60.0,
-        "bell_flare_r_mm": 12.0,
-        "bell_len_mm": 15.0,
+        "flange_extra_mm": 30.0,         # Ø bride = Ø80 + 30
+        "flange_t_mm": 4.0,
+        "duct_len_mm": 60.0,             # conduit Ø80 portant la vanne de décharge
+        "valve_branch_d_mm": 40.0,       # [02] vanne Ø ~ 40 mm
+        "valve_body_mm": 50.0,
+        "valve_branch_len_mm": 20.0,
+        "valve_exhaust_len_mm": 50.0,
+        "bell_flare_r_mm": 20.0,         # buse col Ø30 (profil ISO 5801 approché par un arc)
         "bell_lip_mm": 2.0,
-        "filter_d_mm": 95.6,
-        "filter_t_mm": 20.0,
-        "filter_gap_mm": 10.0,
-        "housing_wall_mm": 2.0,
+        "suction_tube_wall_mm": 2.0,
+        "box_mm": [320.0, 220.0, 320.0],  # [02] caisson d'aspiration 320 x 320 x 220 (X, profondeur Y, Z)
+        "box_wall_mm": 3.0,
+        "box_front_clear_mm": 20.0,      # dégagement devant le bâti
+        "box_floor_clear_mm": 10.0,
+        "filter_mm": [287.0, 48.0, 287.0],  # [02] filtre ePM1 287 x 287 x 48
+        "window_mm": 283.0,
     },
     "frame": {
-        "footprint_mm": 700.0,
-        "table_height_mm": 900.0,        # sol -> dessus de la plaque
-        "foot_h_mm": 60.0,               # pied réglable (hauteur sous montant)
+        "profile_heavy": "45x90",        # [03] cadre supérieur et montants
+        "profile_light": "45x45",        # [03] ceintures, écharpes
+        "belt_axis_heights_mm": [150.0, 420.0],   # [03] ceinture basse / étagère (cotes sol)
+        "foot_h_mm": 60.0,               # sous les montants (M16 + patin)
         "foot_stud_d_mm": 16.0,
-        "foot_base_d_mm": 60.0,
+        "foot_base_d_mm": 80.0,          # [03] patin Ø80
         "foot_base_t_mm": 10.0,
-        "top_ring_drop_mm": 5.0,         # dessus du cadre haut sous le dessous de plaque
     },
     "platine": {
-        "size_mm": [260.0, 200.0],
+        "size_mm": [200.0, 440.0],
         "t_mm": 8.0,
         "plot_d_mm": 25.0,
         "plot_h_mm": 20.0,
-        "plot_inset_mm": 25.0,
-        "margin_mm": 20.0,
+        "plot_x_mm": 55.0,
+        "traverse_y_mm": 200.0,          # traverses du plot le long de X, calées contre les montants
     },
     "screen": {
-        "t_mm": 4.0,
-        "height_above_plate_mm": 150.0,
+        "t_mm": 5.0,                     # [02] parois PMMA 4-6 mm
+        "gap_mm": 0.5,                   # parois contre le bord de zone percée
+        "lid_t_mm": 20.0,                # couvercle nid d'abeille alu 20 mm
+        "lid_mass_kg": 0.5,
     },
     "gantry": {
         "enabled": True,
-        "camera_lens_z_mm": 450.0,       # hauteur de l'objectif au-dessus de la plaque
+        "post_offset_mm": 325.0,         # montants libres de part et d'autre du bâti
+        "camera_lens_z_mm": 450.0,
         "camera_mm": [60.0, 60.0, 40.0],
         "lens_d_mm": 30.0,
         "lens_len_mm": 30.0,
@@ -361,19 +391,14 @@ def cut_list(parts: list[PartSpec]) -> list[dict]:
 # =============================================================================
 #  Cotes dérivées (Z, positions) — SEULE source pour tous les modules
 # =============================================================================
-def support_radius(P: dict) -> float:
-    rr = P.get("support", {}).get("radius_ratio", 0.0) or 0.0
-    return rr * P["plate"]["outer_square_mm"] / 2.0 if rr > 0 else P["support"]["radius_mm"]
-
-
 def support_points(P: dict) -> list[dict]:
-    """Positions des appuis : [{x, y, type, role, index}] (angles mesurés depuis +X)."""
+    """Appuis Maxwell (3 vés) : [{index, x, y, role, vee_angle}] d'après support.points_mm
+    (centre de plaque, +y = arrière) ; l'appui `fixed_point` est le pivot fixe, les autres sont motorisés."""
     S = P["support"]
-    r = support_radius(P)
     out = []
-    for i, a in enumerate(S["angles_deg"]):
-        out.append({"index": i, "x": r * math.cos(math.radians(a)), "y": r * math.sin(math.radians(a)),
-                    "type": S["insert_types"][i], "role": S["roles"][i], "angle": a})
+    for i, (x, y) in enumerate(S["points_mm"]):
+        out.append({"index": i, "x": float(x), "y": float(y), "vee_angle": float(S["vee_axis_angle_deg"][i]),
+                    "role": "pivot" if i == S["fixed_point"] else "verin"})
     return out
 
 
@@ -389,42 +414,66 @@ def diffuser_geometry(P: dict) -> dict:
     return {"length": L, "half_angle_deg": ang, "d_in": d_in, "d_out": d_out}
 
 
+def vee_geometry(P: dict) -> dict:
+    """Couplage bille Ø25,4 / 2 rouleaux Ø20 à 90 deg : entraxe et hauteur du centre de bille / axes."""
+    S, Fr = P["support"], P["frame"]
+    R, r = S["ball_d_mm"] / 2.0, S["roller_d_mm"] / 2.0
+    a = math.radians(S["vee_half_angle_deg"])
+    return {"half_spacing": (R + r) * math.sin(a), "dz": (R + r) * math.cos(a)}
+
+
 def levels(P: dict) -> dict:
-    """Cotes verticales et positions dérivées des paramètres (mm)."""
+    """Cotes verticales et positions dérivées des paramètres (mm, repère CAD : plaque z=0 en haut)."""
     pl, pn, fr, A, F = P["plate"], P["plenum"], P["frame"], P["aero"], P["fan"]
-    lv, pf = P["leveling"], P["platine"]
-    L: dict = {}
+    lv, pf, S = P["leveling"], P["platine"], P["support"]
+    Z0 = fr["plate_top_height_mm"]
+    zc = lambda zd: zd - Z0                         # cotes des notes -> repère CAD
+    L: dict = {"Z0": Z0}
     t = pl["thickness_mm"]
     L["plate_top"], L["plate_bot"] = 0.0, -t
-    # --- plenum ---------------------------------------------------------------
-    pk = pn["profile"]
-    s = PROFILES[pk]["w"]                       # section carrée requise pour le plenum
-    L["pl_s"] = s
-    L["pl_cp"] = (pn["inner_square_mm"] + pn["panel_t_mm"]) / 2.0      # axe des montants/panneaux
-    L["pl_open_half"] = L["pl_cp"] - s / 2.0                          # ouverture libre (demi)
-    L["pl_outer_half"] = L["pl_cp"] + s / 2.0
-    L["bride_top"] = L["plate_bot"] - pn["membrane_gap_mm"]
-    L["bride_bot"] = L["bride_top"] - pn["bride_t_mm"]
-    L["rail_top_top"] = L["bride_bot"]                                # dessus rails/montants
-    L["rail_top_bot"] = L["rail_top_top"] - s
-    L["cavity_top"] = L["bride_top"]
-    L["cavity_floor"] = L["cavity_top"] - pn["height_mm"]
-    L["fond_top"] = L["cavity_floor"]
-    L["fond_bot"] = L["cavity_floor"] - pn["panel_t_mm"]
-    L["rail_bot_c"] = L["cavity_floor"] - pn["panel_t_mm"] / 2.0
-    L["rail_bot_bot"] = L["rail_bot_c"] - s / 2.0
-    L["rail_bot_top"] = L["rail_bot_c"] + s / 2.0
-    L["baffle_top"] = L["cavity_top"] - pn["settling_height_mm"]
-    L["baffle_bot"] = L["baffle_top"] - pn["baffle_t_mm"]
-    # --- nivellement ------------------------------------------------------------
-    L["verin_head_top"] = L["fond_bot"] - lv["head_gap_mm"]
-    L["console_top"] = L["verin_head_top"] - lv["verin_height_mm"]
-    L["pl_leg"] = L["rail_bot_bot"] - L["console_top"]                  # prolongement des montants
-    L["pl_up_bot"] = L["console_top"]
-    # --- chaîne aéraulique --------------------------------------------------------
+    # --- bâti : cadre supérieur (45x90 de chant), montants, ceintures --------------------------------
+    kh, kl = fr["profile_heavy"], fr["profile_light"]
+    wh, hh = PROFILES[kh]["w"], PROFILES[kh]["h"]        # 45 x 90
+    wl = PROFILES[kl]["w"]
+    L.update(w_h=wh, h_h=hh, w_l=wl)
+    ca = fr["top_ring_axis_half_mm"]                      # demi-côté d'axe du cadre (250)
+    L["ca"] = ca
+    L["cad_top"] = zc(fr["ring_axis_height_mm"] + hh / 2)  # dessus du cadre (790 -> -110)
+    L["cad_bot"] = L["cad_top"] - hh
+    L["cad_zc"] = (L["cad_top"] + L["cad_bot"]) / 2
+    L["up_x_in"] = ca - wh / 2                            # face intérieure des montants selon x (227,5)
+    L["up_y_in"] = ca + wh / 2 - hh                       # 272,5 - 90 = 182,5
+    L["up_yc"] = ca + wh / 2 - hh / 2                     # centre des montants selon y (227,5)
+    L["foot_top"] = zc(fr["foot_h_mm"])                   # dessous des montants
+    L["floor"] = -Z0
+    L["up_bot"] = L["floor"] + fr["foot_h_mm"]
+    # --- appuis : bille, rouleaux, bloc de vé, tête de vérin -----------------------------------------------
+    V = vee_geometry(P)
+    L["vee"] = V
+    L["ball_zc"] = L["plate_bot"] - pl["ball_center_below_mm"]
+    L["roller_z"] = L["ball_zc"] - V["dz"]
+    L["block_base"] = L["roller_z"] - S["roller_axis_above_base_mm"]
+    L["stack_h"] = L["block_base"] - L["cad_top"]         # vérin à mi-course / rehausse de P0 (~45)
+    # --- caisson suspendu à la plaque --------------------------------------------------------------------------
+    gk_w, gk_t = pn["gasket_mm"]
+    L["gasket_top"], L["gasket_bot"] = L["plate_bot"], L["plate_bot"] - gk_t
+    L["wall_top"] = L["gasket_bot"]
+    L["cav_half"] = pn["inner_square_mm"] / 2.0
+    L["box_half"] = L["cav_half"] + pn["wall_mm"]
+    L["cav_top"] = L["plate_bot"]                         # le vide du caisson monte jusqu'à la plaque
+    L["floor_top"] = L["plate_bot"] - pn["height_mm"]
+    L["box_bot"] = L["floor_top"] - pn["bottom_mm"]
+    L["baffle_bot"] = L["floor_top"] + pn["distribution_height_mm"]
+    L["baffle_top"] = L["baffle_bot"] + pn["baffle_t_mm"]
+    L["media_top"] = L["baffle_top"] + pn["media_t_mm"]
+    L["deflector_bot"] = L["floor_top"] + pn["deflector_gap_mm"]
+    L["tap_z"] = (L["media_top"] + L["plate_bot"]) / 2.0   # milieu de la chambre de tranquillisation
+    # --- chaîne aéraulique (axe z central) -----------------------------------------------------------------------------
     D = diffuser_geometry(P)
     L["dif"] = D
-    L["dif_top"] = L["fond_bot"]
+    L["duct_top"] = L["box_bot"]
+    L["duct_bot"] = L["duct_top"] - A["duct_len_mm"]
+    L["dif_top"] = L["duct_bot"]
     L["dif_bot"] = L["dif_top"] - D["length"]
     L["adp_top"], L["adp_bot"] = L["dif_bot"], L["dif_bot"] - A["adapter_len_mm"]
     L["man_top"], L["man_bot"] = L["adp_bot"], L["adp_bot"] - A["manchon_len_mm"]
@@ -435,30 +484,22 @@ def levels(P: dict) -> dict:
     L["fan_xc"] = -F["outlet_offset_x_mm"]
     L["fan_yc"] = 0.0
     L["cale_bot"] = L["fan_bot"] - F["standoff_mm"]
-    L["bell_tube_len"] = A["bell_len_mm"] + A["bell_lip_mm"] + A["filter_gap_mm"] + A["filter_t_mm"] + 2.0
-    # empreinte du ventilateur + filtre (axe d'aspiration = -Y)
-    y_far = -F["size_mm"][2] / 2.0 - L["bell_tube_len"]
-    L["fan_y_min"], L["fan_y_max"] = y_far, F["size_mm"][2] / 2.0
-    L["pf_cx"] = L["fan_xc"]
-    L["pf_cy"] = (L["fan_y_min"] + L["fan_y_max"]) / 2.0
-    # --- platine découplée + traverses ---------------------------------------------
+    L["fan_y_in"] = -F["size_mm"][2] / 2.0                # face d'aspiration du ventilateur
+    # aspiration déportée devant le bâti : caisson + filtre + buse col Ø30 + tube
+    box_x, box_y, box_z = A["box_mm"]
+    L["box_y_rear"] = -(ca + wh / 2 + A["box_front_clear_mm"])        # paroi côté ventilateur
+    L["box_y_far"] = L["box_y_rear"] - box_y
+    L["box_z0"] = L["floor"] + A["box_floor_clear_mm"]
+    L["box_z1"] = L["box_z0"] + box_z
+    # --- platine découplée + traverses -------------------------------------------------------------------------------------
     L["pf_top"] = L["cale_bot"]
     L["pf_bot"] = L["pf_top"] - pf["t_mm"]
     L["plot_bot"] = L["pf_bot"] - pf["plot_h_mm"]
-    fs = PROFILES[profile_key(fr["profile_main_mm"])]["w"]
-    L["fs"] = fs
-    L["trav_pf_top"] = L["plot_bot"]
-    L["trav_pf_bot"] = L["trav_pf_top"] - fs
-    # --- bâti ------------------------------------------------------------------------
-    L["floor"] = -fr["table_height_mm"]
-    L["up_bot"] = L["floor"] + fr["foot_h_mm"]
-    L["top_ring_top"] = L["plate_bot"] - fr["top_ring_drop_mm"]
-    L["top_ring_bot"] = L["top_ring_top"] - fs
-    L["low_ring_bot"], L["low_ring_top"] = L["up_bot"], L["up_bot"] + fs
-    L["cad_sup_top"] = L["console_top"]
-    L["cad_sup_bot"] = L["console_top"] - fs
-    L["fr_cp"] = fr["footprint_mm"] / 2.0 - fs / 2.0                    # axe des montants du bâti
-    L["fr_in_half"] = fr["footprint_mm"] / 2.0 - fs                     # face intérieure
+    L["trav_top"] = L["plot_bot"]
+    L["trav_bot"] = L["trav_top"] - wl
+    L["pf_cx"], L["pf_cy"] = L["fan_xc"], 0.0
+    # --- ceintures ------------------------------------------------------------------------------------------------------------
+    L["belts_z"] = [zc(h) for h in fr["belt_axis_heights_mm"]]
     return L
 
 
