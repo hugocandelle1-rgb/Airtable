@@ -71,7 +71,7 @@ def write_recommended():
     ref_frame = next(c for c in fr["cases"] if c["kind"] == "reference" and c["bracing"] == "3faces"
                      and c["joint_factor"] < 1)
     eco_frame = next(c for c in fr["cases"] if c["kind"] == "paillasse" and c["bracing"] == "3faces")
-    D = {(r["pitch_mm"], r["counterbore_mm"]): r for r in hp if r["h_mm"] == 35 and abs(r["orifice_mm"] - 0.4) < 1e-9}
+    D = {(r["pitch_mm"], r["counterbore_mm"]): r for r in hp if r["h_mm"] == 35 and abs(r["orifice_mm"] - 0.30) < 1e-9}
     psens = {(r["pitch_mm"], r["counterbore_mm"]): r for r in ss["pitch_sensitivity"] if r["h_mm"] == 35}
     bud = mb["budget"]
     tol = mb["tolerancing"]
@@ -94,15 +94,16 @@ source = "calc/structure/*.py (plate_fe vérifié Navier ; homogénéisation vé
 
 [plate]
 material = "EN AW-5083 coulée détensionnée (ACP 5080 / Formodal 030 / MIC-6)"
-thickness_mm = 35.0                 # 30 mm : pression 4,6 µrad (pas 4,82) mais 6,8 µrad au pas 2,94 ⇒ 35 mm robuste
+thickness_mm = 35.0                 # 30 mm : pression ≈ 4,5 µrad au pas 5,00 (90 % du budget), 6,8 au pas 2,94 ⇒ 35 mm
 outer_square_mm = 520.0
 counterbore_d_mm = 2.0              # Ø2 convient à tous les pas à e = 35 ; Ø1,5 seulement si e = 30 et pas 2,94
-counterbore_depth_mm = 34.0         # = e − voile 1,0
-orifice_length_mm = 1.0
-study_pitch_mm = 4.82               # pas utilisé pour l'étude principale (lot aéro) ; voir [plate.pitch_sensitivity]
-D_ratio_perforated = {f(D[(4.82, 2.0)]["D_ratio"], 3)}         # e = 35, pas 4,82, Ø2 (stratifié prudent)
-E_ratio_perforated_layer = {f(D[(4.82, 2.0)]["E_ratio_layer"], 3)}
-mass_kg = {f(D[(4.82, 2.0)]["mass_kg"], 1)}                    # plaque percée 520×520×35
+counterbore_depth_mm = 33.8         # = e − voile 1,20 (sommet du cône)
+orifice_length_mm = 1.20            # voile retenu par le lot aéro
+orifice_d_mm = 0.30                 # ±0,005 (lot aéro)
+pitch_mm = 5.0                      # hex, retenu par le lot aéro ; autres pas : [plate.pitch_sensitivity]
+D_ratio_perforated = {f(D[(5.0, 2.0)]["D_ratio"], 3)}         # e = 35, pas 5,00, Ø2, voile 1,2 (stratifié prudent)
+E_ratio_perforated_layer = {f(D[(5.0, 2.0)]["E_ratio_layer"], 3)}
+mass_kg = {f(D[(5.0, 2.0)]["mass_kg"], 1)}                    # plaque percée 520×520×35
 alpha_th = 24.2e-6
 k_W_mK = 110.0                      # borne basse 110–140 (fiche ACP 5080R)
 
@@ -198,8 +199,8 @@ flatness_100_um_required = {f(tol["reference"]["flatness_100_um"], 2)}
 cdc_6um_gives_urad = {f(tol["reference"]["cdc_6um_cylinder_urad"], 0)}             # incohérence du CdC à arbitrer
 finish_economique = "surfaçage fraise sur CN de précision, sur montage 3 appuis, 15–20 µm"
 economique_slope_urad = [{f(tol["economique"][0]["total_urad"], 0)}, {f(tol["economique"][1]["total_urad"], 0)}]   # 15 / 20 µm, avant compensation
-drilling_hours_6000 = {f(drill[(4.82, True)]["hours"], 0)}
-drilling_hours_17000 = {f(drill[(2.94, True)]["hours"], 0)}
+drilling_hours_5935_holes = {f(drill[(5.0, True)]["hours"], 0)}
+drilling_hours_17131_holes = {f(drill[(2.94, True)]["hours"], 0)}
 
 [budget]
 reference_rss_urad = {f(bud["reference"]["total_rss_urad"], 1)}

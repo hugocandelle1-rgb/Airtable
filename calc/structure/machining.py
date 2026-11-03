@@ -67,7 +67,7 @@ def flatness_for_slope(theta, a_zone, s_eval):
 # 3) Temps de perçage
 # -----------------------------------------------------------------------------
 
-def drilling_time(n_holes, h_mm, cb_mm=2.0, orifice_mm=0.4, through_coolant=True, rate_eur_h=90.0):
+def drilling_time(n_holes, h_mm, cb_mm=2.0, orifice_mm=0.30, through_coolant=True, rate_eur_h=90.0, web_mm=1.20):
     """Temps machine (h) et coût indicatif du perçage. Hypothèses d'atelier
     (centre d'usinage 24 000 tr/min, forets carbure) :
       lamage : avant-trou 2×D puis foret long à lubrification centrale
@@ -76,13 +76,13 @@ def drilling_time(n_holes, h_mm, cb_mm=2.0, orifice_mm=0.4, through_coolant=True
       positionnement 0,3 s par trou et par opération ; changement préventif du
       foret d'orifice tous les 1 500 trous (1,5 min), du foret long tous les 1 500 trous ;
       2 mises en position (face inférieure, face supérieure) × 2 h, contrôle d'échantillonnage."""
-    depth = h_mm - 1.0
+    depth = h_mm - web_mm
     n_cb = min(24000, 120e3 / (np.pi * cb_mm))
     t_cb = depth / (n_cb * 0.04) * 60 + 2.0 + 0.6 + 0.3      # perçage + entrée lente du foret long + avant-trou + position
     if not through_coolant:
         t_cb *= 2.2
     f_o = 0.0125 * orifice_mm
-    t_or = 1.3 / (24000 * f_o) * 60 + 3 * 0.15 + 0.3
+    t_or = (web_mm + 0.35) / (24000 * f_o) * 60 + 3 * 0.15 + 0.3
     tool_changes = 2 * np.ceil(n_holes / 1500)
     t_total = n_holes * (t_cb + t_or) / 3600 + tool_changes * 1.5 / 60 + 4.0 + 0.002 * n_holes / 60 * 20
     drills = dict(orifice=int(np.ceil(n_holes / 1500)) + 1, counterbore=int(np.ceil(n_holes / 1500)) + 1)
@@ -153,7 +153,7 @@ def run(P=None, verbose=True):
 
     # 3) perçage
     hm = []
-    for p_mm, d_o in ((4.82, 0.40), (4.23, 0.40), (2.94, 0.30)):
+    for p_mm, d_o in ((5.0, 0.30), (4.82, 0.30), (4.23, 0.30), (2.94, 0.30)):
         n = hex_hole_count(P["zones"]["perforated_square_mm"], p_mm, margin_mm=1.0)
         for cool in (True, False):
             r = drilling_time(n, 35.0, 2.0, d_o, cool)
@@ -186,7 +186,7 @@ def run(P=None, verbose=True):
         rows_ref = [("Inclinaison globale résiduelle (pas 0,64 µrad, 4 ADXL355 moyennés 100 s, offset compensé)", 5, tilt),
                     ("Défaut de planéité d'usinage (si ⏥ 3 µm / 0,8 µm sur 100×100 atteints)", 30, 30.0),
                     ("Poids propre : finition sur appuis de service (positions ±0,5 mm, lest ±5 %, frottement µ 0,15)", 10, dead_ref),
-                    (f"Pression 0 → {P['operating']['p_plenum_max_Pa']:.0f} Pa (chemin B, e = 35, pas 4,82 ; pire pas 2,94 : {P294:.1f})", 5, Pp),
+                    (f"Pression 0 → {P['operating']['p_plenum_max_Pa']:.0f} Pa (chemin B, e = 35, pas 5,00 ; pire pas 2,94 : {P294:.1f})", 5, Pp),
                     ("Thermique (écart air/plaque ≤ 1 K, transitoire)", 5, therm),
                     ("Sol / bâtiment (non calculé, surveillé par les ADXL355)", 5, 5.0)]
         dead_eco_fix = dead_ref

@@ -62,11 +62,12 @@ THICKNESSES_MM = (20, 25, 30, 35)
 # -----------------------------------------------------------------------------
 
 
-# Pas de perçage de l'étude principale : piste du lot aéraulique (hex 4,82 mm,
-# lamage Ø2). La sensibilité aux autres pas (2,94 / 4,23 / 5,0 ; lamage Ø2 ou
-# Ø1,5) est calculée au § 8 du programme principal.
-STUDY_PITCH_MM = 4.82
-STUDY_CB_MM = 2.0
+# Perçage de l'étude principale : configuration retenue par le lot aéraulique
+# (hex 5,00 mm, orifice Ø0,30, voile 1,20, lamage Ø2). La sensibilité aux autres
+# pas (2,94 / 4,23 / 4,82 ; lamage Ø2 ou Ø1,5) est calculée au § 7 du programme.
+from calc.structure.homogenization import AERO_PITCH_MM, AERO_CB_MM, AERO_ORIFICE_MM, AERO_WEB_MM
+STUDY_PITCH_MM = AERO_PITCH_MM
+STUDY_CB_MM = AERO_CB_MM
 
 
 def structure_hypotheses(P):
@@ -104,7 +105,7 @@ def structure_hypotheses(P):
 def build_plate(P, h_mm, n=104, pitch_mm=None, cb_mm=None):
     H = structure_hypotheses(P)
     pr = plate_properties(P, h_mm * 1e-3, pitch_mm=pitch_mm or H["pitch_mm"],
-                          d_mm=cb_mm or H["counterbore_mm"])
+                          d_mm=cb_mm or H["counterbore_mm"], d_o_mm=AERO_ORIFICE_MM, t_w_mm=AERO_WEB_MM)
     L = H["L"]
     pl = SquarePlate(L, n, 1.0, 1.0, 1.0)
     perf = (np.abs(pl.XC) < H["s_perf"]) & (np.abs(pl.YC) < H["s_perf"])

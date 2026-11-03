@@ -12,39 +12,40 @@ source = "calc/structure/*.py (plate_fe vérifié Navier ; homogénéisation vé
 
 [plate]
 material = "EN AW-5083 coulée détensionnée (ACP 5080 / Formodal 030 / MIC-6)"
-thickness_mm = 35.0                 # 30 mm : pression 4,6 µrad (pas 4,82) mais 6,8 µrad au pas 2,94 ⇒ 35 mm robuste
+thickness_mm = 35.0                 # 30 mm : pression ≈ 4,5 µrad au pas 5,00 (90 % du budget), 6,8 au pas 2,94 ⇒ 35 mm
 outer_square_mm = 520.0
 counterbore_d_mm = 2.0              # Ø2 convient à tous les pas à e = 35 ; Ø1,5 seulement si e = 30 et pas 2,94
-counterbore_depth_mm = 34.0         # = e − voile 1,0
-orifice_length_mm = 1.0
-study_pitch_mm = 4.82               # pas utilisé pour l'étude principale (lot aéro) ; voir [plate.pitch_sensitivity]
-D_ratio_perforated = 0.670         # e = 35, pas 4,82, Ø2 (stratifié prudent)
-E_ratio_perforated_layer = 0.642
-mass_kg = 23.3                    # plaque percée 520×520×35
+counterbore_depth_mm = 33.8         # = e − voile 1,20 (sommet du cône)
+orifice_length_mm = 1.20            # voile retenu par le lot aéro
+orifice_d_mm = 0.30                 # ±0,005 (lot aéro)
+pitch_mm = 5.0                      # hex, retenu par le lot aéro ; autres pas : [plate.pitch_sensitivity]
+D_ratio_perforated = 0.694         # e = 35, pas 5,00, Ø2, voile 1,2 (stratifié prudent)
+E_ratio_perforated_layer = 0.662
+mass_kg = 23.5                    # plaque percée 520×520×35
 alpha_th = 24.2e-6
 k_W_mK = 110.0                      # borne basse 110–140 (fiche ACP 5080R)
 
 [plate.pitch_sensitivity]           # e = 35, chemin B, schéma retenu : D*/D ; pente pression crête (µrad) ; nb de trous
-p2_94_cb1_5 = { D_ratio = 0.552, pressure_slope_urad = 3.32, n_holes = 17131, mass_kg = 22.4 }
-p2_94_cb2_0 = { D_ratio = 0.354, pressure_slope_urad = 4.34, n_holes = 17131, mass_kg = 20.2 }
-p4_23_cb1_5 = { D_ratio = 0.742, pressure_slope_urad = 2.70, n_holes = 8197, mass_kg = 23.8 }
-p4_23_cb2_0 = { D_ratio = 0.599, pressure_slope_urad = 3.14, n_holes = 8197, mass_kg = 22.8 }
-p4_82_cb1_5 = { D_ratio = 0.793, pressure_slope_urad = 2.58, n_holes = 6333, mass_kg = 24.1 }
-p4_82_cb2_0 = { D_ratio = 0.670, pressure_slope_urad = 2.91, n_holes = 6333, mass_kg = 23.3 }
-p5_0_cb1_5 = { D_ratio = 0.806, pressure_slope_urad = 2.55, n_holes = 5935, mass_kg = 24.2 }
-p5_0_cb2_0 = { D_ratio = 0.689, pressure_slope_urad = 2.85, n_holes = 5935, mass_kg = 23.5 }
+p2_94_cb1_5 = { D_ratio = 0.560, pressure_slope_urad = 3.28, n_holes = 17131, mass_kg = 22.4 }
+p2_94_cb2_0 = { D_ratio = 0.364, pressure_slope_urad = 4.27, n_holes = 17131, mass_kg = 20.3 }
+p4_23_cb1_5 = { D_ratio = 0.747, pressure_slope_urad = 2.69, n_holes = 8197, mass_kg = 23.8 }
+p4_23_cb2_0 = { D_ratio = 0.606, pressure_slope_urad = 3.11, n_holes = 8197, mass_kg = 22.8 }
+p4_82_cb1_5 = { D_ratio = 0.797, pressure_slope_urad = 2.57, n_holes = 6333, mass_kg = 24.1 }
+p4_82_cb2_0 = { D_ratio = 0.676, pressure_slope_urad = 2.89, n_holes = 6333, mass_kg = 23.4 }
+p5_0_cb1_5 = { D_ratio = 0.809, pressure_slope_urad = 2.54, n_holes = 5935, mass_kg = 24.2 }
+p5_0_cb2_0 = { D_ratio = 0.694, pressure_slope_urad = 2.83, n_holes = 5935, mass_kg = 23.5 }
 
 [support]
 scheme = "3pt-kelvin-frame"         # 3 appuis cinématiques (Maxwell 3 vés) sur le cadre supérieur, hors plenum
 pressure_path = "B"                 # caisson de plenum suspendu à la plaque (poussée auto-équilibrée)
 points_mm = [[0.0, 242.5], [242.5, -145.5], [-242.5, -145.5]]   # repère : centre plaque, +y = arrière
 fixed_point = 0                     # appui arrière fixe ; appuis 1 et 2 (côtés) motorisés
-reactions_N = [130.0, 108.3, 108.3]       # poids propre (plaque + caisson + accessoires)
-slope_deadweight_urad = 15.7       # sans finition sur appuis (hors budget 10)
+reactions_N = [130.5, 108.8, 108.8]       # poids propre (plaque + caisson + accessoires)
+slope_deadweight_urad = 15.5       # sans finition sur appuis (hors budget 10)
 slope_deadweight_finished_on_supports_urad = 1.7
-slope_pressure_urad = 2.81          # 0 → 400 Pa (budget 5)
+slope_pressure_urad = 2.74          # 0 → 400 Pa (budget 5)
 friction_mu = 0.15
-slope_friction_worst_urad = 1.67
+slope_friction_worst_urad = 1.65
 finishing_on_service_supports = true   # finition avec lest du caisson (±5 %) ; caisson absent : 3.3 µrad
 radius_ratio = 0.0                  # sans objet (positions explicites ci-dessus)
 
@@ -119,10 +120,10 @@ flatness_100_um_required = 0.53
 cdc_6um_gives_urad = 56             # incohérence du CdC à arbitrer
 finish_economique = "surfaçage fraise sur CN de précision, sur montage 3 appuis, 15–20 µm"
 economique_slope_urad = [205, 251]   # 15 / 20 µm, avant compensation
-drilling_hours_6000 = 21
-drilling_hours_17000 = 50
+drilling_hours_5935_holes = 20
+drilling_hours_17131_holes = 51
 
 [budget]
-reference_rss_urad = 30.7
+reference_rss_urad = 30.6
 economique_rss_urad = 251
 economique_after_compensation_urad = 12

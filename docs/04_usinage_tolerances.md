@@ -67,19 +67,19 @@ d'enlèvement : c'est acceptable en finition, avec une passe de 20 µm à vitess
 | 30 | Repos 24 h. En option : 3 cycles 20 → 60 → 20 °C | ne pas dépasser 65 °C (5083 : sensibilisation) |
 | 40 | Semi-finition de la face inférieure (⏥ 0,02). Alésages de pions (datums B, C), 3 sièges de billes, taraudages du caisson et des embases, trous de manutention | voir § 7 pour les cotes |
 | 50 | Semi-finition de la face supérieure : épaisseur 35,25 (surépaisseur de finition 0,25) | référence de profondeur du voile |
-| 60 | **Orifices** Ø0,40 (ou Ø0,30) depuis la face supérieure, borgnes, profondeur 1,55 mm | carbure neuf, 24 000 tr/min, 3 débourrages ; changement tous les 1 500 trous ; contrôle 1 trou sur 50 |
-| 70 | **Lamages** Ø2,0 depuis la face inférieure, foret 118°. Sommet du cône à 1,25 mm de la face supérieure semi-finie | avant-trou 2×D puis foret long carbure à lubrification centrale (≥ 20×D). Le cône recoupe proprement le fond des orifices borgnes : entrée conique, pas de bavure de sortie (gain de débit +5,9 % selon le lot aéro) |
+| 60 | **Orifices** Ø0,30 ±0,005 depuis la face supérieure, borgnes, profondeur 1,75 mm (5,8×D) | carbure neuf, 24 000 tr/min, 3 débourrages ; changement tous les 1 500 trous ; contrôle 1 trou sur 50 |
+| 70 | **Lamages** Ø2,0 depuis la face inférieure, foret 118°. Sommet du cône à 1,45 mm de la face supérieure semi-finie | avant-trou 2×D puis foret long carbure à lubrification centrale (≥ 20×D). Le cône recoupe proprement le fond des orifices borgnes : entrée conique, pas de bavure de sortie (gain de débit +5,9 % selon le lot aéro) |
 | 80 | Nettoyage : soufflage inverse, bain à ultrasons, contrôle de débit par zones, endoscope par échantillonnage | aucun abrasif |
 | 90 | Stabilisation 48 h à 20 ± 1 °C | — |
-| 100 | **Finition de la face supérieure sur appuis de service** : plaque **avec son caisson monté** (ou un lest de 10 kg ±5 % réparti sur la ligne d'attache) posée sur 3 vés identiques aux vés de service (positions ±0,5 mm), sur rehausses de 300 mm. Fly-cut diamant : passes de 0,15 puis 0,02 mm. Plenum soufflé à 20–50 Pa pendant la coupe (les jets chassent les copeaux des orifices) | atelier à 20 ± 0,5 °C, plaque thermostatée 12 h avant. Voile final 1,00 ± 0,05 |
+| 100 | **Finition de la face supérieure sur appuis de service** : plaque **avec son caisson monté** (ou un lest de 10 kg ±5 % réparti sur la ligne d'attache) posée sur 3 vés identiques aux vés de service (positions ±0,5 mm), sur rehausses de 300 mm. Fly-cut diamant : passes de 0,15 puis 0,02 mm. Plenum soufflé à 20–50 Pa pendant la coupe (les jets chassent les copeaux des orifices) | atelier à 20 ± 0,5 °C, plaque thermostatée 12 h avant. Voile final 1,20 ± 0,05 |
 | 110 | Contrôle (§ 5) puis protection | **pas d'anodisation** |
 
-**Pourquoi finir sur les appuis :** la flèche de poids propre (15,7 µrad sur le schéma
+**Pourquoi finir sur les appuis :** la flèche de poids propre (15,5 µrad sur le schéma
 retenu, 26 µrad avec les appuis au coin) est alors **usinée en négatif**. Il ne reste que :
 
 - les écarts de position des appuis (±0,5 mm → 0,20 µrad) ;
 - le lest (±5 % → 0,2 µrad) ;
-- le frottement aux appuis (≤ 1,7 µrad).
+- le frottement aux appuis (≤ 1,65 µrad).
 
 Si le caisson est absent à la finition sans lest de remplacement, l'erreur est de
 **3,3 µrad** (35 mm).
@@ -88,9 +88,10 @@ Si le caisson est absent à la finition sans lest de remplacement, l'erreur est 
 
 | Perçage | Trous (zone 360) | s/trou (lamage + orifice) | Lubrification centrale | Avec débourrages |
 |---|---|---|---|---|
-| hex 4,82 / Ø0,40 | 6 333 | 5,6 + 1,4 | **21 h ≈ 2,6 k€** | 32 h ≈ 3,7 k€ |
-| hex 4,23 / Ø0,40 | 8 197 | 5,6 + 1,4 | 26 h ≈ 3,2 k€ | 41 h ≈ 4,6 k€ |
-| hex 2,94 / Ø0,30 | 17 131 | 5,6 + 1,6 | **50 h ≈ 6,1 k€** | 82 h ≈ 9,0 k€ |
+| **hex 5,00 / Ø0,30 (retenu)** | **5 935** | 5,6 + 1,8 | **20 h ≈ 2,4 k€** | 31 h ≈ 3,4 k€ |
+| hex 4,82 / Ø0,30 | 6 333 | 5,6 + 1,8 | 21 h ≈ 2,7 k€ | 33 h ≈ 3,7 k€ |
+| hex 4,23 / Ø0,30 | 8 197 | 5,6 + 1,8 | 26 h ≈ 3,3 k€ | 42 h ≈ 4,6 k€ |
+| hex 2,94 / Ø0,30 | 17 131 | 5,6 + 1,8 | **51 h ≈ 6,2 k€** | 83 h ≈ 9,1 k€ |
 
 Hypothèses :
 
@@ -111,7 +112,7 @@ Le lamage Ø1,5 (ligament 1,44 mm) est plus sûr mais demande un foret de 23×D.
 |---|---|---|---|
 | Pente locale (critère principal), zone 300 | niveau électronique 2 axes (Wyler/Leica, prêt ou labo), base 50 mm, grille 50 mm + Union Jack | ≤ 2 µrad | 100 % de la grille, 2 sens |
 | ⏥ zone percée, ⏥ par 100 × 100 | reconstruction depuis les pentes (méthode de Moody) ou MMT sur palier d'air | ≤ 0,7 µm | 100 % |
-| Ø des orifices | microscope de mesure / jauge de débit | ±2 µm | 1 sur 50 + débit par zones de 50 × 50 |
+| Ø des orifices (±0,005) | microscope de mesure / jauge de débit | ±1 µm | 1 sur 50 + débit par zones de 50 × 50 |
 | Voile (longueur d'orifice) | endoscope ou coupe sur éprouvette ; palpeur sur la face inférieure | ±0,02 mm | 1 sur 200 |
 | Bavures de sortie (face supérieure) | binoculaire ×20 | — | 1 sur 50, 100 % après finition |
 | Position des sièges de billes | MMT | ±0,02 mm | 100 % |
@@ -146,9 +147,9 @@ haut, z = 0 sur la face inférieure. Cotes en mm.
 | Élément | Cotes |
 |---|---|
 | Plaque | 520 × 520 × **35** ; chanfreins 1 × 45° ; EN AW-5083 coulée |
-| Zone percée | carré 360 × 360 centré ; réseau hexagonal, rangées selon x, origine au centre ; pas 4,82 (6 333 trous) — ou 4,23 (8 197), ou 2,94 (17 131, Ø0,30) selon l'arbitrage aéro |
-| Orifice | Ø0,40 ±0,01 (Ø0,30 au pas 2,94), depuis la face supérieure, longueur fonctionnelle (voile) 1,00 ±0,05 |
-| Lamage | Ø2,0 H11 depuis z = 0, foret 118°, sommet du cône à z = 34,00 (voile 1,00) |
+| Zone percée | carré 360 × 360 centré ; réseau hexagonal, rangées selon x, origine au centre ; **pas 5,00** (5 935 trous à ≥ 1 mm du bord de zone ; le lot aéro annonce ≈ 6 000 : décompte de référence dans `docs/02_aeraulique.md` / CAO) |
+| Orifice | **Ø0,30 ±0,005**, depuis la face supérieure, longueur fonctionnelle (voile) **1,20 ±0,05** |
+| Lamage | Ø2,0 H11 depuis z = 0, foret 118°, sommet du cône à z = **33,80** (voile 1,20) |
 | Datums | A = face supérieure (zone 300 × 300) ; B = alésage Ø6 H7 débouchant en (−240 ; 0) ; C = lumière 6 H7 × 10 en (+240 ; 0), grand axe selon x |
 | Sièges des billes (face inférieure) | 3 logements Ø25,4 H8 prof. 10,7 pour billes Ø25,4 G10 collées (centre de bille 2,0 mm sous la face inférieure ; bord du logement à 4,8 mm du chant), aux points (0 ; +242,5), (+242,5 ; −145,5), (−242,5 ; −145,5) ; ⌖ Ø0,2 \| B \| C |
 | Attache du caisson (face inférieure) | parois 6 mm du caisson entre demi-côtés 215 et 221 (axe 218) appuyées sur un joint plat EPDM 6 × 2 (pas de gorge dans la plaque) ; cornière intérieure 15 × 15 × 3 ; 32 × M5 prof. 10 taraudés de bas en haut sur le carré de demi-côté **208** (8 par côté, pas 52, symétriques) |
@@ -162,5 +163,5 @@ haut, z = 0 sur la face inférieure. Cotes en mm.
 
 ## Historique
 
-- 2026-11-03 : création. Gamme de finition sur appuis de service, incohérence 6 µm ↔ 30 µrad
+- 2026-11-03 : création (perçage recalé sur la configuration aéro retenue : hex 5,00, Ø0,30 ±0,005, voile 1,20). Gamme de finition sur appuis de service, incohérence 6 µm ↔ 30 µrad
   signalée, temps de perçage pour 6 000 et 17 000 trous, variante économique chiffrée.

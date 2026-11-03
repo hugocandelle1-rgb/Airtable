@@ -44,7 +44,7 @@ K_AIR = 0.026            # W/(m·K)
 H_TOP = (3.0, 5.0, 10.0)  # W/(m²·K) : convection naturelle + rayonnement (alu nu ε≈0,1 → 10 si anodisé noir)
 ETA_FAN_EL = 0.25        # rendement électrique global estimé (petit centrifuge EC, à recaler sur la fiche)
 
-STUDY_PITCH_MM = 4.82    # cf. support_study (piste lot aéraulique)
+STUDY_PITCH_MM = 5.0     # configuration retenue par le lot aéraulique (hex 5,00, Ø0,30, voile 1,20)
 STUDY_THICKNESS_MM = 35.0  # épaisseur recommandée (support_study)
 STUDY_CB_MM = 2.0
 
@@ -90,7 +90,7 @@ class Through1D:
         self.h_bot = 5.0                                               # face inférieure / air du plenum
         self.z = np.linspace(0, h, nz)
         self.dz = self.z[1] - self.z[0]
-        self.web = h - pl["orifice_length_mm"] * 1e-3                  # au-dessus : voile (échange négligé)
+        self.web = h - 1.20e-3                                        # voile retenu (lot aéro)                  # au-dessus : voile (échange négligé)
 
     def air_profile(self, T, Ta):
         """Température de l'air le long du lamage (quasi stationnaire)."""

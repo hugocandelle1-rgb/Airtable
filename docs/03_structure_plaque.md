@@ -22,23 +22,27 @@
 | Décision | Valeur | Justification |
 |---|---|---|
 | Matériau | EN AW-5083 coulée détensionnée (ACP 5080, Formodal 030, MIC-6) | contraintes résiduelles très faibles, α/k favorable, perçage facile (§ 5) |
-| Épaisseur | **35 mm** (23,3 kg percée au pas 4,82) | pente de pression ≤ 4,3 µrad pour **tous** les pas étudiés, y compris 2,94/Ø2 ; à 30 mm, le pas 2,94 donne 6,8 µrad, hors budget |
-| Lamage | Ø2 (Ø1,5 seulement si l'on revient à 30 mm avec le pas 2,94) | § 1 |
-| Chemin de la pression | **B : caisson de plenum suspendu à la plaque**, sans membrane | la poussée p·A est reprise par les parois du caisson et ne passe pas par les appuis : 2,8 µrad au lieu de 5,2 (chemin A) |
+| Épaisseur | **35 mm** (23,5 kg percée au pas 5,00) | pente de pression ≤ 4,3 µrad pour **tous** les pas étudiés, y compris 2,94/Ø2 ; à 30 mm, le pas 2,94 donne 6,8 µrad, hors budget |
+| Perçage (lot aéro, retenu) | hex **5,00 mm** (5 935 trous dans la zone 360), orifice **Ø0,30 ±0,005**, voile **1,20**, lamage **Ø2** (Ø1,5 seulement si 30 mm et pas 2,94) | § 1 |
+| Chemin de la pression | **B : caisson de plenum suspendu à la plaque**, sans membrane | la poussée p·A est reprise par les parois du caisson et ne passe pas par les appuis : 2,7 µrad au lieu de 5,1 (chemin A) |
 | Schéma d'appui | **3 appuis cinématiques sur le cadre supérieur, hors plenum** : (0 ; +242,5), (±242,5 ; −145,5) | isostatique (insensible au gauchissement du bâti), réalisable sans traverser le caisson |
-| Poids propre | 15,7 µrad bruts (budget 10) ⇒ **finition de la face supérieure sur appuis de service**, caisson monté ⇒ résidu **1,7 µrad** (dont 1,7 µrad de frottement) | § 3 |
+| Poids propre | 15,5 µrad bruts (budget 10) ⇒ **finition de la face supérieure sur appuis de service**, caisson monté ⇒ résidu **1,7 µrad** (dont 1,7 µrad de frottement) | § 3 |
 | Inclinomètres | 4 × ADXL355 en (±220 ; ±220), face supérieure, bande pleine | la moyenne des 4 annule le dôme de pression et le bombé thermique (§ 6) |
 | Bâti | Bosch Rexroth rainure 10 : cadre 45×90, montants 45×90, ceintures et écharpes 45×45 sur 3 faces ; 1er mode **49 Hz** | > 30 Hz ; 26 Hz sans écharpes (§ 7) |
 | Variante économique | même plaque et mêmes appuis ; surfaçage 15–20 µm sur montage 3 appuis ; bâti « paillasse » | 205–251 µrad avant compensation, ≈ 11 µrad après (`04` § 6) |
 
-**Budget de pente (référence)**, somme quadratique **30,7 µrad** :
+Les calculs de pression sont faits à 400 Pa (`design.toml`). Le lot aéro annonce
+57–297 Pa en service (375 Pa au maximum) : la pente de pression réelle est donc
+≤ 2,6 µrad, et 2,0 µrad à 297 Pa.
+
+**Budget de pente (référence)**, somme quadratique **30,6 µrad** :
 
 | Poste | Valeur |
 |---|---|
 | Inclinaison | 1,4 µrad |
 | Usinage (allocation) | 30 µrad |
 | Poids propre résiduel | 1,7 µrad |
-| Pression | 2,8 µrad |
+| Pression | 2,7 µrad |
 | Thermique | 1,4 µrad |
 | Sol | 5 µrad |
 
@@ -50,31 +54,31 @@ poste usinage vaut à lui seul 56 µrad (`04` § 1).
 `homogenization.py`, cellule périodique 2D vérifiée (Mori-Tanaka, cellule 3D : le
 stratifié retenu est 2 % plus souple que la cellule 3D, donc prudent). Le calcul est
 paramétré sur le pas (`pitch_study`, `homogenization_pitch.json`). Le tableau donne les
-valeurs pour e = 35 mm, orifice Ø0,4 et voile de 1 mm. La pente de pression est calculée
+valeurs pour e = 35 mm, orifice Ø0,30 et voile de 1,20 mm (configuration aéro retenue). La pente de pression est calculée
 pour le schéma retenu, chemin B.
 
 | Pas hex (mm) | Lamage | Trous (zone 360) | Ligament | Porosité | E*/E couche | D*/D plein | Masse (kg) | Pente 0→400 Pa (µrad) | Poids propre brut (µrad) |
 |---|---|---|---|---|---|---|---|---|---|
-| 2,94 | Ø2,0 | 17 131 | 0,94 | 0,420 | 0,292 | **0,354** | 20,2 | **4,34** | 17,4 |
-| 2,94 | Ø1,5 | 17 131 | 1,44 | 0,236 | 0,515 | 0,552 | 22,4 | 3,32 | 16,3 |
-| 4,23 | Ø2,0 | 8 197 | 2,23 | 0,203 | 0,565 | 0,599 | 22,8 | 3,14 | 16,1 |
-| 4,23 | Ø1,5 | 8 197 | 2,73 | 0,114 | 0,722 | 0,742 | 23,8 | 2,70 | 15,3 |
-| **4,82** | **Ø2,0** | **6 333** | 2,82 | 0,156 | 0,642 | **0,670** | **23,3** | **2,91** | 15,7 |
-| 4,82 | Ø1,5 | 6 333 | 3,32 | 0,088 | 0,776 | 0,793 | 24,1 | 2,58 | 15,0 |
-| 5,00 | Ø2,0 | 5 935 | 3,00 | 0,145 | 0,662 | 0,689 | 23,5 | 2,85 | 15,6 |
-| 5,00 | Ø1,5 | 5 935 | 3,50 | 0,082 | 0,790 | 0,806 | 24,2 | 2,55 | 14,9 |
+| 2,94 | Ø2,0 | 17 131 | 0,94 | 0,420 | 0,292 | **0,364** | 20,3 | **4,27** | 17,2 |
+| 2,94 | Ø1,5 | 17 131 | 1,44 | 0,236 | 0,515 | 0,560 | 22,4 | 3,28 | 16,2 |
+| 4,23 | Ø2,0 | 8 197 | 2,23 | 0,203 | 0,565 | 0,606 | 22,8 | 3,11 | 16,0 |
+| 4,23 | Ø1,5 | 8 197 | 2,73 | 0,114 | 0,722 | 0,747 | 23,8 | 2,69 | 15,2 |
+| 4,82 | Ø2,0 | 6 333 | 2,82 | 0,156 | 0,642 | 0,676 | 23,4 | 2,89 | 15,6 |
+| 4,82 | Ø1,5 | 6 333 | 3,32 | 0,088 | 0,776 | 0,797 | 24,1 | 2,57 | 14,9 |
+| **5,00 (retenu)** | **Ø2,0** | **5 935** | 3,00 | 0,145 | 0,662 | **0,694** | **23,5** | **2,83** (2,74 au maillage 5 mm) | 15,5 |
+| 5,00 | Ø1,5 | 5 935 | 3,50 | 0,082 | 0,790 | 0,809 | 24,2 | 2,54 | 14,9 |
 
 Lecture du tableau :
 
-- **4,82 et 5,0 mm sont quasi équivalents.** La rigidité ne diffère que de 2,6 % (0,670
-  contre 0,689) et la pente de pression de 0,06 µrad.
+- **4,82 et 5,0 mm sont quasi équivalents.** La rigidité ne diffère que de 2,7 % (0,676
+  contre 0,694) et la pente de pression de 0,06 µrad.
 - **Au pas 2,94 avec un lamage Ø2,** la porosité monte à 42 % et la rigidité de flexion
-  de la zone percée tombe à 35 % de celle de la plaque pleine. La plaque reste dans le
-  budget à 35 mm (4,3 µrad sur 5), mais pas à 30 mm (6,8 µrad). Le lamage Ø1,5 remonte
-  D*/D à 0,55, mais impose un perçage à 23×D, à valider sur éprouvette. **Recommandation :**
+  de la zone percée tombe à 36 % de celle de la plaque pleine. La plaque reste dans le
+  budget à 35 mm (4,3 µrad sur 5), mais pas à 30 mm (6,7 µrad). Le lamage Ø1,5 remonte
+  D*/D à 0,56, mais impose un perçage à 23×D, à valider sur éprouvette. **Recommandation :**
   e = 35 et Ø2 pour tous les pas ; Ø1,5 seulement si l'épaisseur devait redescendre à
   30 mm.
-- Le pas 2,94 triple le temps de perçage : 50 h au lieu de 21 h (`04` § 4).
+- Le pas 2,94 multiplie le temps de perçage par 2,5 : 51 h au lieu de 20 h (`04` § 4).
 
 ## 2. Comparaison des schémas d'appui (`support_study.py`)
 
@@ -95,20 +99,20 @@ Positions optimisées :
 - 3 points sur le cadre (balayage le long de l'axe du cadre) : arrière (0 ; 242,5),
   côtés (±242,5 ; −145,5).
 
-**e = 35 mm**, pas 4,82 / Ø2 (extrait de `support_table.md`) :
+**e = 35 mm**, pas 5,00 / lamage Ø2 / orifice Ø0,30 / voile 1,20 (extrait de `support_table.md`) :
 
 | Schéma | Chemin | Poids propre crête (µrad) | 0→400 Pa crête (µrad) | Réalisable |
 |---|---|---|---|---|
-| 3 pts cadre : milieu arrière + 2 coins avant | A / B | 19,5 / 25,7 | 7,5 / 2,8 | oui |
-| **3 pts cadre, position optimisée** | A / **B** | 12,4 / **15,7** | 5,2 / **2,8** | **oui** |
-| 3 pts optimisés dans la bande pleine (r ≈ 190–220) | A / B | 4,6 / 8,4 | 2,4 / 2,8 | A : colonnettes à travers le plenum ; B : non |
-| Whiffletree 9 pts (bande pleine) | A / B | 2,4 / 3,1 | 1,8 / 2,8 | colonnettes ; B : non |
+| 3 pts cadre : milieu arrière + 2 coins avant | A / B | 19,3 / 25,4 | 7,3 / 2,7 | oui |
+| **3 pts cadre, position optimisée** | A / **B** | 12,3 / **15,5** | 5,1 / **2,7** | **oui** |
+| 3 pts optimisés dans la bande pleine (r ≈ 190–220) | A / B | 4,5 / 7,2 | 2,4 / 2,7 | A : colonnettes à travers le plenum ; B : non |
+| Whiffletree 9 pts (bande pleine) | A / B | 2,4 / 3,0 | 1,8 / 2,7 | colonnettes ; B : non |
 | Whiffletree 9 pts sous la zone percée (théorique) | A | 1,6 | 0,8 | non (trous supprimés dans la zone de travail) |
-| 4 pts rigides aux coins du cadre | A / B | 18,9 / 24,5 | 7,5 / 2,8 | hyperstatique : 1 µm de défaut de hauteur ≈ 1 µrad |
-| Bande élastomère périphérique (joint = appui) | A / B | 7,4 / 8,7 | 3,6 / 2,6 | hyperstatique : 10 µm de gauche du cadre ≈ 20–27 µrad |
+| 4 pts rigides aux coins du cadre | A / B | 18,7 / 24,2 | 7,3 / 2,7 | hyperstatique : 1 µm de défaut de hauteur ≈ 1 µrad |
+| Bande élastomère périphérique (joint = appui) | A / B | 7,4 / 8,6 | 3,5 / 2,6 | hyperstatique : 10 µm de gauche du cadre ≈ 20–27 µrad |
 
-À e = 30 mm (même schéma retenu) : poids propre 22,0 µrad (B), pression 4,4 µrad (B) et
-8,3 µrad (A).
+À e = 30 mm (même schéma retenu) : poids propre 21,9 µrad (B), pression 4,3 µrad (B) et
+8,1 µrad (A).
 
 Lecture du tableau :
 
@@ -136,7 +140,7 @@ finition sur appuis de service**. Les raisons :
     quadratique des 6 cas) ;
   - caisson absent sans lest : 3,3 µrad (lest à ±5 % : 0,16 µrad) ;
   - frottement aux appuis : ci-dessous (1,7 µrad).
-- **Pression.** 2,8 µrad au pas 4,82 et 4,3 µrad au pire pas (2,94/Ø2), pour un budget
+- **Pression.** 2,7 µrad au pas 5,00 et 4,3 µrad au pire pas (2,94/Ø2), pour un budget
   de 5 µrad.
 - **Réalisation.** Les vés reposent sur le cadre 45×90, hors du caisson, et restent
   accessibles. La répartition des charges est équilibrée : 130 / 108 / 108 N.
@@ -150,9 +154,9 @@ répétable (hystérésis).
 
 | e (mm) | µ | Dilatation radiale (µrad) | Pire cas, 8 directions par appui (µrad) |
 |---|---|---|---|
-| 35 | 0,15 (graissé) | 0,93 | **1,67** |
-| 35 | 0,30 (sec) | 1,86 | 3,35 |
-| 30 | 0,15 | 1,22 | 2,19 |
+| 35 | 0,15 (graissé) | 0,92 | **1,65** |
+| 35 | 0,30 (sec) | 1,83 | 3,30 |
+| 30 | 0,15 | 1,20 | 2,16 |
 
 Pour garder ce poste ≤ 1,7 µrad, il faut des contacts graissés et des rouleaux rectifiés.
 Les rouleaux sont orientés vers le barycentre, ce qui donne un glissement purement radial
@@ -252,7 +256,7 @@ sur un critère, comme l'alumine en ρ/E, perdent sur le perçage ou sur le coû
   - **pression :** ±2,0 µrad sur chaque composante, de signes opposés d'un coin à
     l'autre. **La moyenne des 4 capteurs est nulle** (symétrie du dôme), et il en va de
     même pour un bombé thermique sphérique.
-  - **poids propre :** +8,1 / +4,3 µrad (coins arrière) et −19,9 / −2,4 µrad (coins
+  - **poids propre :** +8,1 / +4,2 µrad (coins arrière) et −19,8 / −2,3 µrad (coins
     avant). Ces valeurs sont statiques : elles font partie de l'offset calibré par la
     dérive des palets.
 - **Bonus :** la différence entre capteurs mesure la courbure de la plaque (déformation
@@ -325,7 +329,7 @@ pour le bâti, et face inférieure de la plaque pour les cotes de plaque.
 | Appuis (centres des billes, plan XY) | P0 (0 ; +242,5) fixe ; P1 (+242,5 ; −145,5) et P2 (−242,5 ; −145,5) motorisés |
 | Billes | Ø25,4 G10 (100Cr6), collées dans un logement Ø25,4 H8 × 10,7 de la plaque, centre à 2 mm sous la face inférieure ; contacts sur les rouleaux 11 mm sous la face |
 | Vés | 2 rouleaux Ø20 × 30 h6 trempés par vé, vé à 90°, axes orientés vers (0 ; −16,2) : P0 → −90°, P1 → 151,9°, P2 → 28,1° (angle depuis +x) |
-| Caisson | intérieur 430 × 430, parois de 6 mm (demi-côtés 215–221), hauteur intérieure 160 (distribution 62 + tôle + tranquillisation 80 + marge), fond de 6 mm ; joint plat EPDM 6 × 2 sur la plaque ; cornière intérieure 15 × 15 × 3, 32 vis M5 sur le carré de demi-côté 208 |
+| Caisson | intérieur 430 × 430, parois de 6 mm (demi-côtés 215–221), hauteur intérieure 150 (distribution 62 + tôle + tranquillisation 80, `docs/02_aeraulique.md`), fond de 6 mm ; joint plat EPDM 6 × 2 sur la plaque ; cornière intérieure 15 × 15 × 3, 32 vis M5 sur le carré de demi-côté 208 |
 | Jeu caisson / cadre | 6,5 mm (paroi extérieure 221, face intérieure du cadre 227,5) |
 | Cadre supérieur | 4 × 45×90 de chant, axe sur le carré de demi-côté 250 (545 hors tout), axe à z = 745, dessus à z = 790. Empilement : vérin à mi-course 45 → dessus de tête 835 ; vé : axes des rouleaux à 847 ; centre de bille 863,05 (16,05 au-dessus des axes, entraxe des rouleaux 32,1) ; face inférieure de plaque 865 ; **dessus de plaque 900** |
 | Montants | 4 × 45×90, de z = 0 à 790, aux coins (±250 ; ±250) |
@@ -343,5 +347,6 @@ pour le bâti, et face inférieure de la plaque pour les cotes de plaque.
   - schéma retenu : 3 appuis cadre optimisés, chemin B, finition sur appuis ;
   - e = 35 mm ;
   - étude du pas (2,94 / 4,23 / 4,82 / 5,0, lamage Ø2 ou Ø1,5) ;
+  - résultats finaux recalés sur la configuration aéro retenue (hex 5,00, Ø0,30, voile 1,20, lamage Ø2) ;
   - thermique, matériaux, bâti ;
   - emplacements des ADXL355.

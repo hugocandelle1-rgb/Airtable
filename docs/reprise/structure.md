@@ -19,21 +19,22 @@ relancer après chaque mise à jour du lot aéro.
 Notes : `docs/03_structure_plaque.md`, `docs/04_usinage_tolerances.md`,
 `docs/05_nivellement.md`. Chacune a une section « Données pour la CAO ».
 
-- **Plaque.** EN AW-5083 coulée, **35 mm** d'épaisseur, lamage Ø2, voile 1 mm, 23,3 kg au
-  pas 4,82.
+- **Plaque.** EN AW-5083 coulée, **35 mm** d'épaisseur, 23,5 kg. Perçage de la
+  configuration aéro retenue : **hex 5,00 (5 935 trous), orifice Ø0,30 ±0,005, voile
+  1,20, lamage Ø2** (sommet du cône à z = 33,8).
   - L'homogénéisation est paramétrée sur le pas (`pitch_study`). D*/D vaut :
-    - 0,354 au pas 2,94/Ø2 (0,552 avec un lamage Ø1,5) ;
-    - 0,599 au pas 4,23 ;
-    - 0,670 au pas 4,82 ;
-    - 0,689 au pas 5,0.
+    - 0,364 au pas 2,94/Ø2 (0,560 avec un lamage Ø1,5) ;
+    - 0,606 au pas 4,23 ;
+    - 0,676 au pas 4,82 ;
+    - **0,694 au pas 5,0 (retenu)**.
   - L'écart entre 4,82 et 5,0 est négligeable.
 - **Appuis.** 3 appuis Maxwell sur le cadre, hors plenum : P0 (0 ; 242,5) fixe, P1 et P2
   (±242,5 ; −145,5) motorisés.
   - **Chemin B** (caisson suspendu à la plaque).
   - Pentes à 35 mm :
-    - poids propre 15,7 µrad bruts, puis **1,7 µrad** avec finition sur appuis de
+    - poids propre 15,5 µrad bruts, puis **1,7 µrad** avec finition sur appuis de
       service, caisson monté ;
-    - pression **2,8 µrad** (4,3 au pas 2,94/Ø2) ;
+    - pression **2,7 µrad** à 400 Pa (≤ 2,6 à 375 Pa ; 4,3 au pas 2,94/Ø2) ;
     - frottement 1,7 µrad (µ = 0,15).
 - **Thermique.** κ = αq/k.
   - Exigence ΔT haut/bas ≤ 34 mK (le CdC dit 50).
@@ -51,9 +52,9 @@ Notes : `docs/03_structure_plaque.md`, `docs/04_usinage_tolerances.md`,
   - 1er mode 49 Hz (26 Hz sans écharpes).
   - Variante paillasse : 86 Hz (bâti seul).
 - **Usinage.** Perçage :
-  - 21 h machine pour 6 333 trous ;
-  - **50 h** pour 17 131 trous (pas 2,94).
-- **Budget de référence :** 30,7 µrad, mais **seulement si ⏥ 2,8 µm** est atteint.
+  - **20 h** machine pour 5 935 trous (pas 5,00, retenu) ;
+  - 51 h pour 17 131 trous (pas 2,94).
+- **Budget de référence :** 30,6 µrad, mais **seulement si ⏥ 2,8 µm** est atteint.
 - **Variante économique** (surfaçage 15–20 µm) : 205–251 µrad, ramenés à ≈ 12 µrad après
   cartographie et compensation.
 
@@ -63,7 +64,7 @@ Notes : `docs/03_structure_plaque.md`, `docs/04_usinage_tolerances.md`,
    30. Il faut soit ⏥ 2,8 µm (fly-cut diamant ultra-précis, prestataire non trouvé),
    soit une carte de pente compensée, y compris pour la référence.
 2. **Fusion dans `params/design.toml`.** Clés touchées :
-   - `plate.thickness_mm` : 35 ;
+   - `plate.thickness_mm` : 35 ; `plate.orifice_length_mm` : 1,20 et `plate.orifice_d_mm` : 0,30 (lot aéro) ;
    - `support.scheme` ;
    - `plenum.inner_square_mm` : 430 (caisson suspendu) ;
    - `frame.profile_system` ;

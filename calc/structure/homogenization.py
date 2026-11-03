@@ -319,10 +319,10 @@ def _cell2d_cached(p_mm, d_mm, nu, E):
     return cache[key]["E_ratio"], cache[key]["nu"], cache[key]["G_ratio"]
 
 
-def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None, d_o_mm=None):
+def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None, d_o_mm=None, t_w_mm=None):
     """Propriétés équivalentes pour le modèle de plaque (SI).
 
-    pitch_mm, d_mm (lamage), d_o_mm (orifice) : surcharges optionnelles des
+    pitch_mm, d_mm (lamage), d_o_mm (orifice), t_w_mm (voile) : surcharges optionnelles des
     valeurs de params/design.toml (études de sensibilité au pas de perçage).
     Retourne dict(D_solid, nu, D_perf, nu_perf, m_solid, m_perf, h, ...)."""
     pl = P["plate"]
@@ -330,7 +330,7 @@ def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None, 
     h = pl["thickness_mm"] * 1e-3 if h is None else h
     p_mm = pl["pitch_mm"] if pitch_mm is None else pitch_mm
     d_mm = pl["counterbore_d_mm"] if d_mm is None else d_mm
-    t_w = pl["orifice_length_mm"] * 1e-3
+    t_w = (pl["orifice_length_mm"] if t_w_mm is None else t_w_mm) * 1e-3
     d_o = (pl["orifice_d_mm"] if d_o_mm is None else d_o_mm) * 1e-3
     p = p_mm * 1e-3
     Er, nus, Gr = _cell2d_cached(float(p_mm), float(d_mm), float(nu), float(E))
@@ -350,7 +350,14 @@ def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None, 
 
 # -----------------------------------------------------------------------------
 # Étude paramétrique sur le pas de perçage (lot aéraulique : 2,94 / 4,23 / 4,82 / 5,0)
+# Configuration retenue par le lot aéraulique (2026-11-03) : hex 5,00 mm, orifice
+# Ø0,30, voile 1,20 mm, lamage Ø2 (docs/02_aeraulique.md).
 # -----------------------------------------------------------------------------
+
+AERO_PITCH_MM = 5.0
+AERO_ORIFICE_MM = 0.30
+AERO_WEB_MM = 1.20
+AERO_CB_MM = 2.0
 
 PITCHES_MM = (2.94, 4.23, 4.82, 5.0)
 COUNTERBORES_MM = (2.0, 1.5)
@@ -371,7 +378,7 @@ def hex_hole_count(square_mm, pitch_mm, margin_mm=0.0):
     return count
 
 
-def pitch_study(P, thicknesses_mm=(25, 30, 35), orifice_d_mm=(0.30, 0.40)):
+def pitch_study(P, thicknesses_mm=(25, 30, 35), orifice_d_mm=(0.30, 0.40), t_w_mm=AERO_WEB_MM):
     """Rigidité et masse de la plaque percée en fonction du pas et du lamage.
 
     Retourne une liste de dict (une ligne par pas × lamage × épaisseur)."""
@@ -386,7 +393,7 @@ def pitch_study(P, thicknesses_mm=(25, 30, 35), orifice_d_mm=(0.30, 0.40)):
             lig = (p_mm - d_mm)
             for d_o in orifice_d_mm:
                 for h_mm in thicknesses_mm:
-                    pr = plate_properties(P, h_mm * 1e-3, pitch_mm=p_mm, d_mm=d_mm, d_o_mm=d_o)
+                    pr = plate_properties(P, h_mm * 1e-3, pitch_mm=p_mm, d_mm=d_mm, d_o_mm=d_o, t_w_mm=t_w_mm)
                     mass = pr["m_solid"] * (L**2 - Lp**2) + pr["m_perf"] * Lp**2
                     rows.append(dict(pitch_mm=p_mm, counterbore_mm=d_mm, orifice_mm=d_o, h_mm=h_mm,
                                      n_holes=n_holes, ligament_mm=lig, porosity=pr["porosity"],
@@ -396,8 +403,8 @@ def pitch_study(P, thicknesses_mm=(25, 30, 35), orifice_d_mm=(0.30, 0.40)):
     return rows
 
 
-def print_pitch_study(rows, h_mm=30, d_o=0.40):
-    print(f"Pas de perçage (e = {h_mm} mm, orifice Ø{d_o}) :")
+def print_pitch_study(rows, h_mm=35, d_o=AERO_ORIFICE_MM):
+    print(f"Pas de perçage (e = {h_mm} mm, orifice Ø{d_o}, voile {AERO_WEB_MM} mm) :")
     print("  pas   lamage  trous  ligament  f      E*/E   D*/D   masse")
     for r in rows:
         if r["h_mm"] == h_mm and np.isclose(r["orifice_mm"], d_o):
