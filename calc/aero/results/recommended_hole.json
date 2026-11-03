@@ -2,7 +2,7 @@
   "config": {
     "d": 0.0003,
     "L": 0.0012,
-    "pitch": 0.00294,
+    "pitch": 0.005,
     "pattern": "hex",
     "D_cb": 0.002,
     "t": 0.025,
@@ -10,7 +10,14 @@
     "model": "lichtarowicz",
     "cone_inlet": false
   },
-  "h_target_um": 100.0,
-  "J_urad": 45.090807311304005,
-  "note": "écrit par optimize.py"
+  "h_target_um": 89.99999999999999,
+  "h_um_by_mass": {
+    "2.0": 119.99999999999999,
+    "5.0": 89.99999999999999,
+    "10.0": 80.0
+  },
+  "J_urad": 32.7003518694711,
+  "n_holes": 6017,
+  "counterbore_rule": "paroi ≥ 1,4 mm entre perçages borgnes",
+  "note": "écrit par optimize.py ; entrefer dépendant de la masse : voir setpoints.json (h_law)"
 }

@@ -25,7 +25,12 @@ Pour chaque cas : flèche poids propre, variation 0 → p_max, pente locale
 résiduelle (µrad) après retrait du plan des moindres carrés sur la zone de
 travail (crête, RMS), PV, fréquences propres.
 
-    python3 -m calc.structure.support_study          (≈ 2–3 min)
+Analyses du schéma retenu : moment de frottement aux appuis, variante
+« finition sur appuis de service », souplesse sous effort de coupe, pente
+locale aux emplacements candidats des accéléromètres, sensibilité au pas de
+perçage (2,94 / 4,23 / 4,82 / 5,0 mm ; lamage Ø2 ou Ø1,5).
+
+    OPENBLAS_NUM_THREADS=1 python3 -m calc.structure.support_study   (≈ 2,5 min)
 """
 from __future__ import annotations
 
@@ -57,19 +62,27 @@ THICKNESSES_MM = (20, 25, 30, 35)
 # -----------------------------------------------------------------------------
 
 
+# Pas de perçage de l'étude principale : piste du lot aéraulique (hex 4,82 mm,
+# lamage Ø2). La sensibilité aux autres pas (2,94 / 4,23 / 5,0 ; lamage Ø2 ou
+# Ø1,5) est calculée au § 8 du programme principal.
+STUDY_PITCH_MM = 4.82
+STUDY_CB_MM = 2.0
+
+
 def structure_hypotheses(P):
     pl, zo, pn = P["plate"], P["zones"], P["plenum"]
-    s_in = pn["inner_square_mm"] / 2 * 1e-3            # face intérieure du cadre = paroi du plenum
+    s_in = pn["inner_square_mm"] / 2 * 1e-3            # face intérieure du plenum fixe (chemin A)
     prof = 0.045                                         # largeur du profilé du cadre supérieur
     return dict(
         L=pl["outer_square_mm"] * 1e-3,
         s_work=zo["working_square_mm"] / 2 * 1e-3,
         s_perf=zo["perforated_square_mm"] / 2 * 1e-3,
-        s_ring=s_in + prof / 2,                           # axe du cadre 45×90 (demi-côté)
+        s_ring=s_in + prof / 2,                           # ligne des appuis « cadre » (demi-côté 242,5 mm)
         s_seal_A=s_in + 0.005,                            # ligne d'attache membrane sur la plaque (A)
-        s_box_in_B=s_in,                                  # intérieur du caisson suspendu (B)
-        s_box_wall_B=s_in + 0.005,                        # ligne d'attache des parois (B)
-        m_box_B=8.0,                                      # masse caisson suspendu (parois Al 4 mm, fond 6 mm, déflecteur)
+        s_box_in_B=0.215,                                 # intérieur du caisson suspendu (B) : 430 × 430
+        s_box_wall_B=0.218,                               # ligne d'attache des parois (B, axe paroi 6 mm)
+        m_box_B=10.0,                                     # masse caisson suspendu (cf. frame.py)
+        m_extra=2.0,                                      # capteurs, embases, écran (réparti sur la bande pleine)
         s_min=zo["perforated_square_mm"] / 2 * 1e-3 + 0.010,   # bande pleine : ≥ 10 mm au-delà de la zone percée
         s_max=pl["outer_square_mm"] / 2 * 1e-3 - 0.015,        # ≥ 15 mm du bord
         p_max=P["operating"]["p_plenum_max_Pa"],
@@ -77,6 +90,9 @@ def structure_hypotheses(P):
         k_support=4.0e7,          # raideur verticale d'un appui (Hertz + vérin), N/m (cf. kinematic_coupling)
         perim_band=(s_in + 0.0075, s_in + 0.0375),          # bande élastomère 30 mm de large
         perim_kf=2.0e9,           # N/m³ : EPDM 3 mm, module apparent de compression ~6 MPa
+        friction_mu=0.15,         # bille acier / rouleau trempé, graissé (borne haute à sec : 0,3)
+        contact_below_face=0.014, # m : contacts bille Ø30/vé 90° (centre de bille 3 mm sous la face + 10,6 mm)
+        pitch_mm=STUDY_PITCH_MM, counterbore_mm=STUDY_CB_MM,
     )
 
 
@@ -85,9 +101,10 @@ def structure_hypotheses(P):
 # -----------------------------------------------------------------------------
 
 
-def build_plate(P, h_mm, n=104):
+def build_plate(P, h_mm, n=104, pitch_mm=None, cb_mm=None):
     H = structure_hypotheses(P)
-    pr = plate_properties(P, h_mm * 1e-3)
+    pr = plate_properties(P, h_mm * 1e-3, pitch_mm=pitch_mm or H["pitch_mm"],
+                          d_mm=cb_mm or H["counterbore_mm"])
     L = H["L"]
     pl = SquarePlate(L, n, 1.0, 1.0, 1.0)
     perf = (np.abs(pl.XC) < H["s_perf"]) & (np.abs(pl.YC) < H["s_perf"])
@@ -110,6 +127,8 @@ def loads(pl, path):
     H = pl.H
     g, p = H["g"], H["p_max"]
     fG = pl.load_area(-pl.m * g)
+    # accessoires (capteurs, embases, écran) : charge linéique sur la bande pleine (s = 0,22)
+    fG = fG + pl.load_line_square(0.22, -H["m_extra"] * g / (8 * 0.22))
     if path == "A":
         fP = pl.load_area(np.where(square_mask(pl, H["s_seal_A"] + 1e-9), p, 0.0))
     elif path == "B":
@@ -354,12 +373,10 @@ def optimize_kelvin_band(pl, fG, fP, path, x0=(0.235, 0.22, -0.22)):
         j = objective(r)
         return j
 
-    starts = [x0, (0.21, 0.21, -0.21), (0.24, 0.24, -0.24), (0.20, 0.235, -0.20)]
-    res = None
-    for s0 in starts:
-        rr = minimize(J, s0, method="Nelder-Mead", options=dict(xatol=1e-4, fatol=1e-4, maxiter=250))
-        if res is None or rr.fun < res.fun:
-            res = rr
+    res = minimize(J, x0, method="Nelder-Mead",
+                   options=dict(xatol=2e-4, fatol=1e-3, maxiter=120, initial_simplex=[
+                       x0, (x0[0] + 0.01, x0[1], x0[2]), (x0[0], x0[1] + 0.01, x0[2]),
+                       (x0[0], x0[1], x0[2] + 0.01)]))
     return res.x, res.fun
 
 
@@ -395,14 +412,117 @@ def optimize_wt9(pl, fG, fP, path, band=True):
             return 10 + 1000 * pen
         return objective(eval_iso(iso, fG, fP, pv, path))
 
-    starts = [(0.20, 0.30, 30, 0), (0.22, 0.32, 25, 15), (0.12, 0.25, 30, 0)] if band else \
-             [(0.10, 0.22, 30, 0), (0.12, 0.25, 30, 15)]
-    res = None
-    for s0 in starts:
-        rr = minimize(J, s0, method="Nelder-Mead", options=dict(xatol=1e-4, fatol=1e-4, maxiter=300))
-        if res is None or rr.fun < res.fun:
-            res = rr
+    s0 = (0.21, 0.30, 25, 0) if band else (0.11, 0.23, 30, 0)
+    res = minimize(J, s0, method="Nelder-Mead", options=dict(xatol=2e-4, fatol=1e-3, maxiter=120))
     return res.x, res.fun
+
+
+
+# -----------------------------------------------------------------------------
+# Analyses complémentaires (faisabilité, frottement, finition sur appuis,
+# emplacement des accéléromètres)
+# -----------------------------------------------------------------------------
+
+
+def feasibility(pts, path):
+    """Un appui est réalisable sans traverser le plenum s'il est hors du plenum :
+    chemin A (plenum fixe, face intérieure 220 mm) : max(|x|,|y|) ≥ 0,2225 ;
+    chemin B (caisson suspendu 430 + parois 6 mm + jeu 6,5 mm) : ≥ 0,2275."""
+    lim = 0.2225 if path == "A" else 0.2275
+    m = min(max(abs(x), abs(y)) for x, y in pts)
+    if m >= lim - 1e-9:
+        return "oui"
+    return "colonnettes à travers le plenum" if path == "A" else "non (traverse le caisson)"
+
+
+def plane_coef(pl, d, half):
+    """Plan des moindres carrés de w sur la zone (coefficients c0, cx, cy)."""
+    X, Y = pl.node_xy()
+    sel, wts = pl.zone_nodes(half)
+    x, y, wt = X[sel], Y[sel], wts[sel]
+    A = np.stack([np.ones_like(x), x, y], 1)
+    Wa = A * wt[:, None]
+    return np.linalg.solve(A.T @ Wa, Wa.T @ d[0::4][sel])
+
+
+def friction_study(iso, pts, R_N, mu, arm, ndir=8):
+    """Pente résiduelle due au frottement aux appuis : force tangentielle μN
+    appliquée au contact (à `arm` sous le plan moyen) ⇒ moment μN·arm.
+    Retourne (pente crête dilatation radiale, pente crête pire cas sur ndir
+    directions par appui)."""
+    pl = iso.pl
+    s = pl.H["s_work"]
+    unit = []
+    for (x, y), N in zip(pts, R_N):
+        M = mu * abs(N) * arm
+        fx = pl.load_point_moment(x, y, M, 0.0)
+        fy = pl.load_point_moment(x, y, 0.0, M)
+        dx, _ = iso.solve(fx, kelvin_pivots(pts))
+        dy, _ = iso.solve(fy, kelvin_pivots(pts))
+        unit.append((dx, dy, np.array([x, y]) / np.hypot(x, y)))
+    d_rad = sum(u[2][0] * u[0] + u[2][1] * u[1] for u in unit)
+    radial = pl.residual_slope(d_rad, s)["slope_peak_urad"]
+    angs = np.linspace(0, 2 * np.pi, ndir, endpoint=False)
+    worst = 0.0
+    import itertools
+    for combo in itertools.product(range(ndir), repeat=len(unit)):
+        d = sum(np.cos(angs[k]) * u[0] + np.sin(angs[k]) * u[1] for k, u in zip(combo, unit))
+        worst = max(worst, pl.residual_slope(d, s)["slope_peak_urad"])
+    return radial, worst
+
+
+def finishing_on_supports(iso, fG, pts, dpos=0.5e-3, f_box=None):
+    """Variante « finition sur appuis de service » : la flèche de poids propre
+    est usinée. Résidu = différence entre la flèche en service et celle du
+    montage de finition. Contributions :
+      - erreur de position d'un appui de ±dpos (x ou y) ;
+      - charge du caisson (chemin B) absente pendant la finition (f_box)."""
+    pl = iso.pl
+    s = pl.H["s_work"]
+    d0, _ = iso.solve(fG, kelvin_pivots(pts))
+    rows = []
+    for i in range(len(pts)):
+        for ax_ in (0, 1):
+            q = [list(p) for p in pts]
+            q[i][ax_] += dpos
+            d1, _ = iso.solve(fG, kelvin_pivots([tuple(v) for v in q]))
+            rows.append(pl.residual_slope(d1 - d0, s)["slope_peak_urad"])
+    out = dict(position_err_mm=dpos * 1e3, per_support_axis_urad=rows,
+               rss_urad=float(np.sqrt(np.sum(np.square(rows)))))
+    if f_box is not None:
+        db, _ = iso.solve(f_box, kelvin_pivots(pts))
+        out["box_missing_urad"] = pl.residual_slope(db, s)["slope_peak_urad"]
+    return out
+
+
+def cutting_compliance(iso, pts, ngrid=7):
+    """Flèche locale (µm/N) sous un effort de coupe ponctuel, mesurée par rapport
+    au plan des appuis, max sur une grille de la zone percée."""
+    pl = iso.pl
+    sp_ = pl.H["s_perf"] * 0.95
+    best = 0.0
+    for x in np.linspace(-sp_, sp_, ngrid):
+        for y in np.linspace(-sp_, sp_, ngrid):
+            f = pl.load_point(x, y, -1.0)
+            d, _ = iso.solve(f, kelvin_pivots(pts))
+            z = [pl.point_vector(px, py) @ d for px, py in pts]
+            A = np.array([[1, px, py] for px, py in pts])
+            c = np.linalg.solve(A, z)
+            w = pl.point_vector(x, y) @ d - (c[0] + c[1] * x + c[2] * y)
+            best = max(best, abs(w))
+    return best * 1e6
+
+
+def sensor_slopes(pl, d, cands, half):
+    """Pente locale (gx, gy) aux points candidats, relative au plan moyen de la
+    zone de travail (µrad)."""
+    c = plane_coef(pl, d, half)
+    out = []
+    for x, y in cands:
+        gx = pl.point_vector(x, y, 1, 0) @ d - c[1]
+        gy = pl.point_vector(x, y, 0, 1) @ d - c[2]
+        out.append((gx * 1e6, gy * 1e6))
+    return out
 
 
 # -----------------------------------------------------------------------------
@@ -460,7 +580,7 @@ def main():
                  "Gris : zone percée, vert : bande pleine", fontsize=10)
     fig.tight_layout(); fig.savefig(FIG / "support_kelvin_radius_sweep.png", dpi=130); plt.close(fig)
 
-    # ---------------- 2) optimisations (maillage 10 mm) -----------------------
+    # ---------------- 2) optimisations (maillage 10 mm, 1 départ, 120 itér.) ---
     opt = {}
     for path in ("A", "B"):
         for h_mm in (25, 30):
@@ -470,16 +590,15 @@ def main():
             ring_best, ring_rows = optimize_kelvin_ring(pl, fG, fP, path)
             opt[(path, h_mm, "kelvin_opt")] = isoceles(*xk)
             opt[(path, h_mm, "kelvin_ring_opt")] = ring_best[4]
-            if path == "A":
-                out["sweeps"][f"kelvin_ring_A_h{h_mm}"] = [list(map(float, r[:4])) for r in ring_rows]
+            out["sweeps"][f"kelvin_ring_{path}_h{h_mm}"] = [list(map(float, r[:4])) for r in ring_rows]
             print(f"[{time.time()-t00:5.1f} s] {path} e={h_mm} : Kelvin bande J={jk:.3f} {np.round(np.array(isoceles(*xk))*1e3,1).tolist()} ; "
                   f"cadre J={ring_best[3]:.3f} u={ring_best[0]:.2f}")
-        pl = build_plate(P, 30, n=52)
-        fG, fP = loads(pl, path)
-        xw, jw = optimize_wt9(pl, fG, fP, path, band=True)
-        opt[(path, "wt9")] = tuple(xw)
-        print(f"[{time.time()-t00:5.1f} s] {path} : whiffletree 9 pts J={jw:.3f} paramètres {np.round(xw, 4).tolist()}")
-    xw_free, jw_free = optimize_wt9(build_plate(P, 30, n=52), *loads(build_plate(P, 30, n=52), "A"), "A", band=False)
+    pl30 = build_plate(P, 30, n=52)
+    fG30, fP30 = loads(pl30, "A")
+    xw, jw = optimize_wt9(pl30, fG30, fP30, "A", band=True)
+    opt[("A", "wt9")] = tuple(xw)
+    print(f"[{time.time()-t00:5.1f} s] A : whiffletree 9 pts J={jw:.3f} paramètres {np.round(xw, 4).tolist()}")
+    xw_free, jw_free = optimize_wt9(pl30, fG30, fP30, "A", band=False)
     opt[("A", "wt9_free")] = tuple(xw_free)
     print(f"[{time.time()-t00:5.1f} s] whiffletree théorique (sous zone percée) J={jw_free:.3f} {np.round(xw_free,4).tolist()}")
 
@@ -488,7 +607,7 @@ def main():
     maps = {}
     for h_mm in THICKNESSES_MM:
         for path in ("A", "B"):
-            pl = build_plate(P, h_mm, n=104)
+            pl = build_plate(P, h_mm, n=104 if h_mm >= 30 else 52)
             iso = IsoSupport(pl)
             fG, fP = loads(pl, path)
             hk = 30 if h_mm >= 30 else 25
@@ -501,7 +620,7 @@ def main():
                  kelvin_pivots(opt[(path, hk, "kelvin_opt")])),
                 ("kelvin_eq_r200", "3 pts équilatéral r = 200 mm",
                  kelvin_pivots(equilateral(0.20))),
-                ("wt9", "whiffletree 9 pts (bande pleine)", wt9_pivots(*opt[(path, "wt9")])),
+                ("wt9", "whiffletree 9 pts (bande pleine)", wt9_pivots(*opt[("A", "wt9")])),
             ]
             if path == "A":
                 configs.append(("wt9_free", "whiffletree 9 pts théorique (sous la zone percée)",
@@ -511,11 +630,10 @@ def main():
                 pts = [(x, y) for p_ in pv for x, y, l in p_]
                 rec = dict(scheme=key, label=label, path=path, h_mm=h_mm, points_mm=(np.array(pts) * 1e3).round(1).tolist(),
                            **strip(r), objective=objective(r), mass_kg=pl.mass_total,
-                           feasible=("posts" if key in ("kelvin_opt", "kelvin_eq_r200", "wt9", "wt9_free") and path == "A"
-                                     else ("non" if key in ("kelvin_opt", "kelvin_eq_r200", "wt9", "wt9_free") else "oui")))
+                           feasible=feasibility(pts, path))
                 rec["shear_gamma_G_urad"] = shear_check(pl, r["dG"], pl.props["kappaGh_perf"])
                 out["cases"].append(rec)
-                if h_mm == 30 or (h_mm == 25 and key == "kelvin_ring"):
+                if h_mm == 30:
                     maps[(key, path, h_mm)] = (pl, r["dG"], r["dP"], pts)
             # 4 points
             for a in (0.20, s):
@@ -578,6 +696,71 @@ def main():
         puck[name] = pl.residual_slope(d, H["s_work"])
     out["puck_1N"] = puck
 
+    # ---------------- 6) schéma retenu : frottement, finition sur appuis, capteurs
+    from calc.structure.homogenization import PITCHES_MM, COUNTERBORES_MM
+    # Schéma retenu : 3 appuis sur le cadre, position optimisée pour le chemin B
+    # (milieu arrière + 2 appuis sur les côtés), arrondie au 0,5 mm.
+    pts_sel = [tuple(round(v * 2000) / 2000 for v in p_) for p_ in opt[("B", 30, "kelvin_ring_opt")]]
+    cands = {"coin_AR_G": (-0.22, 0.22), "coin_AR_D": (0.22, 0.22), "coin_AV_G": (-0.22, -0.22),
+             "coin_AV_D": (0.22, -0.22), "milieu_G": (-0.22, 0.0), "milieu_D": (0.22, 0.0),
+             "milieu_AV": (0.0, -0.22), "milieu_AR": (0.0, 0.22)}
+    sel_out = {}
+    for h_mm in (30, 35):
+        pl = build_plate(P, h_mm, n=104)
+        iso = IsoSupport(pl)
+        rec = {}
+        for path in ("A", "B"):
+            fG, fP = loads(pl, path)
+            r = eval_iso(iso, fG, fP, kelvin_pivots(pts_sel), path)
+            R_N = [abs(v) for v in r["R_G_N"]]
+            arm = h_mm * 1e-3 / 2 + H["contact_below_face"]
+            fr = {}
+            for mu in (H["friction_mu"], 0.3):
+                rad, worst = friction_study(iso, pts_sel, R_N, mu, arm)
+                fr[f"mu{mu:.2f}"] = dict(radial_urad=rad, worst_urad=worst)
+            f_box = None
+            if path == "B":
+                s_w = H["s_box_wall_B"]
+                f_box = pl.load_line_square(s_w, -H["m_box_B"] * H["g"] / (8 * s_w))
+            fin = finishing_on_supports(iso, fG, pts_sel, 0.5e-3, f_box)
+            ss = dict(G=sensor_slopes(pl, r["dG"], cands.values(), H["s_work"]),
+                      P=sensor_slopes(pl, r["dP"], cands.values(), H["s_work"]))
+            rec[path] = dict(G=r["G"], P=r["P"], R_G_N=R_N, R_P_N=[abs(v) for v in r["R_P_N"]],
+                             friction=fr, finishing=fin,
+                             sensors={k: dict(G_urad=ss["G"][i], P_urad=ss["P"][i])
+                                      for i, k in enumerate(cands)})
+            fm = fr["mu%.2f" % H["friction_mu"]]
+            print(f"[{time.time()-t00:5.1f} s] retenu e={h_mm} {path} : G {r['G']['slope_peak_urad']:.1f}, "
+                  f"P {r['P']['slope_peak_urad']:.2f} µrad ; R = {np.round(R_N, 1).tolist()} N ; "
+                  f"frottement µ={H['friction_mu']} radial {fm['radial_urad']:.2f} / pire {fm['worst_urad']:.2f} µrad ; "
+                  f"finition sur appuis ±0,5 mm → {fin['rss_urad']:.2f} µrad"
+                  + (f", caisson absent {fin['box_missing_urad']:.1f} µrad" if path == "B" else ""))
+        rec["cutting_compliance_um_per_N"] = cutting_compliance(iso, pts_sel)
+        sel_out[h_mm] = rec
+    out["selected"] = dict(points_mm=(np.array(pts_sel) * 1e3).tolist(), sensor_candidates_mm=
+                           {k: [v[0] * 1e3, v[1] * 1e3] for k, v in cands.items()}, by_thickness=sel_out)
+
+    # ---------------- 7) sensibilité au pas de perçage (schéma retenu, n = 52)
+    pitch_rows = []
+    for p_mm in PITCHES_MM:
+        for cb in COUNTERBORES_MM:
+            for h_mm in (30, 35):
+                pl = build_plate(P, h_mm, n=52, pitch_mm=p_mm, cb_mm=cb)
+                iso = IsoSupport(pl)
+                row = dict(pitch_mm=p_mm, counterbore_mm=cb, h_mm=h_mm, D_ratio=pl.props["D_ratio"],
+                           mass_kg=pl.mass_total)
+                for path in ("A", "B"):
+                    fG, fP = loads(pl, path)
+                    r = eval_iso(iso, fG, fP, kelvin_pivots(pts_sel), path)
+                    row[f"G_{path}_urad"] = r["G"]["slope_peak_urad"]
+                    row[f"P_{path}_urad"] = r["P"]["slope_peak_urad"]
+                pitch_rows.append(row)
+    out["pitch_sensitivity"] = pitch_rows
+    print(f"[{time.time()-t00:5.1f} s] sensibilité au pas :")
+    for r in pitch_rows:
+        print(f"   pas {r['pitch_mm']:.2f} Ø{r['counterbore_mm']:.1f} e={r['h_mm']} : D*/D {r['D_ratio']:.3f} ; "
+              f"G A/B {r['G_A_urad']:.1f}/{r['G_B_urad']:.1f} ; P A/B {r['P_A_urad']:.2f}/{r['P_B_urad']:.2f} µrad")
+
     # ---------------- figures -----------------------------------------------
     def draw_map(axx, pl, d, pts, title, vmax=None):
         X, Y, G, W = pl.slope_map(d, H["s_work"])
@@ -610,14 +793,17 @@ def main():
                      fontsize=10)
         fig.tight_layout(); fig.savefig(FIG / f"support_slope_maps_{comp}.png", dpi=120); plt.close(fig)
 
-    # carte du schéma retenu A et B
+    # carte du schéma retenu (cadre optimisé), chemins A et B, e = 30 ; capteurs ADXL355 (×)
     fig, axs = plt.subplots(2, 2, figsize=(10, 8.6))
     for j, pth in enumerate(("A", "B")):
-        pl_, dG, dP, pts = maps[("kelvin_ring", pth, 30)]
+        pl_, dG, dP, pts = maps[("kelvin_ring_opt", pth, 30)]
         for i, (d, nm) in enumerate(((dG, "poids propre"), (dP, f"0 → {H['p_max']:.0f} Pa"))):
             r = pl_.residual_slope(d, H["s_work"])
-            draw_map(axs[i, j], pl_, d, pts, f"3 pts sur cadre — chemin {pth} — {nm}\ncrête {r['slope_peak_urad']:.2f} µrad, "
+            draw_map(axs[i, j], pl_, d, pts, f"3 pts sur cadre (optimisé) — chemin {pth} — {nm}\ncrête {r['slope_peak_urad']:.2f} µrad, "
                      f"RMS {r['slope_rms_urad']:.2f} µrad, PV {r['pv_um']:.2f} µm")
+            for k_, (cx, cy) in cands.items():
+                if k_.startswith("coin"):
+                    axs[i, j].plot(cx * 1e3, cy * 1e3, "mx", ms=8, mew=2)
     fig.tight_layout(); fig.savefig(FIG / "support_selected_maps.png", dpi=120); plt.close(fig)
 
     # barres comparatives e = 30

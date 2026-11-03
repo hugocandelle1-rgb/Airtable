@@ -1,0 +1,99 @@
+{
+  "config": {
+    "d": 0.0003,
+    "L": 0.0012,
+    "pitch": 0.005,
+    "pattern": "hex",
+    "D_cb": 0.002,
+    "t": 0.025,
+    "K_c": 0.5,
+    "model": "lichtarowicz",
+    "cone_inlet": false
+  },
+  "n_holes": 6017,
+  "open_ratio": 0.0032648388556215913,
+  "jets": {
+    "ps_min": {
+      "ps_Pa": 57.063087972084254,
+      "q_m3s": 2.992017021962686e-07,
+      "V_m_s": 4.23283821209292,
+      "Re": 84.46967747005318,
+      "x_coalescence_laminar_mm": 35.55121105641969,
+      "x_coalescence_turbulent_mm": 26.595744680851062,
+      "x_coalescence_over_d_laminar": 118.5040368547323,
+      "U_mean_up_m_s": 0.013891177794096824,
+      "U_momentum_m_s": 0.24185916232555338,
+      "Q_m3h": 6.481067911613814,
+      "dyn_pressure_merged_Pa": 0.00011616482194533964,
+      "v_entrainment_edge_m_s": 0.012092958116277669
+    },
+    "ps_max": {
+      "ps_Pa": 296.548607279199,
+      "q_m3s": 9.140619391492581e-07,
+      "V_m_s": 12.931331191801574,
+      "Re": 258.0550732861176,
+      "x_coalescence_laminar_mm": 108.6090375783323,
+      "x_coalescence_turbulent_mm": 26.595744680851062,
+      "x_coalescence_over_d_laminar": 362.0301252611077,
+      "U_mean_up_m_s": 0.042437582468063936,
+      "U_momentum_m_s": 0.7388803382251199,
+      "Q_m3h": 19.79967847629991,
+      "dyn_pressure_merged_Pa": 0.001084170940251704,
+      "v_entrainment_edge_m_s": 0.036944016911256
+    }
+  },
+  "drafts": {
+    "2.0": {
+      "v_admissible_m_s": 0.016606051546590353,
+      "slope_at_0p02_urad": 6.834632837876092,
+      "slope_at_0p05_urad": 33.709330325133045,
+      "slope_at_0p10_urad": 119.0039273208615,
+      "slope_at_0p20_urad": 436.1180565509143
+    },
+    "5.0": {
+      "v_admissible_m_s": 0.0284544955362058,
+      "slope_at_0p02_urad": 2.733853135150437,
+      "slope_at_0p05_urad": 13.48373213005322,
+      "slope_at_0p10_urad": 47.6015709283446,
+      "slope_at_0p20_urad": 174.44722262036572
+    },
+    "10.0": {
+      "v_admissible_m_s": 0.042261934206054064,
+      "slope_at_0p02_urad": 1.3669265675752185,
+      "slope_at_0p05_urad": 6.74186606502661,
+      "slope_at_0p10_urad": 23.8007854641723,
+      "slope_at_0p20_urad": 87.22361131018286
+    }
+  },
+  "alloc_draft_urad": 5.0,
+  "H_puck_mm": 10.0,
+  "screen": {
+    "height_mm": 120.0,
+    "rule": "hauteur ≥ ~10 × la hauteur de coalescence des jets et ≥ 4 × la hauteur du palet ; le panache fusionné (U ≈ 0,03–0,1 m/s) doit sortir verticalement par le haut",
+    "walls": "PMMA ou verre 4–6 mm, joint au cadre, sans fente basse (pas d'aspiration rasante)",
+    "top": "couvercle respirant : nid d'abeille aluminium cellule 3–6 mm × 20 mm ou toile filtrante (perte ≪ 1 Pa), pour casser les courants du local sans recirculation dans l'enceinte",
+    "clearance_mm": 30.0,
+    "note": "à 30 mm du bord de la zone de travail (bande percée périphérique) ; vitesse d'entraînement latérale estimée en bord de zone ≈ 36.9 mm/s"
+  },
+  "entrainment_at_setpoint": {
+    "2.0": {
+      "ps_Pa": 65.47275113571796,
+      "U_momentum_m_s": 0.2670955852499604,
+      "v_entrainment_m_s": 0.01335477926249802,
+      "slope_urad": 3.4817097832440567
+    },
+    "5.0": {
+      "ps_Pa": 138.93132276337235,
+      "U_momentum_m_s": 0.45056164165306634,
+      "v_entrainment_m_s": 0.02252808208265332,
+      "slope_urad": 3.346614204477505
+    },
+    "10.0": {
+      "ps_Pa": 265.14466758611456,
+      "U_momentum_m_s": 0.6881432190366709,
+      "v_entrainment_m_s": 0.03440716095183354,
+      "slope_urad": 3.4792212270093015
+    }
+  },
+  "entrainment_note": "ordre de grandeur (α = 0,05) : écoulement d'entraînement horizontal près du bord de la zone percée ; nul par symétrie au centre de la zone"
+}

@@ -1,0 +1,266 @@
+{
+ "tolerancing": {
+  "conversion": [
+   {
+    "flatness_um": 2,
+    "cylinder_urad": 18.51851851851852,
+    "bowl_urad": 13.094570021973105
+   },
+   {
+    "flatness_um": 3,
+    "cylinder_urad": 27.77777777777778,
+    "bowl_urad": 19.641855032959658
+   },
+   {
+    "flatness_um": 4,
+    "cylinder_urad": 37.03703703703704,
+    "bowl_urad": 26.18914004394621
+   },
+   {
+    "flatness_um": 6,
+    "cylinder_urad": 55.55555555555556,
+    "bowl_urad": 39.283710065919315
+   },
+   {
+    "flatness_um": 10,
+    "cylinder_urad": 92.59259259259258,
+    "bowl_urad": 65.4728501098655
+   },
+   {
+    "flatness_um": 15,
+    "cylinder_urad": 138.88888888888886,
+    "bowl_urad": 98.20927516479826
+   },
+   {
+    "flatness_um": 20,
+    "cylinder_urad": 185.18518518518516,
+    "bowl_urad": 130.945700219731
+   }
+  ],
+  "waviness": [
+   {
+    "lambda_mm": 10,
+    "filter": 0.03750225200999911,
+    "slope_urad_per_um": 11.781679940768626
+   },
+   {
+    "lambda_mm": 20,
+    "filter": -0.11953932916952317,
+    "slope_urad_per_um": 18.777193916701304
+   },
+   {
+    "lambda_mm": 30,
+    "filter": 0.18119175498741524,
+    "slope_urad_per_um": 18.974356211983515
+   },
+   {
+    "lambda_mm": 50,
+    "filter": 0.616961799184134,
+    "slope_urad_per_um": 38.76485311724832
+   },
+   {
+    "lambda_mm": 80,
+    "filter": 0.8362585647421991,
+    "slope_urad_per_um": 32.83979704369546
+   },
+   {
+    "lambda_mm": 100,
+    "filter": 0.8930011872883558,
+    "slope_urad_per_um": 28.05445969632061
+   },
+   {
+    "lambda_mm": 150,
+    "filter": 0.9514570769441458,
+    "slope_urad_per_um": 19.927270420891645
+   }
+  ],
+  "reference": {
+   "allocation_urad": 30.0,
+   "flatness_perforated_um": 2.754,
+   "flatness_100_um": 0.5346743499026386,
+   "cdc_6um_cylinder_urad": 55.55555555555556,
+   "cdc_2um_per_100_urad": 56.10891939264122
+  },
+  "economique": [
+   {
+    "flatness_um": 15,
+    "form_urad": 138.88888888888886,
+    "marks_urad": 65.67959408739092,
+    "total_urad": 204.5684829762798
+   },
+   {
+    "flatness_um": 20,
+    "form_urad": 185.18518518518516,
+    "marks_urad": 65.67959408739092,
+    "total_urad": 250.8647792725761
+   }
+  ]
+ },
+ "drilling": [
+  {
+   "n_holes": 6333,
+   "t_counterbore_s": 5.570353755551323,
+   "t_orifice_s": 1.4,
+   "hours": 20.7340139816407,
+   "drills": {
+    "orifice": 6,
+    "counterbore": 6
+   },
+   "cost_eur": 2616.061258347663,
+   "rate_eur_h": 90.0,
+   "pitch_mm": 4.82,
+   "orifice_mm": 0.4,
+   "through_coolant": true
+  },
+  {
+   "n_holes": 6333,
+   "t_counterbore_s": 12.254778262212911,
+   "t_orifice_s": 1.4,
+   "hours": 32.493030759609546,
+   "drills": {
+    "orifice": 6,
+    "counterbore": 6
+   },
+   "cost_eur": 3674.372768364859,
+   "rate_eur_h": 90.0,
+   "pitch_mm": 4.82,
+   "orifice_mm": 0.4,
+   "through_coolant": false
+  },
+  {
+   "n_holes": 8197,
+   "t_counterbore_s": 5.570353755551323,
+   "t_orifice_s": 1.4,
+   "hours": 25.635774926181718,
+   "drills": {
+    "orifice": 7,
+    "counterbore": 7
+   },
+   "cost_eur": 3182.2197433563547,
+   "rate_eur_h": 90.0,
+   "pitch_mm": 4.23,
+   "orifice_mm": 0.4,
+   "through_coolant": true
+  },
+  {
+   "n_holes": 8197,
+   "t_counterbore_s": 12.254778262212911,
+   "t_orifice_s": 1.4,
+   "hours": 40.85583817093312,
+   "drills": {
+    "orifice": 7,
+    "counterbore": 7
+   },
+   "cost_eur": 4552.025435383981,
+   "rate_eur_h": 90.0,
+   "pitch_mm": 4.23,
+   "orifice_mm": 0.4,
+   "through_coolant": false
+  },
+  {
+   "n_holes": 17131,
+   "t_counterbore_s": 5.570353755551323,
+   "t_orifice_s": 1.6166666666666667,
+   "hours": 50.22090190361566,
+   "drills": {
+    "orifice": 13,
+    "counterbore": 13
+   },
+   "cost_eur": 6144.88117132541,
+   "rate_eur_h": 90.0,
+   "pitch_mm": 2.94,
+   "orifice_mm": 0.3,
+   "through_coolant": true
+  },
+  {
+   "n_holes": 17131,
+   "t_counterbore_s": 12.254778262212911,
+   "t_orifice_s": 1.6166666666666667,
+   "hours": 82.02947863239889,
+   "drills": {
+    "orifice": 13,
+    "counterbore": 13
+   },
+   "cost_eur": 9007.6530769159,
+   "rate_eur_h": 90.0,
+   "pitch_mm": 2.94,
+   "orifice_mm": 0.3,
+   "through_coolant": false
+  }
+ ],
+ "budget": {
+  "reference": {
+   "rows": [
+    {
+     "poste": "Inclinaison globale résiduelle (pas 0,64 µrad, 4 ADXL355 moyennés 100 s, offset compensé)",
+     "allocation_urad": 5,
+     "prevu_urad": 1.4278172170657868
+    },
+    {
+     "poste": "Défaut de planéité d'usinage (si ⏥ 3 µm / 0,8 µm sur 100×100 atteints)",
+     "allocation_urad": 30,
+     "prevu_urad": 30.0
+    },
+    {
+     "poste": "Poids propre : finition sur appuis de service (positions ±0,5 mm, lest ±5 %, frottement µ 0,15)",
+     "allocation_urad": 10,
+     "prevu_urad": 1.4612131760627407
+    },
+    {
+     "poste": "Pression 0 → 400 Pa (chemin B, e = 35, pas 4,82 ; pire pas 2,94 : 4.3)",
+     "allocation_urad": 5,
+     "prevu_urad": 2.811274159613184
+    },
+    {
+     "poste": "Thermique (écart air/plaque ≤ 1 K, transitoire)",
+     "allocation_urad": 5,
+     "prevu_urad": 1.3472717376327732
+    },
+    {
+     "poste": "Sol / bâtiment (non calculé, surveillé par les ADXL355)",
+     "allocation_urad": 5,
+     "prevu_urad": 5.0
+    }
+   ],
+   "total_rss_urad": 30.64134803638348
+  },
+  "economique": {
+   "rows": [
+    {
+     "poste": "Inclinaison globale (réglage manuel différentiel 0,26 µrad/div, lecture ADXL355)",
+     "allocation_urad": 5,
+     "prevu_urad": 1.6677080080157918
+    },
+    {
+     "poste": "Planéité surfaçage 15–20 µm (forme + traces)",
+     "allocation_urad": null,
+     "prevu_urad": 250.8647792725761
+    },
+    {
+     "poste": "Poids propre : surfaçage sur montage 3 appuis (sinon +16 µrad)",
+     "allocation_urad": 10,
+     "prevu_urad": 1.4612131760627407
+    },
+    {
+     "poste": "Pression (identique)",
+     "allocation_urad": 5,
+     "prevu_urad": 2.811274159613184
+    },
+    {
+     "poste": "Thermique (identique)",
+     "allocation_urad": 5,
+     "prevu_urad": 1.3472717376327732
+    },
+    {
+     "poste": "Sol / paillasse (non calculé)",
+     "allocation_urad": 5,
+     "prevu_urad": 10.0
+    }
+   ],
+   "total_rss_urad": 251.09315458004775,
+   "after_compensation_urad": 11.473175001346805,
+   "map_uncertainty_urad": 10.0,
+   "without_fixture_G_urad": 15.539560093720533
+  }
+ }
+}

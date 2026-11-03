@@ -1,0 +1,247 @@
+{
+ "cases": [
+  {
+   "kind": "reference",
+   "bracing": "aucun",
+   "joint_factor": 0.25,
+   "f_Hz": [
+    25.340108163564985,
+    30.158222738776598,
+    42.92048167575776,
+    164.07796498666528,
+    180.02700451626444,
+    189.0230260822216,
+    225.73200348065606,
+    240.6847466501227
+   ],
+   "labels": [
+    "balancement y",
+    "balancement x",
+    "torsion autour de z",
+    "balancement y",
+    "pompage vertical",
+    "torsion autour de z",
+    "pompage vertical",
+    "balancement x"
+   ],
+   "frame_mass_kg": 27.70000000000003,
+   "n_dof": 678
+  },
+  {
+   "kind": "reference",
+   "bracing": "3faces",
+   "joint_factor": 0.25,
+   "f_Hz": [
+    48.01154619420392,
+    61.81817026801964,
+    89.0244835653602,
+    180.04792466802147,
+    198.04696935823742,
+    209.73121596961832,
+    226.84899986551704,
+    236.51813661369667
+   ],
+   "labels": [
+    "torsion autour de z",
+    "balancement y",
+    "torsion autour de z",
+    "pompage vertical",
+    "balancement y",
+    "pompage vertical",
+    "pompage vertical",
+    "balancement x"
+   ],
+   "frame_mass_kg": 31.541874542459723,
+   "n_dof": 768
+  },
+  {
+   "kind": "reference",
+   "bracing": "4faces",
+   "joint_factor": 0.25,
+   "f_Hz": [
+    61.59351695024998,
+    74.82966365033872,
+    93.35042066154342,
+    180.11350462298236,
+    197.44504186942828,
+    209.65053868330278,
+    226.95478119540363,
+    234.98028156649917
+   ],
+   "labels": [
+    "balancement y",
+    "balancement x",
+    "pompage vertical",
+    "pompage vertical",
+    "balancement y",
+    "pompage vertical",
+    "pompage vertical",
+    "balancement x"
+   ],
+   "frame_mass_kg": 32.82249938994629,
+   "n_dof": 798
+  },
+  {
+   "kind": "reference",
+   "bracing": "3faces",
+   "joint_factor": 1.0,
+   "f_Hz": [
+    53.017335575096176,
+    66.04457225871175,
+    94.53571334460382,
+    188.13926192852728,
+    212.4529185447079,
+    233.1132197591078,
+    235.80098677330085,
+    252.35751612428342
+   ],
+   "labels": [
+    "torsion autour de z",
+    "balancement y",
+    "torsion autour de z",
+    "pompage vertical",
+    "balancement y",
+    "pompage vertical",
+    "pompage vertical",
+    "balancement x"
+   ],
+   "frame_mass_kg": 31.54187454245968,
+   "n_dof": 540
+  },
+  {
+   "kind": "paillasse",
+   "bracing": "aucun",
+   "joint_factor": 0.25,
+   "f_Hz": [
+    27.823175035722663,
+    27.915586811364786,
+    43.90557092238701,
+    99.7650107138425,
+    155.3262583252581,
+    172.61116303333125,
+    515.5578381801652,
+    556.4320241483371
+   ],
+   "labels": [
+    "torsion autour de z",
+    "balancement y",
+    "torsion autour de z",
+    "pompage vertical",
+    "pompage vertical",
+    "mixte",
+    "torsion autour de z",
+    "balancement y"
+   ],
+   "frame_mass_kg": 5.119999999999997,
+   "n_dof": 390
+  },
+  {
+   "kind": "paillasse",
+   "bracing": "3faces",
+   "joint_factor": 0.25,
+   "f_Hz": [
+    86.36400709638652,
+    103.52570182883014,
+    155.31591209519235,
+    159.95677649344486,
+    178.42821407915153,
+    221.15929579591625,
+    408.26443133575634,
+    420.663177452197
+   ],
+   "labels": [
+    "torsion autour de z",
+    "pompage vertical",
+    "balancement y",
+    "pompage vertical",
+    "balancement y",
+    "torsion autour de z",
+    "torsion autour de z",
+    "torsion autour de z"
+   ],
+   "frame_mass_kg": 7.9188569095257435,
+   "n_dof": 480
+  }
+ ],
+ "k_local_support_N_m": [
+  32192097.09154408,
+  50596811.84583271,
+  52442018.115954965
+ ],
+ "panels": {
+  "p_Pa": 400.0,
+  "panels": [
+   {
+    "panel": "fond caisson alu 6 mm",
+    "a_mm": 430.0,
+    "b_mm": 430.0,
+    "t_mm": 6.0,
+    "w_max_um": 39.28867164126539,
+    "sigma_MPa": 0.6039155520343629,
+    "mass_kg": 2.99538
+   },
+   {
+    "panel": "paroi caisson alu 6 mm",
+    "a_mm": 430.0,
+    "b_mm": 160.0,
+    "t_mm": 6.0,
+    "w_max_um": 2.192828769764195,
+    "sigma_MPa": 0.19774383119760613,
+    "mass_kg": 1.11456
+   },
+   {
+    "panel": "paroi caisson alu 4 mm",
+    "a_mm": 430.0,
+    "b_mm": 160.0,
+    "t_mm": 4.0,
+    "w_max_um": 7.400797097954149,
+    "sigma_MPa": 0.4449236201946139,
+    "mass_kg": 0.74304
+   },
+   {
+    "panel": "hublot PC 6 mm (paroi)",
+    "a_mm": 430.0,
+    "b_mm": 160.0,
+    "t_mm": 6.0,
+    "w_max_um": 64.64122788290159,
+    "sigma_MPa": 0.19828953422441822,
+    "mass_kg": 0.49536
+   },
+   {
+    "panel": "fond PMMA 8 mm",
+    "a_mm": 430.0,
+    "b_mm": 430.0,
+    "t_mm": 8.0,
+    "w_max_um": 351.18331195324635,
+    "sigma_MPa": 0.34991911450111385,
+    "mass_kg": 1.760248
+   },
+   {
+    "panel": "panneau bâti alu composite 4 mm (non pressurisé, info)",
+    "a_mm": 450.0,
+    "b_mm": 450.0,
+    "t_mm": 4.0,
+    "w_max_um": 568.4605729063912,
+    "sigma_MPa": 1.4545831740560997,
+    "mass_kg": 1.1340000000000001
+   }
+  ],
+  "box": {
+   "walls_kg": 4.6617120000000005,
+   "bottom_kg": 3.1648968000000006,
+   "baffle_kg": 1.3774495299999998,
+   "misc_kg": 0.8700000000000001,
+   "total_kg": 10.07405833
+  },
+  "sleeve": {
+   "d_mm": 80,
+   "thrust_N": 2.0106192982974678
+  },
+  "membrane_A": {
+   "loop_radius_mm": 8.0,
+   "tension_N_m": 3.2,
+   "stress_kPa_t0p4": 8.0,
+   "note": "Boucle entre chant de plaque et paroi verticale : l'aire efficace ne dépend pas du déplacement vertical (roulement), seulement du jeu horizontal (±0,5 mm → ±0,6 % de la force de pression sur 440 mm)."
+  }
+ }
+}

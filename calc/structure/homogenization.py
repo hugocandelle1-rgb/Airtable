@@ -319,9 +319,11 @@ def _cell2d_cached(p_mm, d_mm, nu, E):
     return cache[key]["E_ratio"], cache[key]["nu"], cache[key]["G_ratio"]
 
 
-def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None):
+def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None, d_o_mm=None):
     """Propriétés équivalentes pour le modèle de plaque (SI).
 
+    pitch_mm, d_mm (lamage), d_o_mm (orifice) : surcharges optionnelles des
+    valeurs de params/design.toml (études de sensibilité au pas de perçage).
     Retourne dict(D_solid, nu, D_perf, nu_perf, m_solid, m_perf, h, ...)."""
     pl = P["plate"]
     E, nu, rho = pl["E"], pl["nu"], pl["rho"]
@@ -329,7 +331,7 @@ def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None):
     p_mm = pl["pitch_mm"] if pitch_mm is None else pitch_mm
     d_mm = pl["counterbore_d_mm"] if d_mm is None else d_mm
     t_w = pl["orifice_length_mm"] * 1e-3
-    d_o = pl["orifice_d_mm"] * 1e-3
+    d_o = (pl["orifice_d_mm"] if d_o_mm is None else d_o_mm) * 1e-3
     p = p_mm * 1e-3
     Er, nus, Gr = _cell2d_cached(float(p_mm), float(d_mm), float(nu), float(E))
     f_web = hex_porosity(p, d_o)
@@ -347,10 +349,67 @@ def plate_properties(P: dict, h: float | None = None, pitch_mm=None, d_mm=None):
 
 
 # -----------------------------------------------------------------------------
+# Étude paramétrique sur le pas de perçage (lot aéraulique : 2,94 / 4,23 / 4,82 / 5,0)
+# -----------------------------------------------------------------------------
+
+PITCHES_MM = (2.94, 4.23, 4.82, 5.0)
+COUNTERBORES_MM = (2.0, 1.5)
+
+
+def hex_hole_count(square_mm, pitch_mm, margin_mm=0.0):
+    """Nombre de trous d'un réseau hexagonal (rangées selon x, interrangée p·√3/2)
+    dont le centre tombe dans le carré (square − 2·margin), réseau centré."""
+    s = square_mm / 2 - margin_mm
+    dy = pitch_mm * np.sqrt(3) / 2
+    nrow = int(np.floor(s / dy))
+    count = 0
+    for j in range(-nrow, nrow + 1):
+        off = 0.0 if j % 2 == 0 else pitch_mm / 2
+        i = np.arange(-int(s / pitch_mm) - 2, int(s / pitch_mm) + 3)
+        x = i * pitch_mm + off
+        count += int(np.sum(np.abs(x) <= s + 1e-9))
+    return count
+
+
+def pitch_study(P, thicknesses_mm=(25, 30, 35), orifice_d_mm=(0.30, 0.40)):
+    """Rigidité et masse de la plaque percée en fonction du pas et du lamage.
+
+    Retourne une liste de dict (une ligne par pas × lamage × épaisseur)."""
+    pl = P["plate"]
+    E, nu = pl["E"], pl["nu"]
+    L = pl["outer_square_mm"] * 1e-3
+    Lp = P["zones"]["perforated_square_mm"] * 1e-3
+    rows = []
+    for p_mm in PITCHES_MM:
+        n_holes = hex_hole_count(P["zones"]["perforated_square_mm"], p_mm, margin_mm=1.0)
+        for d_mm in COUNTERBORES_MM:
+            lig = (p_mm - d_mm)
+            for d_o in orifice_d_mm:
+                for h_mm in thicknesses_mm:
+                    pr = plate_properties(P, h_mm * 1e-3, pitch_mm=p_mm, d_mm=d_mm, d_o_mm=d_o)
+                    mass = pr["m_solid"] * (L**2 - Lp**2) + pr["m_perf"] * Lp**2
+                    rows.append(dict(pitch_mm=p_mm, counterbore_mm=d_mm, orifice_mm=d_o, h_mm=h_mm,
+                                     n_holes=n_holes, ligament_mm=lig, porosity=pr["porosity"],
+                                     E_ratio_layer=pr["E_ratio_layer"], nu_layer=pr["nu_layer"],
+                                     D_ratio=pr["D_ratio"], D_perf=pr["D_perf"], mass_kg=mass,
+                                     m_perf=pr["m_perf"]))
+    return rows
+
+
+def print_pitch_study(rows, h_mm=30, d_o=0.40):
+    print(f"Pas de perçage (e = {h_mm} mm, orifice Ø{d_o}) :")
+    print("  pas   lamage  trous  ligament  f      E*/E   D*/D   masse")
+    for r in rows:
+        if r["h_mm"] == h_mm and np.isclose(r["orifice_mm"], d_o):
+            print(f"  {r['pitch_mm']:4.2f}  Ø{r['counterbore_mm']:.1f}  {r['n_holes']:6d}  {r['ligament_mm']:5.2f} mm "
+                  f"{r['porosity']:.3f}  {r['E_ratio_layer']:.3f}  {r['D_ratio']:.3f}  {r['mass_kg']:.2f} kg")
+
+
+# -----------------------------------------------------------------------------
 # Programme principal
 # -----------------------------------------------------------------------------
 
-def main():
+def main(quick: bool = False):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -362,6 +421,16 @@ def main():
     p, d = pl["pitch_mm"] * 1e-3, pl["counterbore_d_mm"] * 1e-3
     t_w, d_o = pl["orifice_length_mm"] * 1e-3, pl["orifice_d_mm"] * 1e-3
     out = {}
+
+    # Étude du pas (rapide grâce au cache des cellules 2D)
+    t0 = time.time()
+    prow = pitch_study(P)
+    print_pitch_study(prow)
+    (RESULTS / "homogenization_pitch.json").write_text(json.dumps(prow, indent=1, default=float))
+    print(f"→ results/homogenization_pitch.json ({time.time()-t0:.0f} s)")
+    if quick:
+        print("(mode --quick : cellules 3D et courbes non recalculées ; homogenization.json conservé)")
+        return
 
     lit = literature_estimates(p, d, nu)
     out["literature"] = lit
@@ -449,4 +518,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(quick="--quick" in sys.argv)

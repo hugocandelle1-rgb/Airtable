@@ -1,0 +1,164 @@
+{
+ "source": "support_study.json (e = 35 mm, chemin B)",
+ "points_mm": [
+  [
+   0.0,
+   242.0
+  ],
+  [
+   242.0,
+   -146.0
+  ],
+  [
+   -242.0,
+   -146.0
+  ]
+ ],
+ "reactions_N": [
+  130.4608715084142,
+  108.12168118163108,
+  108.12168118163072
+ ],
+ "hertz": {
+  "ball_d_mm": 30.0,
+  "roller_d_mm": 20.0,
+  "preload_N": 40.0,
+  "vee_included_deg": 90,
+  "contacts": [
+   {
+    "a_mm": 0.25643666408878757,
+    "b_mm": 0.1431013203581738,
+    "delta_um": 4.072496241487139,
+    "pmax_GPa": 1.5682934676337748,
+    "k_N_m": 44395635.142398596,
+    "N_vertical": 170.4608715084142,
+    "W_contact": 120.53403817056841,
+    "k_vertical_N_m": 44395635.1423986
+   },
+   {
+    "a_mm": 0.24470608074574945,
+    "b_mm": 0.1365552128780861,
+    "delta_um": 3.708429076714588,
+    "pmax_GPa": 1.4965525670344344,
+    "k_N_m": 42364776.17784468,
+    "N_vertical": 148.12168118163106,
+    "W_contact": 104.73784520428315,
+    "k_vertical_N_m": 42364776.17784469
+   },
+   {
+    "a_mm": 0.24470608074574932,
+    "b_mm": 0.136555212878086,
+    "delta_um": 3.708429076714583,
+    "pmax_GPa": 1.496552567034433,
+    "k_N_m": 42364776.17784464,
+    "N_vertical": 148.12168118163072,
+    "W_contact": 104.7378452042829,
+    "k_vertical_N_m": 42364776.17784465
+   }
+  ]
+ },
+ "geometry": {
+  "arms_mm": [
+   388.0,
+   410.6688509957694,
+   410.6688509957694
+  ],
+  "L_pitch_mm": 388.0,
+  "L_roll_mm": 484.0,
+  "L_min_mm": 388.0,
+  "z_range_pm_mm": 2.4286256541501094,
+  "centroid_mm": [
+   0.0,
+   -16.666666666666664
+  ],
+  "vee_axis_angle_deg": [
+   -90.0,
+   151.87838135158216,
+   28.121618648417858
+  ]
+ },
+ "wedge": {
+  "reference_motorise": {
+   "tan_wedge": 0.2,
+   "lead_mm": 0.25,
+   "dz_per_rev_um": 50.0,
+   "dz_per_step_um": 0.25,
+   "urad_per_step": 0.6443298969072165,
+   "urad_per_rev": 128.8659793814433,
+   "steps_per_rev": 200,
+   "microsteps": 16,
+   "wedge_travel_pm_mm": 12.143128270750546,
+   "screw_turns_pm": 48.572513083002185,
+   "F_screw_N": 30.395339982216587,
+   "F_return_N": 28.8548729574606,
+   "thread_efficiency": 0.07096362288937953,
+   "self_locking": true,
+   "torque_Nm": 0.0170424240200837,
+   "N_support_N": 148.12168118163106,
+   "meets_resolution": true,
+   "manual_div_per_rev": 100,
+   "urad_per_div": 1.288659793814433
+  },
+  "eco_differentiel_fin": {
+   "tan_wedge": 0.2,
+   "lead_mm": 0.025,
+   "dz_per_rev_um": 5.0,
+   "dz_per_step_um": 5.0,
+   "urad_per_step": 12.88659793814433,
+   "urad_per_rev": 12.88659793814433,
+   "steps_per_rev": 1,
+   "microsteps": 1,
+   "wedge_travel_pm_mm": 12.143128270750546,
+   "screw_turns_pm": 485.72513083002184,
+   "F_screw_N": 45.34337179029523,
+   "F_return_N": 14.521733449179518,
+   "thread_efficiency": 0.007181754800408811,
+   "self_locking": true,
+   "torque_Nm": 0.025121373387978572,
+   "N_support_N": 148.12168118163106,
+   "meets_resolution": false,
+   "manual_div_per_rev": 50,
+   "urad_per_div": 0.2577319587628866
+  },
+  "eco_differentiel_grossier": {
+   "tan_wedge": 0.2,
+   "lead_mm": 0.318,
+   "dz_per_rev_um": 63.600000000000016,
+   "dz_per_step_um": 63.600000000000016,
+   "urad_per_step": 163.9175257731959,
+   "urad_per_rev": 163.9175257731959,
+   "steps_per_rev": 1,
+   "microsteps": 1,
+   "wedge_travel_pm_mm": 12.143128270750546,
+   "screw_turns_pm": 38.185937958335046,
+   "F_screw_N": 45.34337179029523,
+   "F_return_N": 14.521733449179518,
+   "thread_efficiency": 0.08404394901952203,
+   "self_locking": true,
+   "torque_Nm": 0.027305781623308614,
+   "N_support_N": 148.12168118163106,
+   "meets_resolution": false,
+   "manual_div_per_rev": 50,
+   "urad_per_div": 3.2783505154639183
+  }
+ },
+ "stroke_time_s": 48.572513083002185,
+ "stiffness": {
+  "k_hertz": [
+   44395635.1423986,
+   42364776.17784469,
+   42364776.17784465
+  ],
+  "k_wedge": 200000000.0,
+  "k_screw_vertical": 2475035049.7914205,
+  "k_support_chain": [
+   35805370.02615382,
+   34472595.37928385,
+   34472595.37928383
+  ],
+  "k_frame_local_assumed": 32192097.09154408,
+  "mass_kg": 35.3419198645949,
+  "f_bounce_Hz": 274.00168972957607,
+  "f_bounce_with_frame_Hz": 189.7667926111243
+ }
+}

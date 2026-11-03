@@ -1,0 +1,55 @@
+# =============================================================================
+#  AÉRAULIQUE — VALEURS RECOMMANDÉES (calc/aero/run_all.py, 2026-11-03)
+#  Ne remplace pas params/design.toml : à fusionner par le coordinateur.
+#  Note de calcul : docs/02_aeraulique.md
+#  Mêmes clés que params/design.toml ; section [aero] = données complémentaires.
+# =============================================================================
+
+[meta]
+status = "verified"                 # chaîne complète exécutée (python3 -m calc.aero.run_all)
+date = "2026-11-03"
+source = "calc/aero/*.py ; optimisation : results/optimization.json ; table : results/setpoints.json"
+
+[plate]
+orifice_d_mm = 0.30                 # était 0,40 : crantage ÷ 2,7 et débit ÷ 1,9 à pas égal
+orifice_tol_mm = 0.005              # ± (3σ) : pente aléatoire ≤ 8,5 µrad RMS (±0,010 → 16 µrad RMS)
+orifice_length_mm = 1.2             # voile restant (L/d = 4,0) ; ±0,05 mm
+counterbore_d_mm = 2.0              # perçage borgne d'alimentation (paroi 3 mm au pas 5)
+pattern = "hex"
+pitch_mm = 5.0                      # ≈ 6 000 trous sur 360 × 360 (5 935 à 6 017 selon l'origine du réseau)
+# thickness_mm : laissé au lot structure (35 mm proposé ; −0,5 % de débit vs 25 mm, sans effet sur le crantage)
+
+[plenum]
+filter = "ISO 16890 ePM1 ≥ 55 % à l'aspiration (un orifice Ø0,30 bouché sous un palet = 136–159 µrad)"
+settling_height_mm = 80.0
+baffle_open_area = 0.057            # tôle inox ép. 1, trous Ø2 pas 8 quinconce (+ nappe média 10 mm)
+distribution_height_mm = 62.0
+deflector_d_mm = 200.0
+deflector_gap_mm = 25.0
+
+[operating]
+p_plenum_min_Pa = 57.0              # 0,9 × bande basse de ps(2 g) (consigne nominale 65,5 Pa)
+p_plenum_max_Pa = 297.0             # 1,1 × bande haute de ps(10 g) (consigne nominale 265 Pa)
+
+[fan]
+reference = "San Ace 9BMC24P2G001 + vanne de décharge à deux états (Ø≈39 mm équivalent)"
+count = 1
+pwm_freq_Hz = 25000
+
+[aero]                              # données complémentaires (non présentes dans design.toml)
+gap_law_um = "h = clip(130,2 − 24,8·ln(m_g), 80, 140)"   # 113 µm à 2 g, 90 µm à 5 g, 80 µm dès 7,5 g
+ps_table_Pa = [[2.0, 65.5], [3.0, 91.2], [4.0, 115.5], [5.0, 138.9], [6.0, 161.7], [7.0, 184.0], [8.0, 208.4], [9.0, 236.6], [10.0, 265.1]]
+Q_total_m3h = [6.5, 20.0]           # trous libres de la zone percée + fuites, sur [p_min, p_max]
+fan_spec_max = { Q_m3h = 23.1, dp_total_Pa = 375 }   # marges ×1,15, filtre colmaté
+fan_spec_min = { Q_m3h = 5.7, dp_total_Pa = 53 }
+fan_9BMC_duty_at_max_pct = 42       # estimation (linéaire 20 % → 2800, 100 % → 8200 min⁻¹)
+bleed_switch_ps_Pa = 238            # vanne ouverte en dessous (plage ouverte 57–270 Pa, fermée 209–297 Pa)
+nozzle_throat_mm = 30.0             # buse débitmétrique (Δp col 4–39 Pa)
+cogging_slope_rms_urad = 32.7       # pire masse (10 g), modèle nominal ; crête 57 µrad ; enveloppe modèle 27–62
+cogging_mean_urad = 0.0             # périodique de moyenne nulle : cartographiable et compensable
+unbalance_slope_urad_per_um = 0.96  # décentrage du centre de gravité du palet (2 g ; 0,86 à 10 g)
+draft_admissible_m_s = 0.017        # courant d'air horizontal pour 5 µrad (2 g) ⇒ écran obligatoire
+screen_height_mm = 120.0
+gap_ripple_pp_um = 2.5              # ondulation d'entrefer sur la cellule (10 g)
+dh_dps_um_per_Pa = [1.32, 0.71, 0.37]   # 2 / 5 / 10 g ⇒ ±0,3 Pa = ±0,4 µm (2 g)
+plate_thermal_tau_min = 14

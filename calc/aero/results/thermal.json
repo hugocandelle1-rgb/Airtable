@@ -1,0 +1,65 @@
+{
+  "config": {
+    "d": 0.0003,
+    "L": 0.0012,
+    "pitch": 0.005,
+    "pattern": "hex",
+    "D_cb": 0.002,
+    "t": 0.025,
+    "K_c": 0.5,
+    "model": "lichtarowicz",
+    "cone_inlet": false
+  },
+  "porosity": 0.14510394913873742,
+  "k_eff": 100.02283795076772,
+  "h_top": 8.0,
+  "h_bot": 5.0,
+  "eta_fan": 0.25,
+  "air_heating": {
+    "2.0": {
+      "Q_m3h": 7.217057672705548,
+      "dp_fan_Pa": 69.61649140327356,
+      "P_elec_W": 4.6,
+      "dT_air_speed_mod_K": 1.8963024578096797
+    },
+    "5.0": {
+      "Q_m3h": 12.201380086658935,
+      "dp_fan_Pa": 146.60217170350734,
+      "P_elec_W": 4.6,
+      "dT_air_speed_mod_K": 1.1216537888094966
+    },
+    "10.0": {
+      "Q_m3h": 18.680118481260067,
+      "dp_fan_Pa": 278.14559513119275,
+      "P_elec_W": 5.773102968990305,
+      "dT_air_speed_mod_K": 0.9194743727581124
+    }
+  },
+  "constant_speed": {
+    "Q_fan_m3h": 24.054524388743626,
+    "P_W": 25.0,
+    "dT_air_K": 3.092097548191935
+  },
+  "thermal_entry": {
+    "2.0": {
+      "V_bore_m_s": 0.10605418011840326,
+      "Re_bore": 14.109307498625142,
+      "L_th_mm": 1.0017608324023852
+    },
+    "10.0": {
+      "V_bore_m_s": 0.27450309251886407,
+      "Re_bore": 36.51952744670855,
+      "L_th_mm": 2.5928864487163072
+    }
+  },
+  "gradient_steady_2g_K": 0.0027087321790444374,
+  "gradient_steady_10g_K": 0.0014259998305820032,
+  "gradient_transient_max_K": 0.004921060200743358,
+  "gradient_limit_K": 0.05,
+  "plate_tau_s": 831.5635353484001,
+  "plate_tau_min": 13.85939225580667,
+  "mean_T_change_step_2g_to_10g_K": -0.6186177961143623,
+  "gradient_cold_start_max_K": 0.004921060200743358,
+  "gradient_step_max_K": 0.0027087321790444374,
+  "slope_from_transient_gradient_urad": 0.7086326689070435
+}

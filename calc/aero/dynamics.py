@@ -25,7 +25,7 @@ import scipy.linalg as sl
 from scipy.optimize import brentq
 
 from calc.aero.common import (G, MU, RHO, P_ATM, A_PUCK, R_PUCK, recommended_config,
-                              h_target, setup_style, savefig, save_json, SERIES, INK2,
+                              h_target, h_target_for, setup_style, savefig, save_json, SERIES, INK2,
                               MASS_CASES_G)
 from calc.aero import film as F
 
@@ -104,16 +104,18 @@ def puck_mode(ev, part):
 def main():
     plt = setup_style()
     cfg = recommended_config()
-    ht = h_target()
+    ht = h_target()                                   # référence (5 g) pour les figures
     V_top = np.pi * cfg.d * (0.05e-3) ** 2           # chanfrein 0,05 × 45° (≈ anneau)
     V_bot = np.pi / 4 * cfg.D_cb**2 * cfg.L_bore     # perçage Ø D_cb sous le film
-    res = {"config": cfg, "h_target_um": ht * 1e6, "H_puck_assumed_mm": H_PUCK * 1e3,
+    res = {"config": cfg, "h_target_um": ht * 1e6,
+           "h_law_um": {str(mg): h_target_for(mg) * 1e6 for mg in (2.0, 5.0, 10.0)}, "H_puck_assumed_mm": H_PUCK * 1e3,
            "V_pocket_top_m3": V_top, "V_pocket_bottom_m3": V_bot, "cases": []}
     masses = [2.0, 5.0, 10.0]
     omega = np.logspace(0, 4.5, 200)
     fig, axs = plt.subplots(1, 2, figsize=(11, 4.2))
     for mg, col in zip(masses, SERIES):
         m = mg * 1e-3
+        ht = h_target_for(mg)                         # entrefer cible dépendant de la masse
         ps = brentq(lambda p: F.axi_W(cfg, p, ht) - m * G, 5, 20000)
         kz = F.axi_kz(cfg, ps, ht)
         kth = F.axi_ktheta(cfg, ps, ht)
@@ -121,7 +123,7 @@ def main():
         fz = np.sqrt(kz / m) / (2 * np.pi)
         fth = np.sqrt(kth / I_tilt) / (2 * np.pi)
         c_sq = 3 * np.pi * MU * R_PUCK**4 / (2 * ht**3)     # écrasement, disque plein sans trous
-        case = {"mass_g": mg, "ps_Pa": ps, "kz_N_m": kz, "ktheta_Nm_rad": kth,
+        case = {"mass_g": mg, "h_um": ht * 1e6, "ps_Pa": ps, "kz_N_m": kz, "ktheta_Nm_rad": kth,
                 "f_heave_quasistatic_Hz": fz, "f_tilt_quasistatic_Hz": fth,
                 "zeta_squeeze_nofeed": c_sq / (2 * np.sqrt(kz * m))}
         for tag, V in (("top", V_top), ("bottom", V_bot)):
@@ -181,7 +183,8 @@ def main():
     hh = np.linspace(60e-6, 260e-6, 50)
     for mg, col in zip(MASS_CASES_G, SERIES):
         ax.plot(hh * 1e6, mg * 1e-3 * hh / (MU * A_PUCK), color=col, label=f"{mg:g} g")
-    ax.axvline(ht * 1e6, color=INK2, lw=0.8, ls=":")
+    for c in res["cases"]:
+        ax.axvline(c["h_um"], color=INK2, lw=0.8, ls=":")
     ax.set_xlabel("entrefer h (µm)")
     ax.set_ylabel("τ = m·h/(μ·A) (s)")
     ax.set_title("Constante de temps de l'amortissement visqueux (translation = rotation)")
@@ -195,7 +198,7 @@ def main():
         m = mg * 1e-3
         zs = []
         for V in Vs:
-            ev, part = eigen_modes(cfg, c["ps_Pa"], ht, m, "heave", V)
+            ev, part = eigen_modes(cfg, c["ps_Pa"], c["h_um"] * 1e-6, m, "heave", V)
             sm = puck_mode(ev, part)
             zs.append(-sm.real / abs(sm))
         zs = np.array(zs)

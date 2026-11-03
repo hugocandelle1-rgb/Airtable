@@ -36,7 +36,7 @@ DESIGN = dict(
     filter_dp_ref_Pa=120.0, filter_v_ref=2.7,      # perte initiale de référence (panneau ePM1 55 %)
     filter_dirty_factor=3.0,                         # fin de vie (colmatage)
     intake_box_mm=(320.0, 320.0, 220.0),             # caisson d'aspiration (l × p × h)
-    nozzle_throat_mm=45.0, nozzle_alpha=0.98, nozzle_K=0.04,
+    nozzle_throat_mm=30.0, nozzle_alpha=0.98, nozzle_K=0.04,       # Ø30 : Δp col 4–50 Pa sur la plage
     fan_inlet_mm=50.0,
     fan_outlet_mm=(50.0, 35.0),                      # sortie rectangulaire supposée (à adapter)
     adapter_round_mm=50.0, adapter_len_mm=60.0, adapter_K=0.05,
@@ -122,6 +122,102 @@ def fan_total_pressure(ps, Q, dirty=False):
 def fan_curve(Q, n_rel, dp_shut, Q_free):
     """Courbe générique d'un centrifuge à aubes arrière : Δp = n²·Δp0·(1 − (Q/(n·Qf))²)."""
     return dp_shut * n_rel**2 * (1 - (Q / (Q_free * n_rel)) ** 2)
+
+
+# ---------------------------------------------------------------------------
+# Ventilateur candidat : San Ace 9BMC24P2G001 (courbes lues, docs/research/ventilateurs.md)
+# ---------------------------------------------------------------------------
+FAN_9BMC = dict(
+    name="San Ace 9BMC24P2G001 (24 V, PWM 25 kHz)", n_max_rpm=8200.0,
+    Q_m3h=np.array([0.0, 18.0, 30.0, 60.0, 90.0, 111.0]),
+    dp100_Pa=np.array([1900.0, 1790.0, 1640.0, 1130.0, 580.0, 0.0]),
+    check_60pct=dict(Q_m3h=[0.0, 18.0, 30.0, 60.0], dp_Pa=[890.0, 780.0, 710.0, 405.0]),
+    rpm_20pct=2800.0, rpm_floor_est=1500.0,
+)
+
+
+FAN_9BMB = dict(name="San Ace 9BMB24P2G01 (24 V, PWM 25 kHz)", n_max_rpm=6850.0,
+                Q_m3h=np.array([0.0, 24.0, 36.0, 48.0, 60.0, 72.0, 80.0]),
+                dp100_Pa=np.array([755.0, 675.0, 580.0, 430.0, 290.0, 135.0, 0.0]))
+
+
+def fan9_dp(Q_m3h, n_rel, F9=FAN_9BMC):
+    """Courbe du 9BMC à la vitesse relative n_rel (similitude : Q ∝ n, Δp ∝ n²)."""
+    x = np.asarray(Q_m3h, float) / max(n_rel, 1e-9)
+    return n_rel**2 * np.interp(x, F9["Q_m3h"], F9["dp100_Pa"], right=0.0)
+
+
+def fan9_n_for(Q_m3h, dp, F9=FAN_9BMC):
+    return brentq(lambda n: fan9_dp(Q_m3h, n, F9) - dp, 0.02, 5.0)
+
+
+def fan9_duty(n_rel, F9=FAN_9BMC):
+    """Rapport cyclique estimé (linéaire entre 20 % → 2800 min⁻¹ et 100 % → 8200 min⁻¹)."""
+    rpm = n_rel * F9["n_max_rpm"]
+    return 20.0 + 80.0 * (rpm - F9["rpm_20pct"]) / (F9["n_max_rpm"] - F9["rpm_20pct"])
+
+
+def fan9_check(cfg, N, ps_lo, ps_hi, spec_min, spec_max):
+    """Validation du 9BMC sur l'enveloppe et dimensionnement de la vanne de décharge."""
+    F9 = FAN_9BMC
+    n60 = np.sqrt(F9["check_60pct"]["dp_Pa"][0] / F9["dp100_Pa"][0])
+    sim_err = [float(fan9_dp(q, n60) / dp - 1) for q, dp in zip(F9["check_60pct"]["Q_m3h"],
+                                                                 F9["check_60pct"]["dp_Pa"])]
+    n_max = fan9_n_for(spec_max[0] * 3600, spec_max[1])
+    n_min = fan9_n_for(spec_min[0] * 3600, spec_min[1])
+    n20 = F9["rpm_20pct"] / F9["n_max_rpm"]
+    out = dict(name=F9["name"], similarity_check_60pct_rel_err=sim_err,
+               n_rel_at_spec_max=n_max, rpm_at_spec_max=n_max * F9["n_max_rpm"],
+               duty_at_spec_max_pct=fan9_duty(n_max),
+               dp_margin_at_spec_max_full_speed=float(fan9_dp(spec_max[0] * 3600, 1.0) / spec_max[1]),
+               n_rel_at_spec_min=n_min, rpm_at_spec_min=n_min * F9["n_max_rpm"],
+               duty_at_spec_min_pct=fan9_duty(n_min), n_rel_20pct=n20,
+               reaches_min_by_speed_alone=bool(n_min >= 1.1 * n20))
+    # vanne de décharge (orifice fixe réglable en aval du ventilateur, Cd ≈ 0,62) :
+    # dimensionnée pour que le point bas soit tenu à 1,15 × la vitesse à 20 % PWM
+    n_b = 1.15 * n20
+    Qp_lo = total_flow(ps_lo, cfg, N)
+    Qf = brentq(lambda q: fan9_dp(q * 3600, n_b) - fan_total_pressure(ps_lo, q, dirty=False),
+                Qp_lo, 0.05)
+    Qb_lo = Qf - Qp_lo
+    Cd = 0.62
+    Ab = Qb_lo / (Cd * np.sqrt(2 * ps_lo / RHO))
+    Qb_hi = Cd * Ab * np.sqrt(2 * ps_hi / RHO)
+    Qtot_hi = total_flow(ps_hi, cfg, N) + Qb_hi
+    dp_hi = fan_total_pressure(ps_hi, Qtot_hi, dirty=True)
+    n_hi_b = fan9_n_for(Qtot_hi * 3600 * 1.15, dp_hi * 1.15)
+
+    # vanne de décharge à deux états (ouverte / fermée) : plages couvertes
+    def n_needed(ps, A, dirty, margin=1.0):
+        Qt = total_flow(ps, cfg, N) + Cd * A * np.sqrt(2 * ps / RHO)
+        return fan9_n_for(Qt * 3600 * margin, fan_total_pressure(ps, Qt, dirty=dirty) * margin)
+
+    ps_closed_min = brentq(lambda p: n_needed(p, 0.0, False) - n_b, 5.0, ps_hi)
+    ps_open_max = brentq(lambda p: n_needed(p, Ab, True, 1.15) - 1.0, ps_lo, 2 * ps_hi) \
+        if n_needed(ps_lo, Ab, True, 1.15) < 1.0 else ps_lo
+    out["bleed"] = dict(n_rel_low=n_b, Q_fan_low_m3h=Qf * 3600, Q_bleed_low_m3h=Qb_lo * 3600,
+                        orifice_area_mm2=Ab * 1e6, orifice_equiv_d_mm=np.sqrt(4 * Ab / np.pi) * 1e3,
+                        fixed_open_Q_bleed_at_ps_max_m3h=Qb_hi * 3600, fixed_open_Q_fan_at_ps_max_m3h=Qtot_hi * 3600,
+                        fixed_open_n_rel_at_ps_max_with_margins=n_hi_b,
+                        two_state=dict(ps_min_valve_closed_Pa=ps_closed_min, ps_max_valve_open_Pa=ps_open_max,
+                                       overlap=bool(ps_open_max > 1.1 * ps_closed_min),
+                                       switch_ps_Pa=float(np.sqrt(ps_closed_min * ps_open_max))),
+                        note="décharge fixe impossible (au point haut le ventilateur dépasserait 100 %) : "
+                             "vanne à deux états (électrovanne/registre motorisé) ou proportionnelle, en aval "
+                             "du diffuseur, rejet canalisé loin de la table (pas de courant d'air dans le local)")
+    # ventilateur mieux adapté (même famille, pression plus faible) : vitesses relatives requises
+    out["alternative_9BMB"] = dict(name=FAN_9BMB["name"],
+                                   n_rel_at_spec_max=fan9_n_for(spec_max[0] * 3600, spec_max[1], FAN_9BMB),
+                                   n_rel_at_spec_min=fan9_n_for(spec_min[0] * 3600, spec_min[1], FAN_9BMB),
+                                   note="vitesse à 20 % PWM non documentée : à mesurer ; si n(20 %) ≈ 0,34 "
+                                        "comme le 9BMC, une décharge reste nécessaire pour les palets légers")
+    # alternative : étranglement série (Δp à dissiper au point bas, à la vitesse n_b)
+    Qth = Qp_lo
+    out["throttle_alternative"] = dict(dp_to_dissipate_Pa=float(fan9_dp(Qth * 3600, n_b)
+                                                                - fan_total_pressure(ps_lo, Qth)),
+                                       note="restriction série : la même pente de courbe réseau mais "
+                                            "elle pénalise le point haut ; décharge préférée")
+    return out
 
 
 def main():
@@ -224,6 +320,7 @@ def main():
                 area_ratio_entry=np.pi * DESIGN["duct_mm"] * DESIGN["deflector_gap_mm"] / (np.pi * DESIGN["duct_mm"]**2 / 4),
                 v_edge_at_Qmax=Q_hi / (np.pi * DESIGN["deflector_d_mm"] * 1e-3 * DESIGN["deflector_gap_mm"] * 1e-3))
 
+    fan9 = fan9_check(cfg, N, ps_lo, ps_hi, spec_min, spec_max)
     losses_hi = chain_losses(Q_hi, dirty=True)
     losses_hi_clean = chain_losses(Q_hi)
     res = dict(
@@ -249,7 +346,7 @@ def main():
                     uniformity_at_ps_min=U_lo, uniformity_at_ps_max=U_hi),
         nozzle=dict(throat_mm=DESIGN["nozzle_throat_mm"], dp_at_Qmin_Pa=dpn(Q_lo), dp_at_Qmax_Pa=dpn(Q_hi),
                     Re_at_Qmin=Re_n(Q_lo), Re_at_Qmax=Re_n(Q_hi)),
-        diffuser=diff, deflector=defl, sheet=dict(open_ratio=beta, zeta=zeta_perforated(beta)),
+        fan_candidate=fan9, diffuser=diff, deflector=defl, sheet=dict(open_ratio=beta, zeta=zeta_perforated(beta)),
         design=DESIGN,
     )
     save_json("network.json", res)
@@ -266,6 +363,11 @@ def main():
                 fontsize=7, color=MUTED)
     ax.scatter([spec_min[0] * 3600, spec_max[0] * 3600], [spec_min[1], spec_max[1]], color=INK, zorder=5,
                s=30)
+    qq9 = np.linspace(0, Qf * 3600 * 1.05, 120)
+    for nr, lab in ((fan9["n_rel_at_spec_max"], "9BMC au point max"),
+                    (FAN_9BMC["rpm_20pct"] / FAN_9BMC["n_max_rpm"], "9BMC à 20 % PWM")):
+        ax.plot(qq9, fan9_dp(qq9, nr), color=SERIES[2], lw=1.3, ls="-" if "max" in lab else "-.",
+                label=f"{lab} (n = {nr:.2f})")
     ax.annotate("point max spécifié", (spec_max[0] * 3600, spec_max[1]), xytext=(-110, 12),
                 textcoords="offset points", fontsize=8)
     ax.annotate("point min", (spec_min[0] * 3600, spec_min[1]), xytext=(8, -14),
@@ -300,6 +402,8 @@ def main():
     print("uniformité", U_lo["estimated_nonuniformity_pct"], U_hi["estimated_nonuniformity_pct"],
           "ratio tôle", U_lo["ratio_sheet_dp_over_upstream_dyn"])
     print("diffuseur", diff)
+    print("9BMC", {k: v for k, v in fan9.items() if k not in ("bleed", "throttle_alternative")})
+    print("décharge", fan9["bleed"], fan9["throttle_alternative"])
 
 
 def _specific_speed(Q, dp):

@@ -127,6 +127,18 @@ def h_target() -> float:
     return 120e-6
 
 
+def h_target_for(mass_g: float) -> float:
+    """Entrefer cible (m) pour une masse donnée : loi h(m) écrite par setpoints.py
+    (clé ``h_law`` de results/setpoints.json), sinon entrefer unique ``h_target()``."""
+    f = RES_DIR / "setpoints.json"
+    if f.exists():
+        d = json.loads(f.read_text())
+        law = d.get("h_law")
+        if law:
+            return float(np.interp(mass_g, law["mass_g"], law["h_um"])) * 1e-6
+    return h_target()
+
+
 # ---------------------------------------------------------------------------
 # Réseau de trous
 # ---------------------------------------------------------------------------

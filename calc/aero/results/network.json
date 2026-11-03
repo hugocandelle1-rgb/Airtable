@@ -1,7 +1,7 @@
 {
   "config": {
-    "d": 0.0004,
-    "L": 0.001,
+    "d": 0.0003,
+    "L": 0.0012,
     "pitch": 0.005,
     "pattern": "hex",
     "D_cb": 0.002,
@@ -12,119 +12,164 @@
   },
   "n_holes_zone": 6017,
   "ps_range_Pa": [
-    45.0,
-    363.00000000000006
+    57.063087972084254,
+    296.548607279199
   ],
   "operating_min": {
-    "ps": 45.0,
-    "Q_m3s": 0.003572954815335381,
-    "Q_m3h": 12.86263733520737,
-    "dp_fan_total": 49.08636866164865,
+    "ps": 57.063087972084254,
+    "Q_m3s": 0.0018134327120901059,
+    "Q_m3h": 6.528357763524381,
+    "dp_fan_total": 60.471707069970236,
     "losses": {
-      "filtre d'aspiration": 1.9278853912598624,
-      "buse d'entrée": 0.23120987463781634,
-      "adaptateur rect.→rond": 0.12547160293358092,
-      "diffuseur conique": 0.42230520438259905,
-      "manchon souple": 0.04562502208109326,
-      "conduit + coude": 0.09885421450903539,
-      "entrée plenum + déflecteur": 0.4562502208109326,
-      "tôle de distribution": 0.2251067774177075,
-      "nappe de média": 0.5536603536160197
+      "filtre d'aspiration": 0.9784871666066957,
+      "buse d'entrée": 1.7813977662754468,
+      "adaptateur rect.→rond": 0.03232163260685133,
+      "diffuseur conique": 0.10878631773948975,
+      "manchon souple": 0.01175305939277115,
+      "conduit + coude": 0.025464962017670827,
+      "entrée plenum + déflecteur": 0.11753059392771151,
+      "tôle de distribution": 0.07187046418141163,
+      "nappe de média": 0.28100713513792963
     },
-    "leak_m3h": 0.037292817679558
+    "leak_m3h": 0.047289851910567046
   },
   "operating_max": {
-    "ps": 363.00000000000006,
-    "Q_m3s": 0.012892381643493272,
-    "Q_m3h": 46.41257391657578,
-    "dp_fan_total_dirty": 406.2391471891544,
-    "dp_fan_total_clean": 392.32627366365784,
+    "ps": 296.548607279199,
+    "Q_m3s": 0.0055681769418388025,
+    "Q_m3h": 20.045436990619688,
+    "dp_fan_total_dirty": 326.50772234264895,
+    "dp_fan_total_clean": 320.4987983360836,
     "losses_dirty": {
-      "filtre d'aspiration": 20.8693102882448,
-      "buse d'entrée": 3.0103544669004743,
-      "adaptateur rect.→rond": 1.6336413007962838,
-      "diffuseur conique": 5.498417229800032,
-      "manchon souple": 0.5940381622515161,
-      "conduit + coude": 1.287082684878285,
-      "entrée plenum + déflecteur": 5.9403816225151616,
-      "tôle de distribution": 2.4081350220694198,
-      "nappe de média": 1.9977864116983373
+      "filtre d'aspiration": 9.013386009848045,
+      "buse d'entrée": 16.795156974626245,
+      "adaptateur rect.→rond": 0.30473087122100323,
+      "diffuseur conique": 1.0256458819673782,
+      "manchon souple": 0.11080875993597432,
+      "conduit + coude": 0.24008564652794437,
+      "entrée plenum + déflecteur": 1.1080875993597432,
+      "tôle de distribution": 0.4983759839348788,
+      "nappe de média": 0.86283733602874
     },
     "losses_clean": {
-      "filtre d'aspiration": 6.956436762748267,
-      "buse d'entrée": 3.0103544669004743,
-      "adaptateur rect.→rond": 1.6336413007962838,
-      "diffuseur conique": 5.498417229800032,
-      "manchon souple": 0.5940381622515161,
-      "conduit + coude": 1.287082684878285,
-      "entrée plenum + déflecteur": 5.9403816225151616,
-      "tôle de distribution": 2.4081350220694198,
-      "nappe de média": 1.9977864116983373
+      "filtre d'aspiration": 3.0044620032826814,
+      "buse d'entrée": 16.795156974626245,
+      "adaptateur rect.→rond": 0.30473087122100323,
+      "diffuseur conique": 1.0256458819673782,
+      "manchon souple": 0.11080875993597432,
+      "conduit + coude": 0.24008564652794437,
+      "entrée plenum + déflecteur": 1.1080875993597432,
+      "tôle de distribution": 0.4983759839348788,
+      "nappe de média": 0.86283733602874
     },
-    "leak_m3h": 0.30082872928176796
+    "leak_m3h": 0.24575851431977813
   },
   "fan_spec": {
     "margin_Q": 1.15,
     "margin_dp": 1.15,
     "max_point": {
-      "Q_m3h": 53.37446000406214,
-      "dp_total_Pa": 467.1750192675275
+      "Q_m3h": 23.052252539212642,
+      "dp_total_Pa": 375.48388069404626
     },
     "min_point": {
-      "Q_m3h": 11.184902030615106,
-      "dp_total_Pa": 42.68379883621622
+      "Q_m3h": 5.6768328378472885,
+      "dp_total_Pa": 52.58409310432195
     },
-    "shaft_power_max_W": 15.392107642463953,
-    "air_power_max_W": 6.926448439108779,
-    "specific_speed_at_max": 0.4375478211076282,
-    "speed_ratio_generic_fan": 3.1636207473427675,
-    "speed_ratio_quadratic_estimate": 2.8768050571724126,
-    "n_rel_min": 0.28478608741895167,
-    "n_rel_max_clean": 0.892820029892616,
-    "n_rel_max_dirty": 0.9009551747131667,
+    "shaft_power_max_W": 5.34305508775478,
+    "air_power_max_W": 2.404374789489651,
+    "specific_speed_at_max": 0.33875186783768707,
+    "speed_ratio_generic_fan": 2.60281705971791,
+    "speed_ratio_quadratic_estimate": 2.323649472455099,
+    "n_rel_min": 0.34614617702360184,
+    "n_rel_max_clean": 0.8965928197701635,
+    "n_rel_max_dirty": 0.9009551747131666,
     "system_exponent_range": [
-      1.4964627807944897,
-      1.7359364433942466
+      1.3872933751900334,
+      1.589031535558666
     ]
   },
   "plenum": {
     "volume_m3": 0.031050619298297468,
-    "tau_s_at_ps_max": 0.01072257750031888,
-    "tau_s_at_ps_min": 0.0041548749807104705,
-    "plate_pressure_load_N_at_ps_max": 70.27680000000001,
+    "tau_s_at_ps_max": 0.018292593244447423,
+    "tau_s_at_ps_min": 0.009458675283206671,
+    "plate_pressure_load_N_at_ps_max": 57.411810369252926,
     "uniformity_at_ps_min": {
-      "v_settling": 0.018455345120533994,
-      "dyn_settling_rel": 4.556467947507705e-06,
-      "v_sheet_jet": 0.32559888127782294,
-      "Re_sheet_jet": 43.317243431878325,
-      "sheet_jet_residual_rel_laminar": 1.4618202684812071e-05,
-      "sheet_jet_residual_rel_turbulent": 3.191040407830032e-05,
-      "ratio_sheet_dp_over_upstream_dyn": 139.9207545474426,
-      "sheet_flow_nonuniformity": 0.0010329250821608136,
-      "ratio_orifice_dp_over_plenum_dyn": 219468.23976825722,
-      "ratio_orifice_dp_over_duct_dyn": 147.9451338785688,
-      "estimated_nonuniformity_pct": 0.0019174670632319776
+      "v_settling": 0.009366904504597654,
+      "dyn_settling_rel": 9.256214424425648e-07,
+      "v_sheet_jet": 0.16525584364931944,
+      "Re_sheet_jet": 21.985418315334876,
+      "sheet_jet_residual_rel_laminar": 7.649744137569379e-07,
+      "sheet_jet_residual_rel_turbulent": 6.482423357775962e-06,
+      "ratio_sheet_dp_over_upstream_dyn": 173.4187990574045,
+      "sheet_flow_nonuniformity": 0.0005872191222741751,
+      "ratio_orifice_dp_over_plenum_dyn": 1080355.266361551,
+      "ratio_orifice_dp_over_duct_dyn": 728.2753289817655,
+      "estimated_nonuniformity_pct": 0.00016905958561995026
     },
     "uniformity_at_ps_max": {
-      "v_settling": 0.06659288038994458,
-      "dyn_settling_rel": 7.35436984742407e-06,
-      "v_sheet_jet": 1.1748665340269973,
-      "Re_sheet_jet": 156.30268585287345,
-      "sheet_jet_residual_rel_laminar": 0.0003072008297190953,
-      "sheet_jet_residual_rel_turbulent": 5.150500700897843e-05,
-      "ratio_sheet_dp_over_upstream_dyn": 114.96433812039264,
-      "sheet_flow_nonuniformity": 0.00237711912553453,
-      "ratio_orifice_dp_over_plenum_dyn": 135973.58043534597,
-      "ratio_orifice_dp_over_duct_dyn": 91.66077780865844,
-      "estimated_nonuniformity_pct": 0.03145551995665194
+      "v_settling": 0.028761244534291335,
+      "dyn_settling_rel": 1.6792522994460027e-06,
+      "v_sheet_jet": 0.5074209657615006,
+      "Re_sheet_jet": 67.50661246153004,
+      "sheet_jet_residual_rel_laminar": 1.3084364026039712e-05,
+      "sheet_jet_residual_rel_turbulent": 1.1760341572038736e-05,
+      "ratio_sheet_dp_over_upstream_dyn": 127.54976616983772,
+      "sheet_flow_nonuniformity": 0.0014352291731863972,
+      "ratio_orifice_dp_over_plenum_dyn": 595503.1297738327,
+      "ratio_orifice_dp_over_duct_dyn": 401.43298343544205,
+      "estimated_nonuniformity_pct": 0.0014763616325485715
     }
   },
   "nozzle": {
-    "throat_mm": 45.0,
-    "dp_at_Qmin_Pa": 3.1635126110646,
-    "dp_at_Qmax_Pa": 41.188960180581674,
-    "Re_at_Qmin": 6724.701957488106,
-    "Re_at_Qmax": 24264.909173374177
+    "throat_mm": 30.0,
+    "dp_at_Qmin_Pa": 4.125555647491755,
+    "dp_at_Qmax_Pa": 38.89606017192345,
+    "Re_at_Qmin": 5119.625830317399,
+    "Re_at_Qmax": 15719.90088695346
+  },
+  "fan_candidate": {
+    "name": "San Ace 9BMC24P2G001 (24 V, PWM 25 kHz)",
+    "similarity_check_60pct_rel_err": [
+      0.0,
+      0.012660913857100553,
+      -0.0731624350169714,
+      -0.2796920264538568
+    ],
+    "n_rel_at_spec_max": 0.5188628742391909,
+    "rpm_at_spec_max": 4254.675568761365,
+    "duty_at_spec_max_pct": 41.55074916683503,
+    "dp_margin_at_spec_max_full_speed": 4.598990614638183,
+    "n_rel_at_spec_min": 0.1804351250186116,
+    "rpm_at_spec_min": 1479.568025152615,
+    "duty_at_spec_min_pct": 0.4380448170757809,
+    "n_rel_20pct": 0.34146341463414637,
+    "reaches_min_by_speed_alone": false,
+    "bleed": {
+      "n_rel_low": 0.3926829268292683,
+      "Q_fan_low_m3h": 31.920398462038065,
+      "Q_bleed_low_m3h": 25.392040698513686,
+      "orifice_area_mm2": 1168.487379201308,
+      "orifice_equiv_d_mm": 38.57154830601251,
+      "fixed_open_Q_bleed_at_ps_max_m3h": 57.88525022077999,
+      "fixed_open_Q_fan_at_ps_max_m3h": 77.93068721139969,
+      "fixed_open_n_rel_at_ps_max_with_margins": 1.0499184615148234,
+      "two_state": {
+        "ps_min_valve_closed_Pa": 208.92413976415085,
+        "ps_max_valve_open_Pa": 270.0498597003287,
+        "overlap": true,
+        "switch_ps_Pa": 237.52880800298897
+      },
+      "note": "décharge fixe impossible (au point haut le ventilateur dépasserait 100 %) : vanne à deux états (électrovanne/registre motorisé) ou proportionnelle, en aval du diffuseur, rejet canalisé loin de la table (pas de courant d'air dans le local)"
+    },
+    "alternative_9BMB": {
+      "name": "San Ace 9BMB24P2G01 (24 V, PWM 25 kHz)",
+      "n_rel_at_spec_max": 0.7727327783954436,
+      "n_rel_at_spec_min": 0.2767377098335741,
+      "note": "vitesse à 20 % PWM non documentée : à mesurer ; si n(20 %) ≈ 0,34 comme le 9BMC, une décharge reste nécessaire pour les palets légers"
+    },
+    "throttle_alternative": {
+      "dp_to_dissipate_Pa": 216.8417774442981,
+      "note": "restriction série : la même pente de courbe réseau mais elle pénalise le point haut ; décharge préférée"
+    }
   },
   "diffuser": {
     "D_in_mm": 50.0,
@@ -133,14 +178,14 @@
     "total_angle_deg": 7.0,
     "length_mm": 245.24783214149508,
     "L_over_R1": 9.809913285659803,
-    "Re_in_at_Qmax": 21838.418256036755,
+    "Re_in_at_Qmax": 9431.940532172073,
     "criterion": "2θ ≤ 8° et L/R1 ≈ 5–20 : sous la ligne de premier décrochement (Sovran & Klomp 1967) ; Cp attendu ≈ η·(1 − 1/AR²)"
   },
   "deflector": {
     "D_mm": 200.0,
     "gap_mm": 25.0,
     "area_ratio_entry": 1.2499999999999998,
-    "v_edge_at_Qmax": 0.8207545067156671
+    "v_edge_at_Qmax": 0.35448115372158334
   },
   "sheet": {
     "open_ratio": 0.05668123013231931,
@@ -160,7 +205,7 @@
       320.0,
       220.0
     ],
-    "nozzle_throat_mm": 45.0,
+    "nozzle_throat_mm": 30.0,
     "nozzle_alpha": 0.98,
     "nozzle_K": 0.04,
     "fan_inlet_mm": 50.0,
