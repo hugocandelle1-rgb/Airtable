@@ -76,3 +76,23 @@ repartir de son dossier (`calc/aero/`, `calc/structure/`, `firmware/`, `host/`, 
 ## Git
 
 Branche de travail : `claude/air-cushion-table-design-clodgs` (tout est commité et poussé).
+
+## État au 2026-11-03 (2e arrêt quota, 86 %)
+
+- Terminés : aéraulique (note 02), structure (notes 03-05), firmware (note 07, 4 ADXL355),
+  paramètres fusionnés (V3.1). Tests firmware/hôte OK ; `calc.aero.run_all` et
+  `calc.structure.run_all` OK.
+- **Résultat clé de la dérive passive** (`calc/aero/drift_sim.py`, confiance moyenne) : le
+  crantage piège le palet tant que la pente globale reste ≤ 15 µrad (2 g) / 5–10 µrad
+  (5–10 g) ; au-delà, glissement à g·θ·τ. Fonctionnement passif ⇒ budget de pente
+  **5–15 µrad** au lieu de 50 : le cahier des charges et le budget sont à réviser
+  (nivellement 0,64 µrad/pas : OK ; planéité/thermique/balourd : à resserrer).
+- CAO phase 2 à moitié : pièces OK, `build_all` cassé (bâti, assemblage, plans à faire).
+
+## Prochaines étapes
+
+1. Réviser `docs/00_cahier_des_charges.md` (budget passif 5–15 µrad) et refaire le bilan.
+2. Accélérer `drift_sim.py` (< 5 min), l'ajouter à `run_all`, écrire la section
+   « fonctionnement passif » de `docs/02_aeraulique.md`.
+3. Finir la CAO phase 2 (`docs/reprise/cao.md`) + mises en plan cotées.
+4. Vague 3 : nomenclature chiffrée, revue de cohérence, synthèse `docs/01_architecture.md`.
