@@ -1,10 +1,10 @@
 // GÉNÉRÉ par firmware/tools/gen_design_params.py depuis params/design.toml — NE PAS ÉDITER.
-// params/design.toml : version V3.0-baseline (2026-10-29)
+// params/design.toml : version V3.1-merged (2026-11-03)
 #pragma once
 
 // Plage de pression plenum de consigne [Pa]
-#define DESIGN_P_MIN_PA            30.0f
-#define DESIGN_P_MAX_PA            400.0f
+#define DESIGN_P_MIN_PA            57.0f
+#define DESIGN_P_MAX_PA            297.0f
 #define DESIGN_P_REGULATION_PA     0.30f   // stabilité visée
 // Ventilateur(s)
 #define DESIGN_FAN_COUNT           1

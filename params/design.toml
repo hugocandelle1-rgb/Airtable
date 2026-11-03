@@ -9,8 +9,9 @@
 # =============================================================================
 
 [meta]
-version = "V3.0-baseline"
-date = "2026-10-29"
+version = "V3.1-merged"
+date = "2026-11-03"
+sources = "calc/aero/results/recommended_params.toml + calc/structure/results/recommended_params.toml"
 
 # -----------------------------------------------------------------------------
 [environment]
@@ -46,52 +47,122 @@ gap_min_um = 80.0                 # entrefer minimal palet/plaque au point de fo
 gap_max_um = 250.0
 plenum_uniformity_pct = 1.0       # non-uniformité de pression statique ± sur zone percée
 pressure_regulation_Pa = 0.3      # stabilité de la pression régulée
-plate_flatness_um = 6.0           # planéité zone percée (≈ DIN 876 classe 0 sur 360×360)
-plate_local_flatness_um = 2.0     # sur tout carré 100×100 mm
+plate_flatness_um = 2.8           # planéité zone percée requise pour ≤ 30 µrad (calc/structure) ; 6 µm donnait 56 µrad
+plate_local_flatness_um = 0.53    # sur tout carré 100×100 mm (calc/structure)
 plate_deflection_var_um = 1.5     # variation de flèche entre p=0 et p=pmax
 thermal_gradient_K = 0.05         # gradient de température max à travers l'épaisseur
 
 # -----------------------------------------------------------------------------
-[plate]                           # plaque de travail perforée (baseline à vérifier)
-material = "EN AW-5083 coulée, détensionnée, rectifiée (type Alimex ACP 5080R / ALCA PLUS / MIC-6)"
+[plate]                           # plaque de travail perforée (verified : calc/aero + calc/structure)
+material = "EN AW-5083 coulée détensionnée (ACP 5080 / Formodal 030 / MIC-6)"
 E = 70.0e9
 nu = 0.33
 rho = 2660.0
-alpha_th = 24.0e-6
+alpha_th = 24.2e-6
+k_W_mK = 110.0
 outer_square_mm = 520.0
-thickness_mm = 25.0               # candidats 20 / 25 / 30
-orifice_d_mm = 0.40               # orifice calibré débouchant en face supérieure
-orifice_tol_mm = 0.01             # ± (alésage foret carbure neuf, contrôlé par échantillonnage)
-orifice_length_mm = 1.0           # épaisseur du voile restant (longueur de l'orifice)
-counterbore_d_mm = 2.0            # lamage/perçage borgne depuis la face inférieure
-pattern = "hex"                   # "hex" ou "square"
-pitch_mm = 5.0
+thickness_mm = 35.0               # 30 mm : pente pression ≈ 90 % du budget ⇒ 35 mm
+orifice_d_mm = 0.30               # orifice calibré débouchant en face supérieure
+orifice_tol_mm = 0.005            # ± (3σ) : pente aléatoire ≤ 8,5 µrad RMS
+orifice_length_mm = 1.2           # voile restant (L/d = 4)
+counterbore_d_mm = 2.0            # perçage borgne d'alimentation depuis la face inférieure
+counterbore_depth_mm = 33.8       # = épaisseur − voile
+pattern = "hex"
+pitch_mm = 5.0                    # ≈ 5 935 trous sur la zone percée 360×360
+mass_kg = 23.5
+D_ratio_perforated = 0.694
 
 # -----------------------------------------------------------------------------
-[support]                         # mode de montage de la plaque (à trancher par calcul)
-scheme = "TBD"                    # "3pt-kelvin" | "9pt-whiffletree" | "perimeter"
-radius_ratio = 0.0                # position optimale des appuis (calcul)
+[support]                         # 3 appuis Maxwell (3 vés) sur le cadre, hors plenum
+scheme = "3pt-kelvin-frame"
+pressure_path = "B"               # caisson de plenum suspendu à la plaque (poussée auto-équilibrée)
+points_mm = [[0.0, 242.5], [242.5, -145.5], [-242.5, -145.5]]   # centre plaque, +y = arrière
+fixed_point = 0                   # appui arrière fixe ; 1 et 2 motorisés
+finishing_on_service_supports = true
+ball_d_mm = 25.4
+roller_d_mm = 20.0
+vee_axis_angle_deg = [-90.0, 151.9, 28.1]
+antilift_gap_mm = 0.5
+
+# -----------------------------------------------------------------------------
+[leveling]
+mechanism = "vérin à coin 1:5 sur cage à aiguilles, tête guidée par lames flexibles"
+wedge_tan = 0.2
+screw = "M6×0,25 écrou bronze rattrapé par ressort"
+motor = "NEMA17 200 pas/tr double arbre + bouton gradué 100 div, TMC2209"
+resolution_urad_per_full_step = 0.64
+resolution_urad_per_knob_div = 1.29
+vertical_range_pm_mm = 2.43
+lever_pitch_mm = 388
+lever_roll_mm = 485
+coarse = "4 pieds M16×2 sous le bâti"
+
+# -----------------------------------------------------------------------------
+[tilt_sensors]
+type = "ADXL355 ×4 sur embases isothermes rotatives indexées (retournement 180°)"
+count = 4
+positions_mm = [[-220.0, 220.0], [220.0, 220.0], [-220.0, -220.0], [220.0, -220.0]]
+base_block_mm = [60.0, 60.0, 20.0]
 
 # -----------------------------------------------------------------------------
 [plenum]
-inner_square_mm = 440.0
-height_mm = 150.0
-settling_height_mm = 80.0         # chambre de tranquillisation sous la plaque
-baffle_open_area = 0.30           # tôle perforée de distribution
-filter = "média filtrant ISO 16890 ePM10 50% (ex-G4/M5) à l'aspiration"
+inner_square_mm = 430.0           # caisson suspendu à la plaque (chemin B)
+wall_mm = 6.0
+bottom_mm = 6.0
+attachment_line_half_mm = 218.0
+distribution_height_mm = 62.0
+settling_height_mm = 80.0
+height_mm = 150.0                 # hauteur intérieure totale (distribution + tôle + tranquillisation)
+baffle_hole_d_mm = 2.0
+baffle_open_area = 0.057          # tôle inox ép. 1, trous Ø2 pas 8 quinconce + nappe média 10 mm
+deflector_d_mm = 200.0
+deflector_gap_mm = 25.0
+filter = "ISO 16890 ePM1 ≥ 55 % à l'aspiration"
 
 # -----------------------------------------------------------------------------
 [operating]
-p_plenum_min_Pa = 30.0
-p_plenum_max_Pa = 400.0
+p_plenum_min_Pa = 57.0
+p_plenum_max_Pa = 297.0
+gap_law_um = "h = clip(130,2 − 24,8·ln(m_g), 80, 140)"
+setpoints_file = "calc/aero/results/setpoints.json"
 
 # -----------------------------------------------------------------------------
 [fan]
-reference = "TBD"
+reference = "San Ace 9BMC24P2G001"
 count = 1
 pwm_freq_Hz = 25000
+bleed_valve = "vanne de décharge 2 états, Ø ≈ 39 mm équivalent, commutation à 238 Pa"
+nozzle_throat_mm = 30.0
+Q_max_m3h = 23.1
+dp_max_Pa = 375
+Q_min_m3h = 5.7
+dp_min_Pa = 53
 
 # -----------------------------------------------------------------------------
 [frame]
-profile_system = "TBD (item MB / Bosch Rexroth / Misumi — rainure 8 ou 10)"
+profile_system = "Bosch Rexroth rainure 10 (45×90 cadre supérieur et montants, 45×45 ceintures et écharpes)"
 profile_main_mm = 45
+top_ring_axis_half_mm = 250.0     # cadre 545×545 hors tout
+ring_axis_height_mm = 745.0
+plate_top_height_mm = 900.0
+bracing = "écharpes 45×45 sur 3 faces"
+screen_height_mm = 120.0
+
+# -----------------------------------------------------------------------------
+[thermal]
+air_minus_plate_max_K = 1.0
+dT_through_max_mK = 34
+settle_time_min = 50
+
+# -----------------------------------------------------------------------------
+[machining]
+finish = "surfaçage diamant mono-pointe sur appuis de service (lest du caisson), ou rodage + carte"
+drilling_hours = 20
+
+# -----------------------------------------------------------------------------
+[variant_economique]              # documentée, non retenue par défaut
+finish = "surfaçage fraise CN de précision, 15–20 µm"
+leveling = "ajusteur différentiel du commerce (type Thorlabs DAS110) sur le même coin"
+frame = "paillasse : cadre 45×45, montants 300 mm"
+slope_raw_urad = [205, 251]
+slope_after_compensation_urad = 12

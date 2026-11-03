@@ -5,7 +5,7 @@
     "pitch": 0.005,
     "pattern": "hex",
     "D_cb": 0.002,
-    "t": 0.025,
+    "t": 0.035,
     "K_c": 0.5,
     "model": "lichtarowicz",
     "cone_inlet": false
@@ -17,49 +17,49 @@
   "eta_fan": 0.25,
   "air_heating": {
     "2.0": {
-      "Q_m3h": 7.217057672705548,
-      "dp_fan_Pa": 71.72077710566502,
+      "Q_m3h": 7.21113803441621,
+      "dp_fan_Pa": 71.81080454086138,
       "P_elec_W": 4.6,
-      "dT_air_speed_mod_K": 1.8963024578096797
+      "dT_air_speed_mod_K": 1.897859136462042
     },
     "5.0": {
-      "Q_m3h": 12.201380086658935,
-      "dp_fan_Pa": 152.6167095897815,
+      "Q_m3h": 12.191764414847022,
+      "dp_fan_Pa": 152.7332855309371,
       "P_elec_W": 4.6,
-      "dT_air_speed_mod_K": 1.1216537888094966
+      "dT_air_speed_mod_K": 1.122538439656805
     },
     "10.0": {
-      "Q_m3h": 18.680118481260067,
-      "dp_fan_Pa": 292.24314390034505,
-      "P_elec_W": 6.0657072815493125,
-      "dT_air_speed_mod_K": 0.9660770694710669
+      "Q_m3h": 18.66795784823499,
+      "dp_fan_Pa": 292.4067946827994,
+      "P_elec_W": 6.065153019640003,
+      "dT_air_speed_mod_K": 0.9666180548513227
     }
   },
   "constant_speed": {
-    "Q_fan_m3h": 24.054524388743626,
+    "Q_fan_m3h": 24.039749090001084,
     "P_W": 12.0,
-    "dT_air_K": 1.4842068231321286
+    "dT_air_K": 1.4851190455985692
   },
   "thermal_entry": {
     "2.0": {
-      "V_bore_m_s": 0.10605418011840326,
-      "Re_bore": 14.109307498625142,
-      "L_th_mm": 1.0017608324023852
+      "V_bore_m_s": 0.10596719142940501,
+      "Re_bore": 14.097734638784932,
+      "L_th_mm": 1.0009391593537302
     },
     "10.0": {
-      "V_bore_m_s": 0.27450309251886407,
-      "Re_bore": 36.51952744670855,
-      "L_th_mm": 2.5928864487163072
+      "V_bore_m_s": 0.27432439282936694,
+      "Re_bore": 36.495753476967714,
+      "L_th_mm": 2.5911984968647075
     }
   },
-  "gradient_steady_2g_K": 0.0027087321790444374,
-  "gradient_steady_10g_K": 0.0014982752922769738,
-  "gradient_transient_max_K": 0.005170479428785754,
+  "gradient_steady_2g_K": 0.0038260704331369855,
+  "gradient_steady_10g_K": 0.002155757977974959,
+  "gradient_transient_max_K": 0.007688388286013965,
   "gradient_limit_K": 0.05,
-  "plate_tau_s": 831.5635360580924,
-  "plate_tau_min": 13.859392267634872,
-  "mean_T_change_step_2g_to_10g_K": -0.5780558739529013,
-  "gradient_cold_start_max_K": 0.005170479428785754,
-  "gradient_step_max_K": 0.0027087321790444374,
-  "slope_from_transient_gradient_urad": 0.7445490377451486
+  "plate_tau_s": 1164.1914926964516,
+  "plate_tau_min": 19.40319154494086,
+  "mean_T_change_step_2g_to_10g_K": -0.5785809267576433,
+  "gradient_cold_start_max_K": 0.007688388286013965,
+  "gradient_step_max_K": 0.0038260704331369855,
+  "slope_from_transient_gradient_urad": 0.7973956993780197
 }

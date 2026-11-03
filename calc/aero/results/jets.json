@@ -5,7 +5,7 @@
     "pitch": 0.005,
     "pattern": "hex",
     "D_cb": 0.002,
-    "t": 0.025,
+    "t": 0.035,
     "K_c": 0.5,
     "model": "lichtarowicz",
     "cone_inlet": false
@@ -14,32 +14,32 @@
   "open_ratio": 0.0032648388556215913,
   "jets": {
     "ps_min": {
-      "ps_Pa": 57.063087972084254,
-      "q_m3s": 2.992017021962686e-07,
-      "V_m_s": 4.23283821209292,
-      "Re": 84.46967747005318,
-      "x_coalescence_laminar_mm": 35.55121105641969,
+      "ps_Pa": 57.13042862172455,
+      "q_m3s": 2.989334175670113e-07,
+      "V_m_s": 4.229042760990532,
+      "Re": 84.39393620275027,
+      "x_coalescence_laminar_mm": 35.51933341866594,
       "x_coalescence_turbulent_mm": 26.595744680851062,
-      "x_coalescence_over_d_laminar": 118.5040368547323,
-      "U_mean_up_m_s": 0.013891177794096824,
-      "U_momentum_m_s": 0.24185916232555338,
-      "Q_m3h": 6.481067911613814,
-      "dyn_pressure_merged_Pa": 0.00011616482194533964,
-      "v_entrainment_edge_m_s": 0.012092958116277669
+      "x_coalescence_over_d_laminar": 118.3977780622198,
+      "U_mean_up_m_s": 0.01387872201775237,
+      "U_momentum_m_s": 0.24164229492399555,
+      "Q_m3h": 6.475256544602546,
+      "dyn_pressure_merged_Pa": 0.00011595659275731875,
+      "v_entrainment_edge_m_s": 0.012082114746199779
     },
     "ps_max": {
-      "ps_Pa": 296.548607279199,
-      "q_m3s": 9.140619391492581e-07,
-      "V_m_s": 12.931331191801574,
-      "Re": 258.0550732861176,
-      "x_coalescence_laminar_mm": 108.6090375783323,
+      "ps_Pa": 296.67578016936454,
+      "q_m3s": 9.134886495415703e-07,
+      "V_m_s": 12.923220802922755,
+      "Re": 257.8932239787679,
+      "x_coalescence_laminar_mm": 108.54091918298312,
       "x_coalescence_turbulent_mm": 26.595744680851062,
-      "x_coalescence_over_d_laminar": 362.0301252611077,
-      "U_mean_up_m_s": 0.042437582468063936,
-      "U_momentum_m_s": 0.7388803382251199,
-      "Q_m3h": 19.79967847629991,
-      "dyn_pressure_merged_Pa": 0.001084170940251704,
-      "v_entrainment_edge_m_s": 0.036944016911256
+      "x_coalescence_over_d_laminar": 361.8030639432771,
+      "U_mean_up_m_s": 0.04241096608249714,
+      "U_momentum_m_s": 0.738416920593243,
+      "Q_m3h": 19.787260335449865,
+      "dyn_pressure_merged_Pa": 0.0010828114065185353,
+      "v_entrainment_edge_m_s": 0.036920846029662155
     }
   },
   "drafts": {
@@ -77,22 +77,22 @@
   },
   "entrainment_at_setpoint": {
     "2.0": {
-      "ps_Pa": 65.47275113571796,
-      "U_momentum_m_s": 0.2670955852499604,
-      "v_entrainment_m_s": 0.01335477926249802,
-      "slope_urad": 3.4817097832440567
+      "ps_Pa": 65.5488205722059,
+      "U_momentum_m_s": 0.2668727314791624,
+      "v_entrainment_m_s": 0.013343636573958121,
+      "slope_urad": 3.4769247047228857
     },
     "5.0": {
-      "ps_Pa": 138.93132276337235,
-      "U_momentum_m_s": 0.45056164165306634,
-      "v_entrainment_m_s": 0.02252808208265332,
-      "slope_urad": 3.346614204477505
+      "ps_Pa": 139.02265708747873,
+      "U_momentum_m_s": 0.4502006604379205,
+      "v_entrainment_m_s": 0.022510033021896025,
+      "slope_urad": 3.3420425430955207
     },
     "10.0": {
-      "ps_Pa": 265.14466758611456,
-      "U_momentum_m_s": 0.6881432190366709,
-      "v_entrainment_m_s": 0.03440716095183354,
-      "slope_urad": 3.4792212270093015
+      "ps_Pa": 265.26116288565987,
+      "U_momentum_m_s": 0.6876865103181798,
+      "v_entrainment_m_s": 0.034384325515908996,
+      "slope_urad": 3.475179208192393
     }
   },
   "entrainment_note": "ordre de grandeur (α = 0,05) : écoulement d'entraînement horizontal près du bord de la zone percée ; nul par symétrie au centre de la zone"

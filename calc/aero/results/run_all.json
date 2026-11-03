@@ -2,59 +2,59 @@
   "steps": [
     {
       "step": "orifice",
-      "seconds": 0.965386152267456,
+      "seconds": 0.9991586208343506,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "optimize",
-      "seconds": 187.1938931941986,
+      "seconds": 70.55490636825562,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "setpoints",
-      "seconds": 12.112262725830078,
+      "seconds": 9.442744255065918,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "cogging",
-      "seconds": 80.79324460029602,
+      "seconds": 58.17948246002197,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "montecarlo",
-      "seconds": 8.553151369094849,
+      "seconds": 5.258127927780151,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "dynamics",
-      "seconds": 5.318778991699219,
+      "seconds": 4.846267223358154,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "network",
-      "seconds": 1.1630072593688965,
+      "seconds": 1.3130371570587158,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "jets",
-      "seconds": 0.9715752601623535,
+      "seconds": 0.9451658725738525,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "thermal",
-      "seconds": 5.995895147323608,
+      "seconds": 6.005174875259399,
       "returncode": 0,
       "over_limit": false
     }
   ],
   "ok": true,
-  "total_s": 303.0678799152374
+  "total_s": 157.5447907447815
 }

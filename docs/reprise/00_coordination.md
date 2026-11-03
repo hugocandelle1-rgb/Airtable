@@ -52,10 +52,13 @@ repartir de son dossier (`calc/aero/`, `calc/structure/`, `firmware/`, `host/`, 
 2. **Perçage** : aucune contrainte sur le nombre de trous (l'utilisateur a retiré sa
    remarque) ; optimisation selon le critère d'origine. Les pas « magiques » 4,23 / 4,82 mm
    ne sont qu'une comparaison informative.
-3. **Coûts** : variante économique étudiée (finition 15–20 µm + carte de pente compensée
-   par le contrôle des robots, réglage manuel). Non tranchée : l'utilisateur n'a pas
-   encore dit si la compensation logicielle est acceptable ⇒ garder la conception
-   « précision » comme référence et documenter la variante économique.
+3. **Pas de compensation logicielle** (réponse utilisateur du 2026-11-03) : les palets
+   ne sont pas pilotés en position dans le plan et ne doivent pas dériver passivement.
+   ⇒ variante économique (finition 15–20 µm + carte compensée) **abandonnée** ;
+   planéité 2,8 µm ferme ; effet passif du crantage à vérifier (`calc/aero/drift_sim.py`).
+   La carte de pente reste utile pour le **réglage d'inclinaison global** et le contrôle
+   de recette, pas pour piloter les palets.
+4. Paramètres fusionnés dans `params/design.toml` (V3.1-merged, 2026-11-03).
 
 ## Prochaines étapes (ordre recommandé)
 

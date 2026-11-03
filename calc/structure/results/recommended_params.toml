@@ -26,27 +26,27 @@ alpha_th = 24.2e-6
 k_W_mK = 110.0                      # borne basse 110–140 (fiche ACP 5080R)
 
 [plate.pitch_sensitivity]           # e = 35, chemin B, schéma retenu : D*/D ; pente pression crête (µrad) ; nb de trous
-p2_94_cb1_5 = { D_ratio = 0.560, pressure_slope_urad = 3.28, n_holes = 17131, mass_kg = 22.4 }
-p2_94_cb2_0 = { D_ratio = 0.364, pressure_slope_urad = 4.27, n_holes = 17131, mass_kg = 20.3 }
-p4_23_cb1_5 = { D_ratio = 0.747, pressure_slope_urad = 2.69, n_holes = 8197, mass_kg = 23.8 }
-p4_23_cb2_0 = { D_ratio = 0.606, pressure_slope_urad = 3.11, n_holes = 8197, mass_kg = 22.8 }
-p4_82_cb1_5 = { D_ratio = 0.797, pressure_slope_urad = 2.57, n_holes = 6333, mass_kg = 24.1 }
-p4_82_cb2_0 = { D_ratio = 0.676, pressure_slope_urad = 2.89, n_holes = 6333, mass_kg = 23.4 }
-p5_0_cb1_5 = { D_ratio = 0.809, pressure_slope_urad = 2.54, n_holes = 5935, mass_kg = 24.2 }
-p5_0_cb2_0 = { D_ratio = 0.694, pressure_slope_urad = 2.83, n_holes = 5935, mass_kg = 23.5 }
+p2_94_cb1_5 = { D_ratio = 0.560, pressure_slope_urad = 2.43, n_holes = 17131, mass_kg = 22.4 }
+p2_94_cb2_0 = { D_ratio = 0.364, pressure_slope_urad = 3.16, n_holes = 17131, mass_kg = 20.3 }
+p4_23_cb1_5 = { D_ratio = 0.747, pressure_slope_urad = 1.99, n_holes = 8197, mass_kg = 23.8 }
+p4_23_cb2_0 = { D_ratio = 0.606, pressure_slope_urad = 2.30, n_holes = 8197, mass_kg = 22.8 }
+p4_82_cb1_5 = { D_ratio = 0.797, pressure_slope_urad = 1.90, n_holes = 6333, mass_kg = 24.1 }
+p4_82_cb2_0 = { D_ratio = 0.676, pressure_slope_urad = 2.14, n_holes = 6333, mass_kg = 23.4 }
+p5_0_cb1_5 = { D_ratio = 0.809, pressure_slope_urad = 1.88, n_holes = 5935, mass_kg = 24.2 }
+p5_0_cb2_0 = { D_ratio = 0.694, pressure_slope_urad = 2.10, n_holes = 5935, mass_kg = 23.5 }
 
 [support]
 scheme = "3pt-kelvin-frame"         # 3 appuis cinématiques (Maxwell 3 vés) sur le cadre supérieur, hors plenum
 pressure_path = "B"                 # caisson de plenum suspendu à la plaque (poussée auto-équilibrée)
-points_mm = [[0.0, 242.5], [242.5, -145.5], [-242.5, -145.5]]   # repère : centre plaque, +y = arrière
+points_mm = [[0.0, 237.5], [237.5, -142.5], [-237.5, -142.5]]   # repère : centre plaque, +y = arrière
 fixed_point = 0                     # appui arrière fixe ; appuis 1 et 2 (côtés) motorisés
 reactions_N = [130.5, 108.8, 108.8]       # poids propre (plaque + caisson + accessoires)
-slope_deadweight_urad = 15.5       # sans finition sur appuis (hors budget 10)
+slope_deadweight_urad = 14.4       # sans finition sur appuis (hors budget 10)
 slope_deadweight_finished_on_supports_urad = 1.7
-slope_pressure_urad = 2.74          # 0 → 400 Pa (budget 5)
+slope_pressure_urad = 2.04          # 0 → 400 Pa (budget 5)
 friction_mu = 0.15
-slope_friction_worst_urad = 1.65
-finishing_on_service_supports = true   # finition avec lest du caisson (±5 %) ; caisson absent : 3.3 µrad
+slope_friction_worst_urad = 1.64
+finishing_on_service_supports = true   # finition avec lest du caisson (±5 %) ; caisson absent : 3.0 µrad
 radius_ratio = 0.0                  # sans objet (positions explicites ci-dessus)
 
 [support.coupling]
@@ -62,21 +62,21 @@ mechanism = "vérin à coin 1:5 sur cage à aiguilles, tête guidée par lames f
 wedge_tan = 0.2
 screw = "M6×0,25 (écrou bronze rattrapé par ressort), irréversible"
 motor = "NEMA17 200 pas/tr, double arbre (bouton gradué 100 div côté manuel), TMC2209"
-resolution_urad_per_full_step = 0.64
-resolution_urad_per_knob_div = 1.29
-vertical_range_pm_mm = 2.43
-wedge_travel_pm_mm = 12.2
+resolution_urad_per_full_step = 0.66
+resolution_urad_per_knob_div = 1.32
+vertical_range_pm_mm = 2.38
+wedge_travel_pm_mm = 11.9
 screw_force_N = 22
 screw_torque_mNm = 12.5
-lever_pitch_mm = 388
-lever_roll_mm = 485
+lever_pitch_mm = 380
+lever_roll_mm = 475
 coarse = "4 pieds M16×2 sous le bâti (≈ 4 mrad/tour)"
 
 [leveling.economique]
 mechanism = "même coin 1:5 entraîné par ajusteur différentiel du commerce (type Thorlabs DAS110)"
-resolution_urad_per_rev_fine = 12.9
+resolution_urad_per_rev_fine = 13.2
 resolution_urad_per_div = 0.26
-coarse_urad_per_rev = 164
+coarse_urad_per_rev = 167
 screw_force_N = 33     # charge de l'ajusteur à confirmer sur fiche
 
 [tilt_sensors]
@@ -126,4 +126,4 @@ drilling_hours_17131_holes = 51
 [budget]
 reference_rss_urad = 30.6
 economique_rss_urad = 251
-economique_after_compensation_urad = 12
+economique_after_compensation_urad = 11

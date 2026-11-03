@@ -224,7 +224,7 @@
     {
      "poste": "Inclinaison globale résiduelle (pas 0,64 µrad, 4 ADXL355 moyennés 100 s, offset compensé)",
      "allocation_urad": 5,
-     "prevu_urad": 1.4278172170657868
+     "prevu_urad": 1.4298776736449106
     },
     {
      "poste": "Défaut de planéité d'usinage (si ⏥ 3 µm / 0,8 µm sur 100×100 atteints)",
@@ -234,17 +234,17 @@
     {
      "poste": "Poids propre : finition sur appuis de service (positions ±0,5 mm, lest ±5 %, frottement µ 0,15)",
      "allocation_urad": 10,
-     "prevu_urad": 1.6716351737837434
+     "prevu_urad": 1.655966352380332
     },
     {
-     "poste": "Pression 0 → 400 Pa (chemin B, e = 35, pas 5,00 ; pire pas 2,94 : 4.3)",
+     "poste": "Pression 0 → 297 Pa (chemin B, e = 35, pas 5,00 ; pire pas 2,94 : 3.2)",
      "allocation_urad": 5,
-     "prevu_urad": 2.741889641384249
+     "prevu_urad": 2.0358530631114964
     },
     {
      "poste": "Thermique (écart air/plaque ≤ 1 K, transitoire)",
      "allocation_urad": 5,
-     "prevu_urad": 1.3559850556513184
+     "prevu_urad": 1.3672849311150794
     },
     {
      "poste": "Sol / bâtiment (non calculé, surveillé par les ADXL355)",
@@ -252,7 +252,7 @@
      "prevu_urad": 5.0
     }
    ],
-   "total_rss_urad": 30.646201729354004
+   "total_rss_urad": 30.590863676909137
   },
   "economique": {
    "rows": [
@@ -267,19 +267,19 @@
      "prevu_urad": 250.8647792725761
     },
     {
-     "poste": "Poids propre : surfaçage sur montage 3 appuis (sinon +16 µrad)",
+     "poste": "Poids propre : surfaçage sur montage 3 appuis (sinon +14 µrad)",
      "allocation_urad": 10,
-     "prevu_urad": 1.6716351737837434
+     "prevu_urad": 1.655966352380332
     },
     {
      "poste": "Pression (identique)",
      "allocation_urad": 5,
-     "prevu_urad": 2.741889641384249
+     "prevu_urad": 2.0358530631114964
     },
     {
      "poste": "Thermique (identique)",
      "allocation_urad": 5,
-     "prevu_urad": 1.3559850556513184
+     "prevu_urad": 1.3672849311150794
     },
     {
      "poste": "Sol / paillasse (non calculé)",
@@ -287,10 +287,10 @@
      "prevu_urad": 10.0
     }
    ],
-   "total_rss_urad": 251.09374693111982,
-   "after_compensation_urad": 11.501430335210118,
+   "total_rss_urad": 251.08698715747093,
+   "after_compensation_urad": 11.487774279648669,
    "map_uncertainty_urad": 10.0,
-   "without_fixture_G_urad": 15.502083926011382
+   "without_fixture_G_urad": 14.364990709089827
   }
  }
 }
