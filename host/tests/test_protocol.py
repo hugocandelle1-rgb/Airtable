@@ -13,6 +13,12 @@ VALID = [
     ("STREAM ON", "StreamOn"), ("STREAM OFF", "StreamOff"), ("TABLE ADD 2.0 70.5", "TableAdd"),
     ("TABLE CLEAR", "TableClear"), ("CAL TILT BIAS 12.5 -8", "CalTiltBias"), ("CAL PZERO", "CalPZero"),
     ("FAN ON", "FanOn"), ("FAN OFF", "FanOff"), ("CLEAR", "Clear"), ("SAFE", "Safe"),
+    ("CAL TILT BIAS 12.5 -8 2", "CalTiltBias"), ("CAL TILT ROT 90", "CalTiltRot"), ("CAL TILT ROT 90 3", "CalTiltRot"),
+    ("CAL TILT CLEAR", "CalTiltClear"), ("CAL TILT CLEAR 1", "CalTiltClear"), ("CAL TILT USE 2 OFF", "CalTiltUse"),
+    ("CAL TILT THERM START", "CalTiltThermStart"), ("CAL TILT THERM FIT 2", "CalTiltThermFit"),
+    ("CAL TILT THERM FIT 1 3", "CalTiltThermFit"), ("CAL TILT THERM CLEAR", "CalTiltThermClear"),
+    ("CAL TILT THERM CLEAR 0", "CalTiltThermClear"), ("FLIP RUN", "FlipRun"), ("FLIP RUN 30", "FlipRun"),
+    ("flip abort", "FlipAbort"), ("FLIP ZERO", "FlipZero"), ("FLIP APPLY", "FlipApply"), ("GET FLIP", "GetFlip"),
 ]
 INVALID = [
     ("", "empty"), ("FOO", "unknown_command"), ("GET", "missing_argument"), ("SET P", "missing_argument"),
@@ -22,6 +28,14 @@ INVALID = [
     ("LEVEL MOVE Z 10", "bad_axis"), ("LEVEL MOVE A 10", "bad_axis"), ("LEVEL AUTO MAYBE", "bad_flag"),
     ("STREAM ON 1000", "out_of_range"), ("PING PONG", "extra_argument"), ("A B C D E F G H", "extra_argument"),
     ("A" * 200, "line_too_long"),
+    ("CAL TILT BIAS 1 2 4", "out_of_range"), ("CAL TILT BIAS 1 2 1.5", "bad_number"),
+    ("CAL TILT BIAS 1 2 0 9", "extra_argument"), ("CAL TILT BIAS 1", "missing_argument"),
+    ("CAL TILT USE 1", "missing_argument"), ("CAL TILT USE 1 MAYBE", "bad_flag"), ("CAL TILT USE -1 ON", "out_of_range"),
+    ("CAL TILT THERM", "missing_argument"), ("CAL TILT THERM FIT", "missing_argument"),
+    ("CAL TILT THERM FIT 3", "out_of_range"), ("CAL TILT THERM FIT 1.5", "bad_number"),
+    ("CAL TILT THERM FOO", "unknown_command"), ("CAL TILT THERM START 1", "extra_argument"),
+    ("FLIP", "missing_argument"), ("FLIP RUN 1", "out_of_range"), ("FLIP RUN 301", "out_of_range"),
+    ("FLIP RUN 10 10", "extra_argument"), ("FLIP SPIN", "unknown_command"), ("GET FLIP NOW", "extra_argument"),
 ]
 
 
@@ -41,7 +55,7 @@ def test_builders_roundtrip_through_parser():
     """Toute commande construite par l'hôte doit être acceptée par le (miroir du) firmware."""
     lines = [P.cmd_set_pressure(123.456789), P.cmd_set_mass(7.5), P.cmd_set_duty(0.5),
              P.cmd_level_move("x", -12.3456), P.cmd_level_jog("a", 20), P.cmd_level_target(1.5, -2.5),
-             P.cmd_cal_tilt_bias(12.345, -6.789), P.cmd_table_add(2.0, 50.41), P.cmd_stream_on(10)]
+             P.cmd_cal_tilt_bias(12.345, -6.789), P.cmd_cal_tilt_bias(1.0, 2.0, 3), P.cmd_table_add(2.0, 50.41), P.cmd_stream_on(10)]
     for ln in lines:
         P.parse_command(ln)
     assert P.cmd_set_pressure(120.0) == "SET P 120"

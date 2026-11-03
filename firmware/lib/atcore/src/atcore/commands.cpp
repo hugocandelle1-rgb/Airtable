@@ -46,6 +46,16 @@ ParseError number(const char* tok, float lo, float hi, float* out) {
   return ParseError::Ok;
 }
 
+// Numéro de capteur : entier 0…kMaxSensorIdx.
+ParseError sensorIndex(const char* tok, int* out) {
+  float v = 0.0f;
+  const ParseError e = number(tok, 0.0f, static_cast<float>(kMaxSensorIdx), &v);
+  if (e != ParseError::Ok) return e;
+  if (v != floorf(v)) return ParseError::BadNumber;
+  *out = static_cast<int>(v);
+  return ParseError::Ok;
+}
+
 ParseError flag(const char* tok, bool* out) {
   if (is(tok, "ON") || is(tok, "1") || is(tok, "TRUE")) { *out = true; return ParseError::Ok; }
   if (is(tok, "OFF") || is(tok, "0") || is(tok, "FALSE")) { *out = false; return ParseError::Ok; }
@@ -86,6 +96,7 @@ ParseError parseCommand(const char* line, Command* out) {
     if (is(k.t[1], "CONFIG")) return simple(CmdType::GetConfig, 2);
     if (is(k.t[1], "VERSION")) return simple(CmdType::GetVersion, 2);
     if (is(k.t[1], "TABLE")) return simple(CmdType::GetTable, 2);
+    if (is(k.t[1], "FLIP")) return simple(CmdType::GetFlip, 2);
     return ParseError::UnknownCommand;
   }
 
@@ -182,18 +193,70 @@ ParseError parseCommand(const char* line, Command* out) {
     return ParseError::UnknownCommand;
   }
 
+  if (is(c0, "FLIP")) {
+    if (k.n < 2) return ParseError::MissingArg;
+    if (is(k.t[1], "ABORT")) return simple(CmdType::FlipAbort, 2);
+    if (is(k.t[1], "ZERO")) return simple(CmdType::FlipZero, 2);
+    if (is(k.t[1], "APPLY")) return simple(CmdType::FlipApply, 2);
+    if (is(k.t[1], "RUN")) {
+      if (k.n == 2) { out->type = CmdType::FlipRun; out->f[0] = 0.0f; return ParseError::Ok; }   // durée par défaut
+      if ((err = need(k, 3)) != ParseError::Ok) return err;
+      out->type = CmdType::FlipRun;
+      return number(k.t[2], 2.0f, 300.0f, &out->f[0]);
+    }
+    return ParseError::UnknownCommand;
+  }
+
   if (is(c0, "CAL")) {
     if (k.n < 2) return ParseError::MissingArg;
     if (is(k.t[1], "PZERO")) return simple(CmdType::CalPZero, 2);
     if (is(k.t[1], "TILT")) {
       if (k.n < 3) return ParseError::MissingArg;
-      if (is(k.t[2], "CLEAR")) return simple(CmdType::CalTiltClear, 3);
-      if (is(k.t[2], "ROT")) { if ((err = need(k, 4)) != ParseError::Ok) return err; out->type = CmdType::CalTiltRot; return number(k.t[3], -360.0f, 360.0f, &out->f[0]); }
+      out->axis = -1;                                   // par défaut : tous les capteurs
+      if (is(k.t[2], "CLEAR")) {
+        if (k.n > 4) return ParseError::ExtraArg;
+        out->type = CmdType::CalTiltClear;
+        return k.n == 4 ? sensorIndex(k.t[3], &out->axis) : ParseError::Ok;
+      }
+      if (is(k.t[2], "ROT")) {
+        if (k.n < 4) return ParseError::MissingArg;
+        if (k.n > 5) return ParseError::ExtraArg;
+        out->type = CmdType::CalTiltRot;
+        if ((err = number(k.t[3], -360.0f, 360.0f, &out->f[0])) != ParseError::Ok) return err;
+        return k.n == 5 ? sensorIndex(k.t[4], &out->axis) : ParseError::Ok;
+      }
       if (is(k.t[2], "BIAS")) {
-        if ((err = need(k, 5)) != ParseError::Ok) return err;
+        if (k.n < 5) return ParseError::MissingArg;
+        if (k.n > 6) return ParseError::ExtraArg;
         out->type = CmdType::CalTiltBias;
         if ((err = number(k.t[3], -50000.0f, 50000.0f, &out->f[0])) != ParseError::Ok) return err;
-        return number(k.t[4], -50000.0f, 50000.0f, &out->f[1]);
+        if ((err = number(k.t[4], -50000.0f, 50000.0f, &out->f[1])) != ParseError::Ok) return err;
+        return k.n == 6 ? sensorIndex(k.t[5], &out->axis) : ParseError::Ok;
+      }
+      if (is(k.t[2], "USE")) {
+        if ((err = need(k, 5)) != ParseError::Ok) return err;
+        out->type = CmdType::CalTiltUse;
+        if ((err = sensorIndex(k.t[3], &out->axis)) != ParseError::Ok) return err;
+        return flag(k.t[4], &out->flag);
+      }
+      if (is(k.t[2], "THERM")) {
+        if (k.n < 4) return ParseError::MissingArg;
+        if (is(k.t[3], "START")) return simple(CmdType::CalTiltThermStart, 4);
+        if (is(k.t[3], "CLEAR")) {
+          if (k.n > 5) return ParseError::ExtraArg;
+          out->type = CmdType::CalTiltThermClear;
+          return k.n == 5 ? sensorIndex(k.t[4], &out->axis) : ParseError::Ok;
+        }
+        if (is(k.t[3], "FIT")) {
+          if (k.n < 5) return ParseError::MissingArg;
+          if (k.n > 6) return ParseError::ExtraArg;
+          out->type = CmdType::CalTiltThermFit;
+          float ord = 0.0f;
+          if ((err = number(k.t[4], 1.0f, 2.0f, &ord)) != ParseError::Ok) return err;
+          if (ord != floorf(ord)) return ParseError::BadNumber;
+          out->f[0] = ord;
+          return k.n == 6 ? sensorIndex(k.t[5], &out->axis) : ParseError::Ok;
+        }
       }
     }
     return ParseError::UnknownCommand;

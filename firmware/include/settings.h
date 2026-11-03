@@ -4,10 +4,12 @@
 #include <Arduino.h>
 
 #include "atcore/leveling.h"
+#include "atcore/tilt_array.h"
 #include "config.h"
 
 struct Settings {
-  atc::TiltCal tilt;                           // biais / rotation / signes de l'inclinomètre
+  atc::SensorCal sens[atc::kMaxTilt];          // par capteur : biais / rotation / signes + modèle thermique du zéro
+  uint8_t tilt_use_mask = 0x0F;                // capteurs admis dans la fusion (bit i = capteur i)
   float p_offset[NUM_PLENUM_SENSORS] = {};     // zéros des capteurs de pression
   float nozzle_offset = 0.0f;
   float nozzle_cd = NOZZLE_CD_DEFAULT;

@@ -143,6 +143,42 @@ class AirtableClient:
     def save(self) -> dict:
         return self.command("SAVE")
 
+    def collect_tilt_array(self, n: int, hz: float = 10.0, discard: int = 5,
+                           sensors=(0, 1, 2, 3)) -> dict[int, list[tuple[float, float]]]:
+        """n échantillons simultanés de pente brute compensée (champ `tr`) pour chaque capteur demandé."""
+        return _collect_array(self, n, hz, discard, tuple(sensors))
+
+    # -- réseau d'inclinomètres, retournement motorisé -------------------------------------------------
+    def cal_tilt_bias(self, x_urad: float, y_urad: float, sensor: int | None = None) -> dict:
+        return self.command(proto.cmd_cal_tilt_bias(x_urad, y_urad, sensor))
+
+    def tilt_use(self, sensor: int, on: bool) -> dict:
+        return self.command(proto.cmd_cal_tilt_use(sensor, on))
+
+    def therm_start(self) -> dict:
+        return self.command("CAL TILT THERM START")
+
+    def therm_fit(self, order: int = 1, sensor: int | None = None) -> dict:
+        return self.command(proto.cmd_cal_tilt_therm_fit(order, sensor))
+
+    def therm_clear(self, sensor: int | None = None) -> dict:
+        return self.command(proto.cmd_cal_tilt_therm_clear(sensor))
+
+    def flip_run(self, avg_s: float | None = None) -> dict:
+        return self.command(proto.cmd_flip_run(avg_s))
+
+    def flip_status(self) -> dict:
+        return self.command("GET FLIP")
+
+    def flip_apply(self) -> dict:
+        return self.command("FLIP APPLY")
+
+    def flip_abort(self) -> dict:
+        return self.command("FLIP ABORT")
+
+    def flip_zero(self) -> dict:
+        return self.command("FLIP ZERO")
+
     def wait_homed(self, timeout: float = 240.0, poll_s: float = 1.0) -> dict:
         """Attend la fin de la prise d'origine (home == 3). Lève TimeoutError / DeviceError."""
         t0 = time.monotonic()
@@ -206,13 +242,21 @@ class AirtableClient:
             except Exception:  # pragma: no cover
                 pass
 
-    def collect_tilt_raw(self, n: int, hz: float = 10.0, discard: int = 5) -> list[tuple[float, float]]:
-        """n échantillons de pente brute (repère capteur, sans biais) ; ignore les trames invalides."""
+    def collect_tilt_raw(self, n: int, hz: float = 10.0, discard: int = 5,
+                         sensor: int = 0) -> list[tuple[float, float]]:
+        """n échantillons de pente brute compensée thermiquement (repère capteur, avant biais) du capteur
+        `sensor` ; ignore les trames où ce capteur est invalide (champ `tr`, ou `traw` pour le capteur 0)."""
         out: list[tuple[float, float]] = []
         skipped = 0
         for fr in self.stream(hz=hz):
-            tr = fr.get("traw")
-            if not tr or tr[0] is None or tr[1] is None or not fr.get("tok", True):
+            tr = fr.get("tr")
+            if tr is not None:
+                tr = tr[2 * sensor:2 * sensor + 2]
+            elif sensor == 0:
+                tr = fr.get("traw")
+            else:
+                raise DeviceError("no_such_sensor", fr)
+            if not tr or len(tr) < 2 or tr[0] is None or tr[1] is None:
                 continue
             if skipped < discard:
                 skipped += 1
@@ -221,6 +265,25 @@ class AirtableClient:
             if len(out) >= n:
                 break
         return out
+
+
+def _collect_array(client, n: int, hz: float, discard: int, sensors) -> dict[int, list[tuple[float, float]]]:
+    out: dict[int, list[tuple[float, float]]] = {i: [] for i in sensors}
+    skipped = 0
+    for fr in client.stream(hz=hz):
+        tr = fr.get("tr")
+        if tr is None:
+            raise DeviceError("firmware_without_tilt_array", fr)
+        if skipped < discard:
+            skipped += 1
+            continue
+        for i in sensors:
+            v = tr[2 * i:2 * i + 2]
+            if len(v) == 2 and v[0] is not None and v[1] is not None and len(out[i]) < n:
+                out[i].append((float(v[0]), float(v[1])))
+        if all(len(v) >= n for v in out.values()):
+            break
+    return out
 
 
 def read_setpoints(path: str | Path) -> tuple[float | None, list[tuple[float, float]]]:

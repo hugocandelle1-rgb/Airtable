@@ -15,7 +15,15 @@
 
 #define FW_NAME "airtable-fw"
 #define FW_VERSION "0.1.0"
-#define PROTOCOL_VERSION 1
+#define PROTOCOL_VERSION 2
+
+// Capteurs d'inclinaison : ADXL355 ×4 par défaut ; -DUSE_SCL3300 sélectionne l'option SCL3300-D01 (1 capteur).
+#if defined(USE_SCL3300) && defined(USE_ADXL355)
+#error "USE_SCL3300 et USE_ADXL355 sont exclusifs"
+#endif
+#if !defined(USE_SCL3300) && !defined(USE_ADXL355)
+#define USE_ADXL355 1
+#endif
 
 // -----------------------------------------------------------------------------
 //  Brochage ESP32-S3-DevKitC-1
@@ -29,14 +37,25 @@ constexpr int PIN_TCA_RESET = 4;      // RESET# du TCA9548A (actif bas), pull-up
 constexpr uint32_t I2C_FREQ_HZ = 400000;
 constexpr uint8_t TCA_ADDR = 0x70;    // A0=A1=A2=GND
 
-// SPI (FSPI) partagé : SCL3300 (mode 0), ADXL355 (mode 0), ADS1220 (mode 1)
+// SPI (FSPI) partagé : 4 × ADXL355 (mode 0, une ligne CS par capteur) ou 1 × SCL3300 (mode 0),
+// ADS1220 (mode 1). Les MISO des composants inactifs sont en haute impédance (CS haut).
 constexpr int PIN_SPI_MOSI = 11;
 constexpr int PIN_SPI_SCK = 12;
 constexpr int PIN_SPI_MISO = 13;
-constexpr int PIN_CS_SCL3300 = 10;
-constexpr int PIN_CS_ADXL355 = 14;
 constexpr int PIN_CS_ADS1220 = 16;
 constexpr int PIN_ADS1220_DRDY = 1;   // entrée, actif bas
+// Lignes CS des inclinomètres. GPIO 35/36 : libres seulement sur module SANS PSRAM octale
+// (ESP32-S3-DevKitC-1-N8 ou -N16, PAS les versions R8/R16V)  [À VALIDER à la commande du module].
+constexpr int TILT_MAX_SENSORS = 4;                  // = atc::kMaxTilt
+constexpr int PIN_CS_TILT[TILT_MAX_SENSORS] = {10, 14, 35, 36};
+#ifdef USE_SCL3300
+constexpr int TILT_NUM_SENSORS = 1;                  // SCL3300-D01 : un seul capteur (CS = PIN_CS_TILT[0])
+#else
+constexpr int TILT_NUM_SENSORS = 4;                  // ADXL355 : jusqu'à 4 (détection automatique des présents)
+#endif
+// Retournement 180° motorisé optionnel de l'embase du capteur FLIP_SENSOR_IDX (servo + contact d'index)
+constexpr int PIN_FLIP_SERVO = 37;                   // PWM 50 Hz (LEDC canal 2) ; même remarque PSRAM que ci-dessus
+constexpr int PIN_FLIP_INDEX = 3;                    // contact d'index à 0° (NO vers GND, pull-up interne) ; GPIO3 = strapping : à l'état haut au reset
 
 // Ventilateurs 4 fils (PWM 25 kHz, tachymètre collecteur ouvert 2 imp/tr)
 constexpr int MAX_FANS = 2;
@@ -70,10 +89,12 @@ constexpr int PIN_LED_RGB = 48;                      // WS2812 de la carte (v1.0
 constexpr int MUX_CH_PLENUM[5] = {0, 1, 2, 3, 4};    // SDP810-500Pa : 4 coins + centre
 constexpr int MUX_CH_NOZZLE = 5;                     // SDP810-125Pa (buse d'entrée)
 constexpr int MUX_CH_ENV = 6;                        // TMP117 ×4 (0x48-0x4B) + BME280 (0x76)
+constexpr int MUX_CH_TILT_T = 7;                     // TMP117 ×4 (0x48-0x4B) accolés aux embases des ADXL355
 constexpr int NUM_PLENUM_SENSORS = 5;
 constexpr uint8_t TMP117_ADDR[4] = {0x48, 0x49, 0x4A, 0x4B};
 //   0 : plaque dessus, 1 : plaque dessous, 2 : air plenum, 3 : local (salle)
 constexpr uint8_t BME280_ADDR = 0x76;
+constexpr uint8_t TMP117_TILT_ADDR[TILT_MAX_SENSORS] = {0x48, 0x49, 0x4A, 0x4B};   // ADD0 : GND, V+, SDA, SCL
 
 // -----------------------------------------------------------------------------
 //  Périodes des tâches coopératives [ms] (aucune attente active dans loop())
@@ -129,14 +150,34 @@ constexpr int SAFE_MIN_VALID_PRESSURE = 2;
 constexpr uint32_t SAFE_SENSOR_LOST_MS = 500;
 
 // -----------------------------------------------------------------------------
-//  Inclinomètre
+//  Inclinomètres (réseau de TILT_NUM_SENSORS capteurs sur la plaque)
 // -----------------------------------------------------------------------------
-// Choix à la compilation : -DUSE_ADXL355 pour l'option ADXL355 (défaut : SCL3300-D01)
 constexpr uint32_t SPI_SCL3300_HZ = 4000000;         // 4 MHz max
-constexpr uint32_t SPI_ADXL355_HZ = 4000000;
+constexpr uint32_t SPI_ADXL355_HZ = 1000000;         // 1 MHz : câbles de 0,3–0,5 m vers les embases (10 MHz max)
 constexpr uint32_t SPI_ADS1220_HZ = 2000000;
-constexpr uint32_t TILT_TIMEOUT_MS = 1000;           // sans échantillon valide → invalide
-constexpr int TILT_AVG_SAMPLES = 50;                 // moyenne glissante de la pente (50 × 100 ms = 5 s)
+constexpr uint32_t TILT_TIMEOUT_MS = 1000;           // sans échantillon valide → capteur invalide
+constexpr int TILT_AVG_SAMPLES = 50;                 // moyenne glissante de la pente fusionnée (50 × 100 ms = 5 s)
+// Positions des capteurs dans le repère plaque [mm] (coins du carré de travail)  [À VALIDER : CAO]
+constexpr float TILT_POS_X_MM[TILT_MAX_SENSORS] = {-200.0f, 200.0f, 200.0f, -200.0f};
+constexpr float TILT_POS_Y_MM[TILT_MAX_SENSORS] = {-200.0f, -200.0f, 200.0f, 200.0f};
+// Fusion
+constexpr float TILT_REJECT_URAD = 40.0f;            // écart à la médiane au-delà duquel un capteur est rejeté
+constexpr float TILT_SIGMA_FLOOR_URAD = 0.3f;
+constexpr float TILT_DEFORM_WARN_URAD = 20.0f;       // écart inter-capteurs (max − min) signalé comme déformation
+// Apprentissage thermique du zéro (CAL TILT THERM)
+constexpr uint32_t THERM_MIN_SAMPLES = 1200;         // 2 min à 10 Hz
+constexpr float THERM_MIN_SPAN_K = 1.0f;             // excursion de température minimale pour ajuster
+// Retournement motorisé de l'embase du capteur FLIP_SENSOR_IDX
+constexpr int FLIP_SENSOR_IDX = 0;
+constexpr int FLIP_LEDC_CHANNEL = 2;                 // timer LEDC distinct des ventilateurs (canaux 0/1)
+constexpr uint32_t FLIP_SERVO_US_0 = 1000;           // largeur d'impulsion à 0°      [À VALIDER : étalonner]
+constexpr uint32_t FLIP_SERVO_US_180 = 2000;         // largeur d'impulsion à 180°    [À VALIDER]
+constexpr uint32_t FLIP_TRAVEL_MS = 1800;            // temps de course (servo → butée / appui sur l'embase)
+constexpr bool FLIP_INDEX_ACTIVE_LOW = true;
+constexpr uint32_t FLIP_SETTLE_MS = 8000;
+constexpr uint32_t FLIP_AVG_MS = 20000;
+constexpr uint32_t FLIP_MOVE_TIMEOUT_MS = 6000;
+constexpr float FLIP_DRIFT_LIMIT_URAD = 3.0f;
 
 // -----------------------------------------------------------------------------
 //  Nivellement : mécanique (valeurs de départ, à remplacer par la CAO)  [À VALIDER]
@@ -173,4 +214,4 @@ constexpr float DISP_DIVIDER[NUM_DISP] = {1.0f, 1.0f, 1.0f};    // pont diviseur
 // -----------------------------------------------------------------------------
 constexpr uint32_t SERIAL_BAUD = 115200;             // ignoré en USB CDC natif
 constexpr size_t SERIAL_LINE_MAX = 120;
-constexpr size_t JSON_BUF = 1100;
+constexpr size_t JSON_BUF = 1800;

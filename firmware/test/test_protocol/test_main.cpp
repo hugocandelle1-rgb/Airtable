@@ -106,6 +106,45 @@ void test_divers() {
   TEST_ASSERT_TRUE(parseOk("CAL PZERO").type == CmdType::CalPZero);
 }
 
+void test_capteurs_multiples_et_retournement() {
+  Command c = parseOk("CAL TILT BIAS 12.5 -8");
+  TEST_ASSERT_EQUAL_INT(-1, c.axis);                       // sans indice : tous les capteurs
+  c = parseOk("CAL TILT BIAS 12.5 -8 2");
+  TEST_ASSERT_EQUAL_INT(2, c.axis);
+  c = parseOk("CAL TILT ROT 90 3");
+  TEST_ASSERT_TRUE(c.type == CmdType::CalTiltRot);
+  TEST_ASSERT_EQUAL_INT(3, c.axis);
+  c = parseOk("CAL TILT CLEAR 1");
+  TEST_ASSERT_EQUAL_INT(1, c.axis);
+  c = parseOk("CAL TILT USE 2 OFF");
+  TEST_ASSERT_TRUE(c.type == CmdType::CalTiltUse);
+  TEST_ASSERT_EQUAL_INT(2, c.axis);
+  TEST_ASSERT_FALSE(c.flag);
+  TEST_ASSERT_TRUE(parseOk("CAL TILT THERM START").type == CmdType::CalTiltThermStart);
+  c = parseOk("CAL TILT THERM FIT 2 1");
+  TEST_ASSERT_TRUE(c.type == CmdType::CalTiltThermFit);
+  TEST_ASSERT_FLOAT_WITHIN(1e-6, 2.0, c.f[0]);
+  TEST_ASSERT_EQUAL_INT(1, c.axis);
+  TEST_ASSERT_EQUAL_INT(-1, parseOk("CAL TILT THERM FIT 1").axis);
+  TEST_ASSERT_TRUE(parseOk("CAL TILT THERM CLEAR").type == CmdType::CalTiltThermClear);
+  c = parseOk("FLIP RUN");
+  TEST_ASSERT_TRUE(c.type == CmdType::FlipRun);
+  TEST_ASSERT_FLOAT_WITHIN(1e-6, 0.0, c.f[0]);             // durée par défaut du firmware
+  TEST_ASSERT_FLOAT_WITHIN(1e-6, 30.0, parseOk("FLIP RUN 30").f[0]);
+  TEST_ASSERT_TRUE(parseOk("FLIP ABORT").type == CmdType::FlipAbort);
+  TEST_ASSERT_TRUE(parseOk("FLIP ZERO").type == CmdType::FlipZero);
+  TEST_ASSERT_TRUE(parseOk("FLIP APPLY").type == CmdType::FlipApply);
+  TEST_ASSERT_TRUE(parseOk("GET FLIP").type == CmdType::GetFlip);
+  TEST_ASSERT_TRUE(parseErr("CAL TILT BIAS 1 2 4") == ParseError::OutOfRange);
+  TEST_ASSERT_TRUE(parseErr("CAL TILT BIAS 1 2 1.5") == ParseError::BadNumber);
+  TEST_ASSERT_TRUE(parseErr("CAL TILT BIAS 1 2 0 1") == ParseError::ExtraArg);
+  TEST_ASSERT_TRUE(parseErr("CAL TILT USE 1") == ParseError::MissingArg);
+  TEST_ASSERT_TRUE(parseErr("CAL TILT THERM FIT 3") == ParseError::OutOfRange);
+  TEST_ASSERT_TRUE(parseErr("CAL TILT THERM FIT 1.5") == ParseError::BadNumber);
+  TEST_ASSERT_TRUE(parseErr("FLIP RUN 1") == ParseError::OutOfRange);
+  TEST_ASSERT_TRUE(parseErr("FLIP SPIN") == ParseError::UnknownCommand);
+}
+
 void test_erreurs() {
   TEST_ASSERT_TRUE(parseErr("") == ParseError::Empty);
   TEST_ASSERT_TRUE(parseErr("   \t ") == ParseError::Empty);
@@ -175,6 +214,7 @@ int main(int, char**) {
   RUN_TEST(test_set_masse_duty_gains);
   RUN_TEST(test_niveau);
   RUN_TEST(test_divers);
+  RUN_TEST(test_capteurs_multiples_et_retournement);
   RUN_TEST(test_erreurs);
   RUN_TEST(test_erreur_ne_modifie_pas_commande_valide);
   RUN_TEST(test_json_objet_status);

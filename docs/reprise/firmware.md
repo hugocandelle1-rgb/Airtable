@@ -1,6 +1,7 @@
 # Reprise — firmware, hôte Python, contrôle-commande
 
-Rapport intermédiaire (arrêt demandé pour quota). Aucun commit effectué par l'ingénieur firmware.
+Mis à jour après la décision de l'utilisateur « inclinaison par 4 accéléromètres ADXL355 » (plus d'inclinomètre
+métrologique ni de SCL3300 comme référence). Aucun commit git effectué ; `params/design.toml` non modifié.
 
 ## (a) Ce qui est écrit et vérifié
 
@@ -8,35 +9,60 @@ Commandes exactes et résultats réels (depuis la racine du dépôt `/home/user/
 
 | Commande | Résultat |
 |---|---|
-| `make -C firmware test` (g++ seul, shim Unity) | 5 suites, 64 tests, 0 échec |
-| `make -C firmware syntax` | OK (`-fsyntax-only` de toute `lib/atcore`) |
-| `pio test -d firmware -e native` (vrai Unity) | 64 cas passés (PlatformIO 6.2.0 installé via pip) |
-| `pio run -d firmware -e esp32s3` | SUCCESS, 0 warning, RAM 7 %, Flash 11 % (toolchain xtensa téléchargée, Arduino core 2.0.17) |
-| `python3 -m pytest host/tests -q` | 87 passés, 1 ignoré (test vidéo : OpenCV non installé) |
+| `make -C firmware test` (g++ seul, shim Unity) | 6 suites, 97 tests, 0 échec |
+| `make -C firmware syntax` | OK (18 fichiers) |
+| `pio test -d firmware -e native` (vrai Unity) | 97 cas passés |
+| `pio run -d firmware -e esp32s3` | SUCCESS, 0 warning, RAM 7,4 %, Flash 11,4 % |
+| `pio run -d firmware -e esp32s3_scl3300` | SUCCESS, 0 warning (option SCL3300-D01, 1 capteur) |
+| `pio run -d firmware -e esp32s3_flip` | SUCCESS, 0 warning (avec retournement motorisé) |
+| `python3 -m pytest host/tests -q` | 144 passés, 1 ignoré (test vidéo : OpenCV non installé) |
 | `python3 firmware/tools/gen_design_params.py --check` | en-tête `design_params.h` à jour |
 
-Non testé : `-DUSE_ADXL355` (option de compilation), `pio run` après le dernier ajout du champ `target` dans `writeConfig` de `console.cpp` (compilé OK lors du dernier `pio run`, SUCCESS). Rien n'a été exécuté sur matériel réel.
+Rien n'a été exécuté sur matériel réel.
 
 ## (b) État des modules
 
-**Fini (compile + testé sur PC)** — `firmware/lib/atcore/src/atcore/` : `crc`, `filters`, `pid` (PI(D), anti-windup conditionnel, `RateLimiter`), `fan_model`, `pressure_controller` (FF p∝N², gains planifiés, modèle de référence anti-dépassement), `setpoints` (table masse→pression + parseur JSON), `tach`, `sdp8xx`, `airphys`, `scl3300` (trames/CRC vérifiés), `adxl355`, `tmp117`, `ads1220`, `inclinometer` (interface + accumulateur), `leveling` (µrad/µm/pas, découplage, étalonnage, boucle à bande morte), `stepgen` (trapèze entier, ISR-safe), `safety`, `commands`, `json`. Tests : `firmware/test/test_*/`, `firmware/Makefile`, `firmware/tools/unity_shim/unity.h`.
+**Fini (compile + testé sur PC)** — `firmware/lib/atcore/src/atcore/` : `crc`, `filters`, `pid`, `fan_model`,
+`pressure_controller`, `setpoints`, `tach`, `sdp8xx`, `airphys`, `scl3300`, `adxl355`, `tmp117`, `ads1220`,
+`inclinometer`, `leveling`, `stepgen`, `safety`, `commands`, `json`, et **nouveau `tilt_array`** (compensation
+thermique polynomiale ordre 1–2 + apprentissage par moindres carrés + recalage du biais, estimateur de bruit,
+fusion pondérée 1/σ² avec rejet par la médiane et cas N = 1…4, écart inter-capteurs, ajustement de courbure
+`z_xx, z_xy, z_yy` + rotationnel, séquence de retournement 0° → 180° → 0°). Tests : `firmware/test/test_*/` (dont
+`test_tilt_array`, 32 tests ; `test_protocol` étendu aux commandes v2).
 
-**Fini (compile pour esp32s3, non testé sur matériel)** — `firmware/include/` + `firmware/src/` : `config.h`, `design_params.h` (généré), `i2c_bus` (TCA9548A), `pressure_sensors` (SDP810), `env_sensors` (TMP117 + BME280 Adafruit), `fan` (LEDC 25 kHz + tachy ISR), `inclinometer_drivers` (SCL3300, ADXL355), `displacement_sensors` (ADS1220), `level_actuators` (TMC2209 + ISR de pas + prise d'origine), `settings` (NVS), `app.cpp` (ordonnanceur, sécurités, nivellement), `console.cpp` (protocole), `main.cpp`, `platformio.ini`.
+**Fini (compile pour esp32s3, non testé sur matériel)** — `firmware/include/` + `firmware/src/` : tous les modules
+précédents, plus : `flip_actuator` (servo LEDC 50 Hz + contact d'index, option `-DUSE_FLIP_ACTUATOR`),
+`env_sensors` (TMP117 ×4 des bases d'ADXL355 sur le canal 7 du TCA9548A), `settings` (NVS par capteur : biais,
+rotation, signes, modèle thermique, masque d'utilisation), `app.cpp` (réseau de capteurs : lecture synchronisée,
+fusion, gel du nivellement pendant retournement/apprentissage), `console.cpp` (protocole version 2, télémétrie par
+capteur). **ADXL355 ×4 est la configuration par défaut** ; `-DUSE_SCL3300` (env `esp32s3_scl3300`) sélectionne le
+SCL3300-D01 seul.
 
-**Fini (hôte)** — `host/airtable_host/` : `protocol` (miroir Python du parseur C++, parité testée par fuzz), `client`, `logger`, `sim` (simulateur), `tilt_calibration` (retournement 180°), `drift_calibration` (ajustement avec/sans amortissement, carte, champ de hauteur, correction plan moyen, repère caméra, suivi vidéo OpenCV optionnel), `cli`. Tests dans `host/tests/`.
+**Fini (hôte)** — `host/airtable_host/` : `protocol` (miroir C++ + commandes v2, parité fuzz), `client`, `logger`,
+`sim` (simulateur à N capteurs, thermique, retournement motorisé), `tilt_calibration` (retournement N capteurs,
+champ de pente, retournement motorisé, planification, biais vs température), `drift_calibration`, **`slope_export`**
+(carte de pente / efforts parasites JSON/CSV + lecture côté robots), `cli` (nouvelles sous-commandes `flip-auto`,
+`flip-schedule`, `therm-learn`, `tilt-report`, `slope-export`, `cal-tilt-flip --all/--sensor`).
 
-**Autres** : `calc/aero/results/setpoints.json` (exemple provisoire, 3 points issus de `dynamics.json`).
-
-**Non commencé** : `docs/07_controle_commande.md` (livrable 5), `docs/research` n'a pas été complété pour les composants de contrôle (voir `docs/research/capteurs.md` déjà existant, écrit par un autre agent).
+**Documentation** : `docs/07_controle_commande.md` **écrit** (architecture, câblage SPI des 4 ADXL355, boucles,
+sécurités, protocole, procédures, carte de pente, liste à valider).
 
 ## (c) Étapes restantes, dans l'ordre
 
-1. Écrire `docs/07_controle_commande.md` (en français) : schéma bloc (mermaid), câblage broche par broche (reprendre `firmware/include/config.h`), alimentations 12/24 V et découplage, blindage/longueurs I²C (TCA9548A : canaux 0-4 SDP810-500, 5 SDP810-125, 6 TMP117×4 + BME280), connecteurs, boucles (schémas, gains initiaux `kp_norm=0.8`, `ti=0.8 s`, période 20 ms, méthode de réglage : échelon de PWM → τ_p, `ref_tau_s`), nivellement (bande morte 3 µrad, 5 confirmations, silence 6 s), sécurités (tableau `safety.h`, SAFE = PWM de repos 0.20 + moteurs inhibés), protocole (reprendre l'en-tête de `commands.h` ; règle : réponse = clé `ok`, télémétrie = clé `t` sans `ok`), procédures (mise en route, préchauffage thermique, prise d'origine `LEVEL HOME`, nivellement, retournement `cal-tilt-flip`, calibration palets `drift-fit`), conventions de signe (`tilt = ∂z/∂x` ; θ de dérive = −tilt ; correction = +θ moyen ; `LEVEL TARGET`), et liste de ce qui reste à valider sur matériel. Citer `docs/research/capteurs.md` (dérive MEMS 20-100 µrad/°C : l'inclinomètre n'est pas une référence à 2 µrad sans thermostatisation et calibration palets).
-2. Vérifier la construction `pio run -e esp32s3 -DUSE_ADXL355` (ajouter un env `esp32s3_adxl355` dans `platformio.ini` si souhaité).
-3. Optionnel : installer `opencv-python-headless` et lancer `test_video_optionnelle`.
-4. Optionnel : test pytest du CLI (`python3 -m host.airtable_host --port sim:// ...`), `host/README` d'usage, et `pytest.ini`/`pyproject` si on veut l'installer en paquet.
-5. À valider sur matériel (à lister dans le doc) : valeurs `[À VALIDER]` de `config.h` (p_full, seuil de calage, géométrie et mécanique des vérins sens `DIR_INVERT`, fin de course NF, Cd de la buse, sensibilités des capteurs de déplacement), écriture NVS interdite pendant mouvement, comportement `Serial` USB-CDC non connecté, brochage RGB (GPIO 48 v1.0 / 38 v1.1), précisions SCL3300 (trame bank1 `kCmdBank1` calculée, non issue de la fiche).
-6. Hygiène git (à faire par le coordinateur) : `firmware/.build_native/` (binaires) a été committé dans un commit WIP avant l'ajout de `firmware/.gitignore` ; faire `git rm -r --cached firmware/.build_native`.
+1. À valider sur matériel (liste complète : `docs/07_controle_commande.md` §12) : sélection SPI/I²C et bruit réel
+   des ADXL355 ; coefficients thermiques ; seuils 40 µrad (rejet) / 20 µrad (déformation) ; positions des capteurs
+   (`TILT_POS_*_MM`, à reprendre de la CAO) ; reproductibilité de l'appui du retournement motorisé, largeurs
+   d'impulsion du servo, polarité de l'index ; GPIO 35/36/37 (module **sans** PSRAM octale) et GPIO 3 (strapping) ;
+   `FAN_P_FULL_PA`, seuil de calage, Cd de la buse, `DIR_INVERT`, fins de course, RGB (GPIO 48 v1.0 / 38 v1.1),
+   écriture NVS interdite pendant mouvement, comportement `Serial` USB-CDC non connecté.
+2. Synchronisation matérielle des ADXL355 (broche SYNC) : non implémentée (lecture séquentielle dans le même tour).
+3. Optionnel : installer `opencv-python-headless` et lancer `test_video_optionnelle` ; test pytest du CLI sur
+   `sim://` (seul `slope-export` est testé via le CLI), `host/README` d'usage, `pyproject`.
+4. Cohérence amont : `docs/research/capteurs.md` présente toujours les MEMS comme « dégrossissage » ; la décision
+   utilisateur (4 ADXL355 + thermique + retournement + palets) est consignée dans `00_coordination.md` et
+   `07_controle_commande.md` §1. `.claude/skills/firmware-banc/SKILL.md` parle encore d'« inclinomètre » au singulier.
+5. Hygiène git (coordinateur) : `firmware/.build_native/` a été committé dans un commit WIP avant l'ajout de
+   `firmware/.gitignore` ; faire `git rm -r --cached firmware/.build_native`. Rappel : `firmware/.pio/` doit rester ignoré.
 
 ## (d) Commandes de compilation et de test
 
@@ -44,8 +70,11 @@ Non testé : `-DUSE_ADXL355` (option de compilation), `pio run` après le dernie
 make -C firmware test                 # tests natifs sans PlatformIO
 make -C firmware syntax               # g++ -fsyntax-only de la logique portable
 pio test -d firmware -e native        # tests Unity PlatformIO
-pio run -d firmware -e esp32s3        # compilation firmware ESP32-S3
+pio run -d firmware -e esp32s3        # firmware ESP32-S3 : 4 × ADXL355 (défaut)
+pio run -d firmware -e esp32s3_scl3300   # option SCL3300-D01 (1 capteur)
+pio run -d firmware -e esp32s3_flip      # + retournement 180° motorisé (servo GPIO 37, index GPIO 3)
 python3 firmware/tools/gen_design_params.py [--check]   # en-tête depuis params/design.toml
 python3 -m pytest host/tests -q       # tests hôte (parité C++/Python incluse, nécessite g++)
 python3 -m host.airtable_host --port sim:// status       # essai sans matériel
+python3 -m host.airtable_host slope-export lachers.csv -o carte_pente.json --grid-out 31x31
 ```

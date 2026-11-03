@@ -49,9 +49,11 @@ def test_fuzz_jetons(harness):
     rnd = random.Random(42)
     words = ["SET", "P", "MASS", "DUTY", "GET", "STATUS", "LEVEL", "MOVE", "JOG", "X", "Y", "A", "B", "AUTO", "ON",
              "OFF", "TARGET", "CAL", "TILT", "BIAS", "ROT", "CLEAR", "TABLE", "ADD", "H", "STREAM", "FAN", "GAINS",
-             "NOZZLE", "RAMP", "WDT", "DEADBAND", "ZERO", "HOME", "STOP", "PZERO", "SAFE", "PING", "SAVE", "FOO"]
+             "NOZZLE", "RAMP", "WDT", "DEADBAND", "ZERO", "HOME", "STOP", "PZERO", "SAFE", "PING", "SAVE", "FOO",
+             "THERM", "FIT", "START", "USE", "FLIP", "RUN", "ABORT", "APPLY"]
     nums = ["0", "1", "-1", "5", "12.5", "-3.25", "100", "400", "999", "1e2", "1e9", "-1e9", "nan", "inf", "abc",
-            "0x10", "1_0", "0.05", "0.01", "5000", "5001", "-5000", "3600", "3601", "1.2", "1.21", "0.1", "0.09"]
+            "0x10", "1_0", "0.05", "0.01", "5000", "5001", "-5000", "3600", "3601", "1.2", "1.21", "0.1", "0.09",
+            "2", "3", "4", "1.5", "300", "301"]
     lines = []
     for _ in range(1500):
         n = rnd.randint(1, 5)
@@ -61,5 +63,27 @@ def test_fuzz_jetons(harness):
         lines.append(" ".join(toks))
     got = run_cpp(harness, lines)
     assert len(got) == len(lines)
+    bad = [(l, g, py_result(l)) for l, g in zip(lines, got) if g != py_result(l)]
+    assert not bad, f"{len(bad)} divergences, ex. {bad[:3]}"
+
+
+def test_fuzz_commandes_reseau_et_retournement(harness):
+    """Mutations de lignes valides des commandes v2 (indice de capteur, THERM, FLIP) : mêmes verdicts C++ / Python."""
+    rnd = random.Random(7)
+    base = [l for l, _ in VALID if l.upper().startswith(("CAL TILT", "FLIP", "GET FLIP"))]
+    nums = ["0", "1", "2", "3", "4", "-1", "1.5", "2.0", "30", "300", "301", "abc", "nan", "1e1", "0x2"]
+    lines = []
+    for _ in range(1500):
+        toks = rnd.choice(base).split()
+        op = rnd.random()
+        if op < 0.35 and len(toks) > 1:
+            toks.pop(rnd.randrange(len(toks)))
+        elif op < 0.65:
+            toks.append(rnd.choice(nums + ["ON", "OFF", "START"]))
+        elif op < 0.95:
+            k = rnd.randrange(len(toks))
+            toks[k] = rnd.choice(nums + ["FIT", "USE", "RUN", "BIAS", "ROT", "CLEAR", "THERM", "ZERO"])
+        lines.append(" ".join(toks))
+    got = run_cpp(harness, lines)
     bad = [(l, g, py_result(l)) for l, g in zip(lines, got) if g != py_result(l)]
     assert not bad, f"{len(bad)} divergences, ex. {bad[:3]}"

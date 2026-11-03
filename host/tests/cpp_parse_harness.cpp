@@ -15,6 +15,7 @@ static const char* name(CmdType t) {
     case CmdType::GetConfig: return "GetConfig";
     case CmdType::GetVersion: return "GetVersion";
     case CmdType::GetTable: return "GetTable";
+    case CmdType::GetFlip: return "GetFlip";
     case CmdType::SetP: return "SetP";
     case CmdType::SetMass: return "SetMass";
     case CmdType::SetDuty: return "SetDuty";
@@ -35,6 +36,14 @@ static const char* name(CmdType t) {
     case CmdType::CalTiltBias: return "CalTiltBias";
     case CmdType::CalTiltRot: return "CalTiltRot";
     case CmdType::CalTiltClear: return "CalTiltClear";
+    case CmdType::CalTiltUse: return "CalTiltUse";
+    case CmdType::CalTiltThermStart: return "CalTiltThermStart";
+    case CmdType::CalTiltThermFit: return "CalTiltThermFit";
+    case CmdType::CalTiltThermClear: return "CalTiltThermClear";
+    case CmdType::FlipRun: return "FlipRun";
+    case CmdType::FlipAbort: return "FlipAbort";
+    case CmdType::FlipZero: return "FlipZero";
+    case CmdType::FlipApply: return "FlipApply";
     case CmdType::CalPZero: return "CalPZero";
     case CmdType::TableClear: return "TableClear";
     case CmdType::TableAdd: return "TableAdd";

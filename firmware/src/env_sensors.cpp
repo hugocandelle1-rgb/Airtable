@@ -20,6 +20,14 @@ void EnvSensors::begin(Tca9548a& mux) {
     tmp_started_[i] = i2cReadReg16(w, TMP117_ADDR[i], atc::tmp117::kRegDeviceId, &id) &&
                       ((id & 0x0FFF) == atc::tmp117::kDeviceId);
   }
+  if (mux_->select(MUX_CH_TILT_T)) {
+    for (int i = 0; i < 4; ++i) {
+      uint16_t id = 0;
+      tmpb_started_[i] = i2cReadReg16(w, TMP117_TILT_ADDR[i], atc::tmp117::kRegDeviceId, &id) &&
+                         ((id & 0x0FFF) == atc::tmp117::kDeviceId);
+    }
+    mux_->select(MUX_CH_ENV);
+  }
   if (g_bme.begin(BME280_ADDR, &w)) {
     // 1 mesure/s, filtre IIR x4, peu de sur-échantillonnage : limite l'auto-échauffement
     g_bme.setSampling(Adafruit_BME280::MODE_NORMAL, Adafruit_BME280::SAMPLING_X2,
@@ -47,6 +55,24 @@ void EnvSensors::update(uint32_t now_ms) {
       ++errors_;
     }
   }
+  // Bases des accéléromètres (canal 7) : absentes en configuration SCL3300 → ignorées sans erreur
+  if (mux_->select(MUX_CH_TILT_T)) {
+    for (int i = 0; i < 4; ++i) {
+      uint16_t raw;
+      if (tmpb_started_[i] && i2cReadReg16(w, TMP117_TILT_ADDR[i], atc::tmp117::kRegTemp, &raw) &&
+          atc::tmp117::plausible(raw)) {
+        Tb[i] = atc::tmp117::toC(raw);
+        Tb_valid[i] = true;
+      } else {
+        Tb_valid[i] = false;
+        if (tmpb_started_[i]) ++errors_;
+      }
+    }
+  } else {
+    for (int i = 0; i < 4; ++i) Tb_valid[i] = false;
+    ++errors_;
+  }
+  if (!mux_->select(MUX_CH_ENV)) { ++errors_; return; }
   if (!bme_started_ && static_cast<int32_t>(now_ms - next_bme_retry_) >= 0) {
     next_bme_retry_ = now_ms + 5000;
     bme_started_ = g_bme.begin(BME280_ADDR, &w);

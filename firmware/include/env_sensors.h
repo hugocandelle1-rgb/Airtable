@@ -1,5 +1,6 @@
 // Capteurs d'environnement sur le canal 6 du multiplexeur :
 // 4 × TMP117 (plaque dessus/dessous, air plenum, local) + BME280 (pression atmo, humidité).
+// Canal 7 : 4 × TMP117 accolés aux embases isothermes des accéléromètres d'inclinaison (Tb[i]).
 #pragma once
 #include <Arduino.h>
 
@@ -12,6 +13,8 @@ class EnvSensors {
 
   float T[4] = {};                       // °C : 0 dessus, 1 dessous, 2 air plenum, 3 local
   bool T_valid[4] = {};
+  float Tb[4] = {};                      // °C : base de l'accéléromètre i
+  bool Tb_valid[4] = {};
   float p_atm_Pa = 101325.0f;
   float rh_pct = 50.0f;
   float T_bme = 20.0f;
@@ -27,4 +30,5 @@ class EnvSensors {
   uint32_t errors_ = 0;
   uint32_t next_bme_retry_ = 0;
   bool tmp_started_[4] = {false, false, false, false};
+  bool tmpb_started_[4] = {false, false, false, false};
 };

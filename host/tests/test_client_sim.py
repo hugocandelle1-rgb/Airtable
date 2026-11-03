@@ -21,7 +21,7 @@ def client():
 
 def test_ping_version_status(client):
     assert client.ping()["ok"]
-    assert client.version()["proto"] == 1
+    assert client.version()["proto"] == 2
     st = client.status()
     assert st["ok"] and "t" in st and len(st["p"]) == 5
 

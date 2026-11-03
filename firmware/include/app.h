@@ -9,11 +9,13 @@
 #include "atcore/leveling.h"
 #include "atcore/pressure_controller.h"
 #include "atcore/safety.h"
+#include "atcore/tilt_array.h"
 #include "atcore/setpoints.h"
 #include "config.h"
 #include "displacement_sensors.h"
 #include "env_sensors.h"
 #include "fan.h"
+#include "flip_actuator.h"
 #include "i2c_bus.h"
 #include "inclinometer_drivers.h"
 #include "level_actuators.h"
@@ -30,7 +32,9 @@ class App {
  private:
   // --- tâches périodiques
   void controlTask(uint32_t now_ms);
+  void tiltPoll();
   void tiltTask(uint32_t now_ms);
+  void flipTask(uint32_t now_ms);
   void levelTask(uint32_t now_ms);
   void ledTask(uint32_t now_ms);
   void streamTask(uint32_t now_ms);
@@ -48,6 +52,18 @@ class App {
   bool startRegulation(float p_Pa, const char** err);
   float flowM3h() const;
   void applySettings();
+  static constexpr bool flipHardware() {
+#ifdef USE_FLIP_ACTUATOR
+    return true;
+#else
+    return false;
+#endif
+  }
+  bool flipBusy() const;                // séquence en cours ou embase hors de 0° : nivellement et étalonnages gelés
+  bool flipExcludesSensor(uint32_t now_ms);   // le capteur retournable est exclu de la fusion (pendant et après la séquence)
+  bool targetSensors(int idx, int* first, int* last) const;   // idx = -1 → tous les capteurs présents
+  void resetTiltAverages();
+  void writeFlipResult(atc::JsonWriter& j);
 
   // matériel
   Tca9548a mux_;
@@ -55,9 +71,37 @@ class App {
   EnvSensors env_;
   FanBank fans_;
   LevelActuators lvl_;
-  Scl3300Driver scl_{SPI, PIN_CS_SCL3300};
-  Adxl355Driver adxl_{SPI, PIN_CS_ADXL355};
-  atc::Inclinometer* incl_ = nullptr;
+#ifdef USE_SCL3300
+  Scl3300Driver drv_[1] = {Scl3300Driver(SPI, PIN_CS_TILT[0])};
+#else
+  Adxl355Driver drv_[TILT_MAX_SENSORS] = {Adxl355Driver(SPI, PIN_CS_TILT[0]), Adxl355Driver(SPI, PIN_CS_TILT[1]),
+                                          Adxl355Driver(SPI, PIN_CS_TILT[2]), Adxl355Driver(SPI, PIN_CS_TILT[3])};
+#endif
+  // Un canal par accéléromètre : échantillon brut, température de la base, sortie corrigée
+  struct TiltChannel {
+    atc::Inclinometer* drv = nullptr;
+    bool present = false;           // répondait au démarrage
+    bool have = false;              // au moins un échantillon reçu
+    bool valid = false;             // échantillon récent, sain et température disponible si le modèle thermique est actif
+    uint32_t last_ok_ms = 0;
+    atc::TiltSample s;              // dernier échantillon (brut, repère capteur)
+    float T = NAN;                  // température de la base [°C]
+    atc::Vec2 comp;                 // brut compensé thermiquement (avant biais/rotation)
+    atc::Vec2 plate;                // pente dans le repère plaque (biais, rotation, signes appliqués)
+    atc::RunningSigma sd;
+  };
+  TiltChannel ch_[atc::kMaxTilt];
+  int n_tilt_ = 0;
+  atc::FuseConfig fuse_cfg_;
+  atc::FuseResult fuse_;
+  atc::SlopeField field_;
+  uint8_t used_prev_ = 0;
+  atc::ThermalLearner learner_[atc::kMaxTilt];
+  bool learning_ = false;
+  FlipActuator flip_act_;
+  atc::FlipSequencer flip_;
+  bool flip_new_sample_ = false;
+  uint32_t flip_last_busy_ms_ = 0;      // dernier instant où l'embase était hors de 0° ou en mouvement
   DisplacementSensors disp_;
 
   // logique
@@ -72,8 +116,7 @@ class App {
   float manual_duty_ = 0.0f;
   float mass_g_ = 0.0f;
   bool auto_level_ = false;
-  atc::TiltSample tilt_sample_;           // dernière sortie du capteur (repère capteur, brut)
-  atc::Vec2 tilt_plate_{0.0f, 0.0f};      // pente plaque instantanée (biais/rotation appliqués)
+  atc::Vec2 tilt_plate_{0.0f, 0.0f};      // pente plaque fusionnée instantanée (10 Hz)
   atc::MovingAverage<64> avg_x_, avg_y_;  // moyenne glissante pour la boucle de nivellement
   atc::Vec2 tilt_avg_{0.0f, 0.0f};
   uint32_t tilt_last_ok_ms_ = 0;

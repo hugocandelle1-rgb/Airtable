@@ -73,8 +73,30 @@ def cmd_level_target(x_urad: float, y_urad: float) -> str:
     return f"LEVEL TARGET {fmt(x_urad)} {fmt(y_urad)}"
 
 
-def cmd_cal_tilt_bias(x_urad: float, y_urad: float) -> str:
+def cmd_cal_tilt_bias(x_urad: float, y_urad: float, sensor: int | None = None) -> str:
+    if sensor is not None:
+        return f"CAL TILT BIAS {fmt(x_urad)} {fmt(y_urad)} {int(sensor)}"
     return f"CAL TILT BIAS {fmt(x_urad)} {fmt(y_urad)}"
+
+
+def cmd_cal_tilt_rot(deg: float, sensor: int | None = None) -> str:
+    return f"CAL TILT ROT {fmt(deg)}" + ("" if sensor is None else f" {int(sensor)}")
+
+
+def cmd_cal_tilt_use(sensor: int, on: bool) -> str:
+    return f"CAL TILT USE {int(sensor)} {'ON' if on else 'OFF'}"
+
+
+def cmd_cal_tilt_therm_fit(order: int, sensor: int | None = None) -> str:
+    return f"CAL TILT THERM FIT {int(order)}" + ("" if sensor is None else f" {int(sensor)}")
+
+
+def cmd_cal_tilt_therm_clear(sensor: int | None = None) -> str:
+    return "CAL TILT THERM CLEAR" + ("" if sensor is None else f" {int(sensor)}")
+
+
+def cmd_flip_run(avg_s: float | None = None) -> str:
+    return "FLIP RUN" if avg_s is None else f"FLIP RUN {fmt(avg_s)}"
 
 
 def cmd_table_add(mass_g: float, p_pa: float) -> str:
@@ -121,6 +143,16 @@ def _num(tok: str, lo: float, hi: float) -> float:
     return v
 
 
+MAX_SENSOR_IDX = 3
+
+
+def _sensor_index(tok: str) -> int:
+    v = _num(tok, 0.0, float(MAX_SENSOR_IDX))
+    if v != math.floor(v):
+        raise ParseError("bad_number")
+    return int(v)
+
+
 def _flag(tok: str) -> bool:
     if tok in ("ON", "1", "TRUE"):
         return True
@@ -164,7 +196,8 @@ def parse_command(line: str) -> ParsedCommand:
     if c0 == "GET":
         if len(tk) < 2:
             raise ParseError("missing_argument")
-        names = {"STATUS": "GetStatus", "CONFIG": "GetConfig", "VERSION": "GetVersion", "TABLE": "GetTable"}
+        names = {"STATUS": "GetStatus", "CONFIG": "GetConfig", "VERSION": "GetVersion", "TABLE": "GetTable",
+                 "FLIP": "GetFlip"}
         if tk[1] in names:
             return simple(names[tk[1]], 2)
         raise ParseError("unknown_command")
@@ -265,6 +298,21 @@ def parse_command(line: str) -> ParsedCommand:
             out.f[0] = _num(tk[2], 0.1, 1000.0)
             return out
         raise ParseError("unknown_command")
+    if c0 == "FLIP":
+        if len(tk) < 2:
+            raise ParseError("missing_argument")
+        for name, t in (("ABORT", "FlipAbort"), ("ZERO", "FlipZero"), ("APPLY", "FlipApply")):
+            if tk[1] == name:
+                return simple(t, 2)
+        if tk[1] == "RUN":
+            out.type = "FlipRun"
+            if len(tk) == 2:
+                out.f[0] = 0.0
+                return out
+            _need(tk, 3)
+            out.f[0] = _num(tk[2], 2.0, 300.0)
+            return out
+        raise ParseError("unknown_command")
     if c0 == "CAL":
         if len(tk) < 2:
             raise ParseError("missing_argument")
@@ -273,19 +321,67 @@ def parse_command(line: str) -> ParsedCommand:
         if tk[1] == "TILT":
             if len(tk) < 3:
                 raise ParseError("missing_argument")
-            if tk[2] == "CLEAR":
-                return simple("CalTiltClear", 3)
-            if tk[2] == "ROT":
-                _need(tk, 4)
+            out.axis = -1                                   # par défaut : tous les capteurs
+            sub = tk[2]
+            if sub == "CLEAR":
+                if len(tk) > 4:
+                    raise ParseError("extra_argument")
+                out.type = "CalTiltClear"
+                if len(tk) == 4:
+                    out.axis = _sensor_index(tk[3])
+                return out
+            if sub == "ROT":
+                if len(tk) < 4:
+                    raise ParseError("missing_argument")
+                if len(tk) > 5:
+                    raise ParseError("extra_argument")
                 out.type = "CalTiltRot"
                 out.f[0] = _num(tk[3], -360.0, 360.0)
+                if len(tk) == 5:
+                    out.axis = _sensor_index(tk[4])
                 return out
-            if tk[2] == "BIAS":
-                _need(tk, 5)
+            if sub == "BIAS":
+                if len(tk) < 5:
+                    raise ParseError("missing_argument")
+                if len(tk) > 6:
+                    raise ParseError("extra_argument")
                 out.type = "CalTiltBias"
                 out.f[0] = _num(tk[3], -50000.0, 50000.0)
                 out.f[1] = _num(tk[4], -50000.0, 50000.0)
+                if len(tk) == 6:
+                    out.axis = _sensor_index(tk[5])
                 return out
+            if sub == "USE":
+                _need(tk, 5)
+                out.type = "CalTiltUse"
+                out.axis = _sensor_index(tk[3])
+                out.flag = _flag(tk[4])
+                return out
+            if sub == "THERM":
+                if len(tk) < 4:
+                    raise ParseError("missing_argument")
+                if tk[3] == "START":
+                    return simple("CalTiltThermStart", 4)
+                if tk[3] == "CLEAR":
+                    if len(tk) > 5:
+                        raise ParseError("extra_argument")
+                    out.type = "CalTiltThermClear"
+                    if len(tk) == 5:
+                        out.axis = _sensor_index(tk[4])
+                    return out
+                if tk[3] == "FIT":
+                    if len(tk) < 5:
+                        raise ParseError("missing_argument")
+                    if len(tk) > 6:
+                        raise ParseError("extra_argument")
+                    out.type = "CalTiltThermFit"
+                    order = _num(tk[4], 1.0, 2.0)
+                    if order != math.floor(order):
+                        raise ParseError("bad_number")
+                    out.f[0] = order
+                    if len(tk) == 6:
+                        out.axis = _sensor_index(tk[5])
+                    return out
         raise ParseError("unknown_command")
     raise ParseError("unknown_command")
 
@@ -321,6 +417,9 @@ CSV_FIELDS = (
     ["t_ms", "st", "flt", "pm", "pu", "nv", "psp", "pr", "set", "dpn", "q", "rho"]
     + [f"p{i}" for i in range(5)]
     + ["rpm0", "rpm1", "pwm", "tilt_x", "tilt_y", "traw_x", "traw_y", "tt", "tok"]
+    + ["tu", "trj", "tn", "tsg", "dsp_x", "dsp_y", "dfm", "dfw", "tinc", "crv_xx", "crv_xy", "crv_yy", "crv_curl", "flip"]
+    + [f"{k}{i}_{a}" for i in range(4) for k in ("tc", "tr") for a in "xy"]
+    + [f"Tb{i}" for i in range(4)]
     + list(_T_NAMES)
     + ["pa", "rh", "disp0", "disp1", "disp2", "stp0", "stp1", "home", "auto", "lbusy", "drop"]
 )
@@ -347,6 +446,11 @@ def flatten(frame: dict[str, Any]) -> dict[str, Any]:
     arr("rpm", ["rpm0", "rpm1"])
     arr("tilt", ["tilt_x", "tilt_y"])
     arr("traw", ["traw_x", "traw_y"])
+    arr("dsp", ["dsp_x", "dsp_y"])
+    arr("crv", ["crv_xx", "crv_xy", "crv_yy", "crv_curl"])
+    arr("tc", [f"tc{i}_{a}" for i in range(4) for a in "xy"])
+    arr("tr", [f"tr{i}_{a}" for i in range(4) for a in "xy"])
+    arr("Tb", [f"Tb{i}" for i in range(4)])
     arr("T", list(_T_NAMES))
     arr("disp", ["disp0", "disp1", "disp2"])
     arr("stp", ["stp0", "stp1"])

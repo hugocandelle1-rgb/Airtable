@@ -95,8 +95,12 @@ void App::execute(const Command& c, uint32_t now_ms) {
       return;
     case CmdType::GetVersion:
       j.beginObject().kv("ok", true).kv("fw", FW_NAME).kv("ver", FW_VERSION)
-          .kv("proto", static_cast<int32_t>(PROTOCOL_VERSION)).kv("incl", incl_->name())
+          .kv("proto", static_cast<int32_t>(PROTOCOL_VERSION)).kv("incl", drv_[0].name()).kv("ntilt", static_cast<int32_t>(n_tilt_))
           .kv("reset", static_cast<int32_t>(esp_reset_reason())).endObject();
+      sendLine(buf);
+      return;
+    case CmdType::GetFlip:
+      writeFlipResult(j);
       sendLine(buf);
       return;
     case CmdType::GetTable: {
@@ -164,12 +168,14 @@ void App::execute(const Command& c, uint32_t now_ms) {
 
     // ---- nivellement
     case CmdType::LevelAuto:
+      if (c.flag && flipBusy()) { replyErr("flip_active"); return; }
       if (c.flag && (!lvl_.homed() || lvl_.inhibited())) { replyErr(lvl_.inhibited() ? "motors_inhibited" : "not_homed"); return; }
       auto_level_ = c.flag;
       level_.reset();
       replyOk();
       return;
     case CmdType::LevelHome:
+      if (flipBusy()) { replyErr("flip_active"); return; }
       if (lvl_.inhibited()) { replyErr("motors_inhibited"); return; }
       auto_level_ = false;
       lvl_.startHoming();
@@ -189,6 +195,7 @@ void App::execute(const Command& c, uint32_t now_ms) {
       return;
     }
     case CmdType::LevelMove: {
+      if (flipBusy()) { replyErr("flip_active"); return; }
       Vec2 ds = {c.axis == 0 ? c.f[0] : 0.0f, c.axis == 1 ? c.f[0] : 0.0f};
       const uint32_t ms = lvl_.moveSlope(ds);
       if (!ms) { replyErr(lvl_.inhibited() ? "motors_inhibited" : "not_homed"); return; }
@@ -200,6 +207,7 @@ void App::execute(const Command& c, uint32_t now_ms) {
       return;
     }
     case CmdType::LevelJog: {
+      if (flipBusy()) { replyErr("flip_active"); return; }
       const uint32_t ms = lvl_.jog(c.axis, c.f[0]);
       if (!ms) { replyErr(lvl_.inhibited() ? "motors_inhibited" : "not_homed"); return; }
       level_.commit(now_ms, ms);
@@ -227,24 +235,131 @@ void App::execute(const Command& c, uint32_t now_ms) {
 
     // ---- étalonnages
     case CmdType::CalTiltBias:
-      settings_.tilt.bias_x_urad = c.f[0];
-      settings_.tilt.bias_y_urad = c.f[1];
-      avg_x_.reset();
-      avg_y_.reset();
-      replyOk();
-      return;
     case CmdType::CalTiltRot:
-      settings_.tilt.mount_rot_deg = c.f[0];
-      avg_x_.reset();
-      avg_y_.reset();
+    case CmdType::CalTiltClear: {
+      int i0, i1;
+      if (!targetSensors(c.axis, &i0, &i1)) { replyErr("no_such_sensor"); return; }
+      for (int i = i0; i <= i1; ++i) {
+        TiltCal& g = settings_.sens[i].geo;
+        if (c.type == CmdType::CalTiltBias) { g.bias_x_urad = c.f[0]; g.bias_y_urad = c.f[1]; }
+        else if (c.type == CmdType::CalTiltRot) g.mount_rot_deg = c.f[0];
+        else g = TiltCal();
+      }
+      resetTiltAverages();
       replyOk();
       return;
-    case CmdType::CalTiltClear:
-      settings_.tilt = TiltCal();
-      avg_x_.reset();
-      avg_y_.reset();
+    }
+    case CmdType::CalTiltUse:
+      if (c.axis >= n_tilt_) { replyErr("no_such_sensor"); return; }
+      if (c.flag) settings_.tilt_use_mask = static_cast<uint8_t>(settings_.tilt_use_mask | (1u << c.axis));
+      else settings_.tilt_use_mask = static_cast<uint8_t>(settings_.tilt_use_mask & ~(1u << c.axis));
+      resetTiltAverages();
       replyOk();
       return;
+    case CmdType::CalTiltThermStart:
+      if (flipBusy() || lvl_.busy()) { replyErr("motors_busy"); return; }
+      auto_level_ = false;                          // plaque immobile pendant l'apprentissage
+      for (int i = 0; i < n_tilt_; ++i) learner_[i].start();
+      learning_ = true;
+      replyOk();
+      return;
+    case CmdType::CalTiltThermClear: {
+      int i0, i1;
+      if (!targetSensors(c.axis, &i0, &i1)) { replyErr("no_such_sensor"); return; }
+      for (int i = i0; i <= i1; ++i) {
+        learner_[i].stop();
+        rebaseBias(&settings_.sens[i], ThermalComp(), isnan(ch_[i].T) ? 20.0f : ch_[i].T);
+      }
+      learning_ = false;
+      for (int i = 0; i < n_tilt_; ++i) learning_ = learning_ || learner_[i].active();
+      resetTiltAverages();
+      replyOk();
+      return;
+    }
+    case CmdType::CalTiltThermFit: {
+      int i0, i1;
+      if (!targetSensors(c.axis, &i0, &i1)) { replyErr("no_such_sensor"); return; }
+      const int order = static_cast<int>(c.f[0]);
+      ThermalLearner::Status first_err = ThermalLearner::Status::Ok;
+      int n_ok = 0;
+      j.beginObject().kv("ok", true).key("fit").beginArray();
+      for (int i = i0; i <= i1; ++i) {
+        if (!learner_[i].active()) continue;
+        ThermalComp th;
+        float rms[2] = {0, 0};
+        const ThermalLearner::Status st =
+            learner_[i].fit(order, THERM_MIN_SAMPLES, THERM_MIN_SPAN_K, &th, rms);
+        if (st != ThermalLearner::Status::Ok) { if (first_err == ThermalLearner::Status::Ok) first_err = st; continue; }
+        rebaseBias(&settings_.sens[i], th, isnan(ch_[i].T) ? th.t_ref_C : ch_[i].T);       // la sortie corrigée reste continue à la température courante
+        learner_[i].stop();
+        ++n_ok;
+        j.beginArray().value(static_cast<int32_t>(i)).value(th.c1[0], 3).value(th.c1[1], 3)
+            .value(th.c2[0], 4).value(th.c2[1], 4).value(rms[0], 3).value(rms[1], 3)
+            .value(learner_[i].spanK(), 2).endArray();
+      }
+      j.endArray().endObject();
+      learning_ = false;
+      for (int i = 0; i < n_tilt_; ++i) learning_ = learning_ || learner_[i].active();
+      if (n_ok == 0) {
+        replyErr(first_err == ThermalLearner::Status::SpanTooSmall ? "span_too_small"
+                 : first_err == ThermalLearner::Status::Singular ? "singular"
+                 : first_err == ThermalLearner::Status::TooFewSamples ? "too_few_samples" : "not_learning");
+        return;
+      }
+      resetTiltAverages();
+      sendLine(buf);
+      return;
+    }
+
+    // ---- retournement motorisé
+    case CmdType::FlipRun: {
+#ifndef USE_FLIP_ACTUATOR
+      replyErr("no_flip_hardware");
+      return;
+#else
+      if (safety_.fanSafe()) { replyErr("safe_state"); return; }
+      if (flip_.active()) { replyErr("flip_busy"); return; }
+      if (lvl_.busy()) { replyErr("motors_busy"); return; }
+      if (learning_) { replyErr("learning_active"); return; }
+      if (FLIP_SENSOR_IDX >= n_tilt_ || !ch_[FLIP_SENSOR_IDX].valid) { replyErr("sensor_invalid"); return; }
+      FlipConfig fc = flip_.config();
+      fc.avg_ms = c.f[0] > 0.0f ? static_cast<uint32_t>(c.f[0] * 1000.0f) : FLIP_AVG_MS;
+      flip_.configure(fc);
+      flip_act_.clearFault();
+      flip_new_sample_ = false;
+      flip_.start(now_ms);
+      resetTiltAverages();
+      replyOk();
+      return;
+#endif
+    }
+    case CmdType::FlipAbort:
+      flip_.abort();
+      replyOk();
+      return;
+    case CmdType::FlipZero:
+#ifndef USE_FLIP_ACTUATOR
+      replyErr("no_flip_hardware");
+      return;
+#else
+      if (flip_.active()) { replyErr("flip_busy"); return; }
+      flip_act_.clearFault();
+      flip_act_.setTarget(0.0f, now_ms);
+      replyOk();
+      return;
+#endif
+    case CmdType::FlipApply: {
+      const FlipResult& r = flip_.result();
+      if (!r.valid) { replyErr("no_result"); return; }
+      if (!r.reliable) { replyErr("unreliable"); return; }
+      settings_.sens[FLIP_SENSOR_IDX].geo.bias_x_urad = r.bias.x;
+      settings_.sens[FLIP_SENSOR_IDX].geo.bias_y_urad = r.bias.y;
+      resetTiltAverages();
+      j.beginObject().kv("ok", true).kv("idx", static_cast<int32_t>(FLIP_SENSOR_IDX))
+          .key("bias").beginArray().value(r.bias.x, 3).value(r.bias.y, 3).endArray().endObject();
+      sendLine(buf);
+      return;
+    }
     case CmdType::CalPZero:
       if (!(mode_ == Mode::Off || (mode_ == Mode::Manual && manual_duty_ < 0.01f)) || fans_.rpmMax() > 50.0f) {
         replyErr("fan_must_be_stopped");
@@ -314,6 +429,7 @@ void App::streamTask(uint32_t now_ms) {
   char buf[JSON_BUF];
   JsonWriter j(buf, sizeof buf);
   writeStatus(j, false);
+  if (!j.ok()) { ++dropped_; return; }              // tampon débordé : jamais de JSON tronqué
   sendLine(buf);
 }
 
@@ -348,13 +464,38 @@ void App::writeStatus(JsonWriter& j, bool as_reply) {
   for (int i = 0; i < NUM_FANS; ++i) rpm[i] = fans_.rpm(i);
   j.kvArray("rpm", rpm, NUM_FANS, 0);
   j.kv("pwm", fans_.duty() * 100.0f, 1);
-  // Inclinaison
-  const float tr[2] = {tilt_sample_.x_urad, tilt_sample_.y_urad};
+  // Inclinaison : fusion + détail par capteur (tableaux plats [x0,y0,x1,y1,…], NaN si invalide)
   const float tf[2] = {tilt_valid_ ? tilt_avg_.x : NAN, tilt_valid_ ? tilt_avg_.y : NAN};
   j.kvArray("tilt", tf, 2, 2);
-  j.kvArray("traw", tr, 2, 2);
-  j.kv("tt", tilt_sample_.temp_C, 2);
+  float tc[2 * atc::kMaxTilt], tr[2 * atc::kMaxTilt], tb[atc::kMaxTilt];
+  for (int i = 0; i < n_tilt_; ++i) {
+    const TiltChannel& c = ch_[i];
+    tc[2 * i] = c.valid ? c.plate.x : NAN;
+    tc[2 * i + 1] = c.valid ? c.plate.y : NAN;
+    tr[2 * i] = c.valid ? c.comp.x : NAN;
+    tr[2 * i + 1] = c.valid ? c.comp.y : NAN;
+    tb[i] = env_.Tb_valid[i] ? env_.Tb[i] : NAN;
+  }
+  const float traw[2] = {tr[0], tr[1]};              // compatibilité : capteur 0, brut compensé (avant biais)
+  j.kvArray("traw", traw, 2, 2);
+  j.kvArray("tr", tr, 2 * n_tilt_, 2);
+  j.kvArray("tc", tc, 2 * n_tilt_, 2);
+  j.kvArray("Tb", tb, n_tilt_, 3);
+  j.kv("tu", static_cast<int32_t>(fuse_.used_mask));
+  j.kv("trj", static_cast<int32_t>(fuse_.rejected_mask));
+  j.kv("tn", static_cast<int32_t>(fuse_.n_used));
+  j.kv("tsg", fuse_.valid ? fuse_.sigma_urad : NAN, 3);
+  const float dsp[2] = {fuse_.valid ? fuse_.spread.x : NAN, fuse_.valid ? fuse_.spread.y : NAN};
+  j.kvArray("dsp", dsp, 2, 2);
+  j.kv("dfm", fuse_.valid ? fuse_.dev_max_urad : NAN, 2);
+  j.kv("dfw", fuse_.valid && fmaxf(fuse_.spread.x, fuse_.spread.y) > TILT_DEFORM_WARN_URAD);
+  j.kv("tinc", fuse_.inconsistent);
+  const float crv[4] = {field_.valid ? field_.zxx : NAN, field_.valid ? field_.zxy : NAN,
+                        field_.valid ? field_.zyy : NAN, field_.valid ? field_.curl : NAN};
+  j.kvArray("crv", crv, 4, 1);
+  j.kv("tt", (n_tilt_ > 0 && !isnan(ch_[0].T)) ? ch_[0].T : NAN, 2);
   j.kv("tok", tilt_valid_);
+  j.kv("flip", flipStateName(flip_.state()));
   // Températures
   float T[4];
   for (int i = 0; i < 4; ++i) T[i] = env_.T_valid[i] ? env_.T[i] : NAN;
@@ -385,10 +526,54 @@ void App::writeConfig(JsonWriter& j) {
   j.kv("um_step", g.um_per_step[0], 5).kv("half_steps", static_cast<int32_t>(lvl_.halfRangeSteps(0)));
   j.kv("deadband", level_.config().deadband_urad, 2);
   j.kvArray("target", (const float*)tgt, 2, 2);
-  const float bias[2] = {settings_.tilt.bias_x_urad, settings_.tilt.bias_y_urad};
-  j.kvArray("tilt_bias", bias, 2, 3);
-  j.kv("tilt_rot", settings_.tilt.mount_rot_deg, 2);
+  float bias[2 * atc::kMaxTilt], rot[atc::kMaxTilt], c1[2 * atc::kMaxTilt], c2[2 * atc::kMaxTilt], tref[atc::kMaxTilt],
+      ord[atc::kMaxTilt], pres[atc::kMaxTilt];
+  for (int i = 0; i < n_tilt_; ++i) {
+    const SensorCal& k = settings_.sens[i];
+    bias[2 * i] = k.geo.bias_x_urad;  bias[2 * i + 1] = k.geo.bias_y_urad;
+    c1[2 * i] = k.th.c1[0];           c1[2 * i + 1] = k.th.c1[1];
+    c2[2 * i] = k.th.c2[0];           c2[2 * i + 1] = k.th.c2[1];
+    rot[i] = k.geo.mount_rot_deg;
+    tref[i] = k.th.t_ref_C;
+    ord[i] = k.th.order;
+    pres[i] = ch_[i].present ? 1.0f : 0.0f;
+  }
+  j.kv("ntilt", static_cast<int32_t>(n_tilt_));
+  j.kv("tuse", static_cast<int32_t>(settings_.tilt_use_mask));
+  j.kvArray("tpres", pres, n_tilt_, 0);
+  j.kvArray("tilt_bias", bias, 2 * n_tilt_, 3);
+  j.kvArray("tilt_rot", rot, n_tilt_, 2);
+  j.kvArray("th_c1", c1, 2 * n_tilt_, 3);
+  j.kvArray("th_c2", c2, 2 * n_tilt_, 4);
+  j.kvArray("th_ref", tref, n_tilt_, 2);
+  j.kvArray("th_ord", ord, n_tilt_, 0);
+  j.kv("flip_hw", flipHardware());
   j.kv("drivers", lvl_.driversOk());
   j.kv("errs", static_cast<uint32_t>(press_.errors() + env_.errors() + mux_.errors()));
+  j.endObject();
+}
+
+// ============================================================================================
+//  Aides de commande
+// ============================================================================================
+
+// idx = -1 : tous les capteurs ; sinon un seul. Faux si le capteur n'existe pas dans cette configuration.
+bool App::targetSensors(int idx, int* first, int* last) const {
+  if (idx < 0) { *first = 0; *last = n_tilt_ - 1; return n_tilt_ > 0; }
+  if (idx >= n_tilt_) return false;
+  *first = *last = idx;
+  return true;
+}
+
+void App::writeFlipResult(JsonWriter& j) {
+  const FlipResult& r = flip_.result();
+  j.beginObject().kv("ok", true).kv("hw", flipHardware()).kv("state", flipStateName(flip_.state()))
+      .kv("err", flipErrorName(flip_.error())).kv("idx", static_cast<int32_t>(FLIP_SENSOR_IDX))
+      .kv("valid", r.valid).kv("reliable", r.reliable);
+  const float bias[2] = {r.bias.x, r.bias.y}, slope[2] = {r.slope.x, r.slope.y}, drift[2] = {r.drift.x, r.drift.y};
+  if (r.valid) {
+    j.kvArray("bias", bias, 2, 3).kvArray("slope", slope, 2, 3).kvArray("drift", drift, 2, 3);
+    j.kv("T_mean", r.t_mean_C, 2).kv("na", static_cast<int32_t>(r.n_a)).kv("nb", static_cast<int32_t>(r.n_b));
+  }
   j.endObject();
 }
