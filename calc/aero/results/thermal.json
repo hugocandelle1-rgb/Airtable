@@ -18,27 +18,27 @@
   "air_heating": {
     "2.0": {
       "Q_m3h": 7.217057672705548,
-      "dp_fan_Pa": 69.61649140327356,
+      "dp_fan_Pa": 71.72077710566502,
       "P_elec_W": 4.6,
       "dT_air_speed_mod_K": 1.8963024578096797
     },
     "5.0": {
       "Q_m3h": 12.201380086658935,
-      "dp_fan_Pa": 146.60217170350734,
+      "dp_fan_Pa": 152.6167095897815,
       "P_elec_W": 4.6,
       "dT_air_speed_mod_K": 1.1216537888094966
     },
     "10.0": {
       "Q_m3h": 18.680118481260067,
-      "dp_fan_Pa": 278.14559513119275,
-      "P_elec_W": 5.773102968990305,
-      "dT_air_speed_mod_K": 0.9194743727581124
+      "dp_fan_Pa": 292.24314390034505,
+      "P_elec_W": 6.0657072815493125,
+      "dT_air_speed_mod_K": 0.9660770694710669
     }
   },
   "constant_speed": {
     "Q_fan_m3h": 24.054524388743626,
-    "P_W": 25.0,
-    "dT_air_K": 3.092097548191935
+    "P_W": 12.0,
+    "dT_air_K": 1.4842068231321286
   },
   "thermal_entry": {
     "2.0": {
@@ -53,13 +53,13 @@
     }
   },
   "gradient_steady_2g_K": 0.0027087321790444374,
-  "gradient_steady_10g_K": 0.0014259998305820032,
-  "gradient_transient_max_K": 0.004921060200743358,
+  "gradient_steady_10g_K": 0.0014982752922769738,
+  "gradient_transient_max_K": 0.005170479428785754,
   "gradient_limit_K": 0.05,
-  "plate_tau_s": 831.5635353484001,
-  "plate_tau_min": 13.85939225580667,
-  "mean_T_change_step_2g_to_10g_K": -0.6186177961143623,
-  "gradient_cold_start_max_K": 0.004921060200743358,
+  "plate_tau_s": 831.5635360580924,
+  "plate_tau_min": 13.859392267634872,
+  "mean_T_change_step_2g_to_10g_K": -0.5780558739529013,
+  "gradient_cold_start_max_K": 0.005170479428785754,
   "gradient_step_max_K": 0.0027087321790444374,
-  "slope_from_transient_gradient_urad": 0.7086326689070435
+  "slope_from_transient_gradient_urad": 0.7445490377451486
 }

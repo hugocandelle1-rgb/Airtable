@@ -1,0 +1,60 @@
+{
+  "steps": [
+    {
+      "step": "orifice",
+      "seconds": 0.965386152267456,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "optimize",
+      "seconds": 187.1938931941986,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "setpoints",
+      "seconds": 12.112262725830078,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "cogging",
+      "seconds": 80.79324460029602,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "montecarlo",
+      "seconds": 8.553151369094849,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "dynamics",
+      "seconds": 5.318778991699219,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "network",
+      "seconds": 1.1630072593688965,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "jets",
+      "seconds": 0.9715752601623535,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "thermal",
+      "seconds": 5.995895147323608,
+      "returncode": 0,
+      "over_limit": false
+    }
+  ],
+  "ok": true,
+  "total_s": 303.0678799152374
+}
