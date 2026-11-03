@@ -91,7 +91,7 @@ def structure_hypotheses(P):
         perim_band=(s_in + 0.0075, s_in + 0.0375),          # bande élastomère 30 mm de large
         perim_kf=2.0e9,           # N/m³ : EPDM 3 mm, module apparent de compression ~6 MPa
         friction_mu=0.15,         # bille acier / rouleau trempé, graissé (borne haute à sec : 0,3)
-        contact_below_face=0.014, # m : contacts bille Ø30/vé 90° (centre de bille 3 mm sous la face + 10,6 mm)
+        contact_below_face=0.011, # m : contacts bille Ø25,4/vé 90° (centre de bille 2 mm sous la face + 9,0 mm)
         pitch_mm=STUDY_PITCH_MM, counterbore_mm=STUDY_CB_MM,
     )
 

@@ -26,18 +26,18 @@
 | Lamage | Ø2 (Ø1,5 seulement si l'on revient à 30 mm avec le pas 2,94) | § 1 |
 | Chemin de la pression | **B : caisson de plenum suspendu à la plaque**, sans membrane | la poussée p·A est reprise par les parois du caisson et ne passe pas par les appuis : 2,8 µrad au lieu de 5,2 (chemin A) |
 | Schéma d'appui | **3 appuis cinématiques sur le cadre supérieur, hors plenum** : (0 ; +242,5), (±242,5 ; −145,5) | isostatique (insensible au gauchissement du bâti), réalisable sans traverser le caisson |
-| Poids propre | 15,5 µrad bruts (budget 10) ⇒ **finition de la face supérieure sur appuis de service**, caisson monté ⇒ résidu **1,5 µrad** (dont 1,4 µrad de frottement) | § 3 |
+| Poids propre | 15,7 µrad bruts (budget 10) ⇒ **finition de la face supérieure sur appuis de service**, caisson monté ⇒ résidu **1,7 µrad** (dont 1,7 µrad de frottement) | § 3 |
 | Inclinomètres | 4 × ADXL355 en (±220 ; ±220), face supérieure, bande pleine | la moyenne des 4 annule le dôme de pression et le bombé thermique (§ 6) |
-| Bâti | Bosch Rexroth rainure 10 : cadre 45×90, montants 45×90, ceintures et écharpes 45×45 sur 3 faces ; 1er mode **48 Hz** | > 30 Hz ; 25 Hz sans écharpes (§ 7) |
+| Bâti | Bosch Rexroth rainure 10 : cadre 45×90, montants 45×90, ceintures et écharpes 45×45 sur 3 faces ; 1er mode **49 Hz** | > 30 Hz ; 26 Hz sans écharpes (§ 7) |
 | Variante économique | même plaque et mêmes appuis ; surfaçage 15–20 µm sur montage 3 appuis ; bâti « paillasse » | 205–251 µrad avant compensation, ≈ 11 µrad après (`04` § 6) |
 
-**Budget de pente (référence)**, somme quadratique **30,6 µrad** :
+**Budget de pente (référence)**, somme quadratique **30,7 µrad** :
 
 | Poste | Valeur |
 |---|---|
 | Inclinaison | 1,4 µrad |
 | Usinage (allocation) | 30 µrad |
-| Poids propre résiduel | 1,5 µrad |
+| Poids propre résiduel | 1,7 µrad |
 | Pression | 2,8 µrad |
 | Thermique | 1,4 µrad |
 | Sol | 5 µrad |
@@ -55,14 +55,14 @@ pour le schéma retenu, chemin B.
 
 | Pas hex (mm) | Lamage | Trous (zone 360) | Ligament | Porosité | E*/E couche | D*/D plein | Masse (kg) | Pente 0→400 Pa (µrad) | Poids propre brut (µrad) |
 |---|---|---|---|---|---|---|---|---|---|
-| 2,94 | Ø2,0 | 17 131 | 0,94 | 0,420 | 0,292 | **0,354** | 20,2 | **4,34** | 17,2 |
-| 2,94 | Ø1,5 | 17 131 | 1,44 | 0,236 | 0,515 | 0,552 | 22,4 | 3,31 | 16,2 |
-| 4,23 | Ø2,0 | 8 197 | 2,23 | 0,203 | 0,565 | 0,599 | 22,8 | 3,14 | 15,9 |
-| 4,23 | Ø1,5 | 8 197 | 2,73 | 0,114 | 0,722 | 0,742 | 23,8 | 2,70 | 15,1 |
-| **4,82** | **Ø2,0** | **6 333** | 2,82 | 0,156 | 0,642 | **0,670** | **23,3** | **2,91** | 15,5 |
-| 4,82 | Ø1,5 | 6 333 | 3,32 | 0,088 | 0,776 | 0,793 | 24,1 | 2,58 | 14,9 |
-| 5,00 | Ø2,0 | 5 935 | 3,00 | 0,145 | 0,662 | 0,689 | 23,5 | 2,85 | 15,4 |
-| 5,00 | Ø1,5 | 5 935 | 3,50 | 0,082 | 0,790 | 0,806 | 24,2 | 2,55 | 14,8 |
+| 2,94 | Ø2,0 | 17 131 | 0,94 | 0,420 | 0,292 | **0,354** | 20,2 | **4,34** | 17,4 |
+| 2,94 | Ø1,5 | 17 131 | 1,44 | 0,236 | 0,515 | 0,552 | 22,4 | 3,32 | 16,3 |
+| 4,23 | Ø2,0 | 8 197 | 2,23 | 0,203 | 0,565 | 0,599 | 22,8 | 3,14 | 16,1 |
+| 4,23 | Ø1,5 | 8 197 | 2,73 | 0,114 | 0,722 | 0,742 | 23,8 | 2,70 | 15,3 |
+| **4,82** | **Ø2,0** | **6 333** | 2,82 | 0,156 | 0,642 | **0,670** | **23,3** | **2,91** | 15,7 |
+| 4,82 | Ø1,5 | 6 333 | 3,32 | 0,088 | 0,776 | 0,793 | 24,1 | 2,58 | 15,0 |
+| 5,00 | Ø2,0 | 5 935 | 3,00 | 0,145 | 0,662 | 0,689 | 23,5 | 2,85 | 15,6 |
+| 5,00 | Ø1,5 | 5 935 | 3,50 | 0,082 | 0,790 | 0,806 | 24,2 | 2,55 | 14,9 |
 
 Lecture du tableau :
 
@@ -135,7 +135,7 @@ finition sur appuis de service**. Les raisons :
   - erreur de position des appuis de finition de ±0,5 mm : **0,20 µrad** (somme
     quadratique des 6 cas) ;
   - caisson absent sans lest : 3,3 µrad (lest à ±5 % : 0,16 µrad) ;
-  - frottement aux appuis : ci-dessous.
+  - frottement aux appuis : ci-dessous (1,7 µrad).
 - **Pression.** 2,8 µrad au pas 4,82 et 4,3 µrad au pire pas (2,94/Ø2), pour un budget
   de 5 µrad.
 - **Réalisation.** Les vés reposent sur le cadre 45×90, hors du caisson, et restent
@@ -145,16 +145,16 @@ finition sur appuis de service**. Les raisons :
 
 Une dilatation différentielle plaque/bâti, ou la rotation des appuis sous charge, fait
 glisser les billes dans les vés. La force de frottement μN agit au contact, à
-(e/2 + 14 mm) sous le plan moyen. Elle crée un moment μN·(e/2 + 14 mm) qui n'est pas
+(e/2 + 11 mm) sous le plan moyen. Elle crée un moment μN·(e/2 + 11 mm) qui n'est pas
 répétable (hystérésis).
 
 | e (mm) | µ | Dilatation radiale (µrad) | Pire cas, 8 directions par appui (µrad) |
 |---|---|---|---|
-| 35 | 0,15 (graissé) | 0,80 | **1,44** |
-| 35 | 0,30 (sec) | 1,60 | 2,88 |
-| 30 | 0,15 | 1,03 | 1,85 |
+| 35 | 0,15 (graissé) | 0,93 | **1,67** |
+| 35 | 0,30 (sec) | 1,86 | 3,35 |
+| 30 | 0,15 | 1,22 | 2,19 |
 
-Pour garder ce poste ≤ 1,5 µrad, il faut des contacts graissés et des rouleaux rectifiés.
+Pour garder ce poste ≤ 1,7 µrad, il faut des contacts graissés et des rouleaux rectifiés.
 Les rouleaux sont orientés vers le barycentre, ce qui donne un glissement purement radial
 (`05`).
 
@@ -252,7 +252,7 @@ sur un critère, comme l'alumine en ρ/E, perdent sur le perçage ou sur le coû
   - **pression :** ±2,0 µrad sur chaque composante, de signes opposés d'un coin à
     l'autre. **La moyenne des 4 capteurs est nulle** (symétrie du dôme), et il en va de
     même pour un bombé thermique sphérique.
-  - **poids propre :** +8,2 / +4,3 µrad (coins arrière) et −19,7 / −2,5 µrad (coins
+  - **poids propre :** +8,1 / +4,3 µrad (coins arrière) et −19,9 / −2,4 µrad (coins
     avant). Ces valeurs sont statiques : elles font partie de l'offset calibré par la
     dérive des palets.
 - **Bonus :** la différence entre capteurs mesure la courbure de la plaque (déformation
@@ -264,7 +264,7 @@ sur un critère, comme l'alumine en ρ/E, perdent sur le perçage ou sur le coû
 **Bâti de référence.** Profilés Bosch Rexroth rainure 10 :
 
 - cadre supérieur 45×90 posé de chant, axe à 250 mm du centre, soit 545 × 545 hors tout,
-  axe à z = 775 ;
+  axe à z = 745 ;
 - 4 montants 45×90 ;
 - ceinture basse 45×45 à z = 150 et étagère 45×45 à z = 420 (ventilateur et caisson
   filtre) ;
@@ -276,15 +276,15 @@ Le modèle EF utilise des poutres 3D, des assemblages semi-rigides (tronçons de
 
 | Bâti | Contreventement | 1er / 2e / 3e mode | Masse des profilés |
 |---|---|---|---|
-| Référence | aucun | **25** (balancement y) / 30 / 43 Hz | 27,7 kg |
-| **Référence** | **écharpes 45×45 sur 3 faces (arrière, gauche, droite)** | **48** (torsion) / 62 / 89 Hz | 31,5 kg |
-| Référence | 4 faces | 62 / 75 / 93 Hz | 32,8 kg |
-| Référence, assemblages rigides (borne haute) | 3 faces | 53 / 66 / 95 Hz | 31,5 kg |
+| Référence | aucun | **26** (balancement y) / 31 / 44 Hz | 27,3 kg |
+| **Référence** | **écharpes 45×45 sur 3 faces (arrière, gauche, droite)** | **49** (torsion) / 63 / 92 Hz | 31,1 kg |
+| Référence | 4 faces | 63 / 77 / 96 Hz | 32,3 kg |
+| Référence, assemblages rigides (borne haute) | 3 faces | 55 / 68 / 97 Hz | 31,1 kg |
 | Paillasse (variante économique, montants de 300 mm) | aucun | 28 / 28 / 44 Hz | 5,1 kg |
 | Paillasse | 3 faces | 86 / 104 / 155 Hz | 7,9 kg |
 
 - La face avant reste ouverte pour l'accès.
-- La raideur verticale du cadre sous les appuis vaut 32–52 N/µm.
+- La raideur verticale du cadre sous les appuis vaut 33–54 N/µm.
 - Pour la paillasse, la table support domine (souvent 15–30 Hz) : il faut l'évaluer sur
   place.
 - La constante de torsion des profilés n'est pas publiée dans la veille. Le modèle prend
@@ -323,14 +323,14 @@ pour le bâti, et face inférieure de la plaque pour les cotes de plaque.
 |---|---|
 | Plaque | 520 × 520 × **35**, EN AW-5083 coulée ; détail des perçages, datums et taraudages : `04` § 7 |
 | Appuis (centres des billes, plan XY) | P0 (0 ; +242,5) fixe ; P1 (+242,5 ; −145,5) et P2 (−242,5 ; −145,5) motorisés |
-| Billes | Ø30 G10, centre à 3 mm sous la face inférieure (siège conique 90° dans un insert trempé Ø36 × 16 noyé dans la plaque) ; contacts sur les rouleaux 13,6 mm sous la face |
-| Vés | 2 rouleaux Ø20 × 30 h6 trempés par vé, vé à 90°, axes orientés vers (0 ; −16,7) : P0 → −90°, P1 → 151,9°, P2 → 28,1° (angle depuis +x) |
+| Billes | Ø25,4 G10 (100Cr6), collées dans un logement Ø25,4 H8 × 10,7 de la plaque, centre à 2 mm sous la face inférieure ; contacts sur les rouleaux 11 mm sous la face |
+| Vés | 2 rouleaux Ø20 × 30 h6 trempés par vé, vé à 90°, axes orientés vers (0 ; −16,2) : P0 → −90°, P1 → 151,9°, P2 → 28,1° (angle depuis +x) |
 | Caisson | intérieur 430 × 430, parois de 6 mm (demi-côtés 215–221), hauteur intérieure 160 (distribution 62 + tôle + tranquillisation 80 + marge), fond de 6 mm ; joint plat EPDM 6 × 2 sur la plaque ; cornière intérieure 15 × 15 × 3, 32 vis M5 sur le carré de demi-côté 208 |
 | Jeu caisson / cadre | 6,5 mm (paroi extérieure 221, face intérieure du cadre 227,5) |
-| Cadre supérieur | 4 × 45×90 de chant, axe sur le carré de demi-côté 250 (545 hors tout), axe à z = 775 (dessus à 820) ; dessus de plaque ≈ 900 |
-| Montants | 4 × 45×90, de z = 0 à 820, aux coins (±250 ; ±250) |
+| Cadre supérieur | 4 × 45×90 de chant, axe sur le carré de demi-côté 250 (545 hors tout), axe à z = 745, dessus à z = 790. Empilement : vérin à mi-course 45 → dessus de tête 835 ; vé : axes des rouleaux à 847 ; centre de bille 863,05 (16,05 au-dessus des axes, entraxe des rouleaux 32,1) ; face inférieure de plaque 865 ; **dessus de plaque 900** |
+| Montants | 4 × 45×90, de z = 0 à 790, aux coins (±250 ; ±250) |
 | Ceinture basse / étagère | 45×45 à z = 150 et z = 420 |
-| Écharpes | 45×45 dans les faces arrière, gauche et droite, de la ceinture basse (z = 150) au cadre (z = 775), en diagonale |
+| Écharpes | 45×45 dans les faces arrière, gauche et droite, de la ceinture basse (z = 150) au cadre (z = 745), en diagonale |
 | Pieds | 4 × M16 × 2, rotule, patin Ø80 |
 | Embases ADXL355 | 4 en (±220 ; ±220) sur la face supérieure (`05` § 5) |
 | Variante paillasse | cadre 45×45 sur le carré de demi-côté 250 à z = 300 au-dessus de la table, montants 45×45 de 300, écharpes 45×45 sur 3 faces ; ventilateur posé à côté, sur la table |

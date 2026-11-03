@@ -128,10 +128,10 @@ finishing_on_service_supports = true   # finition avec lest du caisson (±5 %) ;
 radius_ratio = 0.0                  # sans objet (positions explicites ci-dessus)
 
 [support.coupling]
-ball_d_mm = {f(hk["ball_d_mm"], 0)}                     # bille G10 100Cr6, collée dans un siège conique de la plaque (insert acier)
+ball_d_mm = {f(hk["ball_d_mm"], 1)}                   # bille G10 100Cr6 collée dans un logement H8 de la plaque, centre 2 mm sous la face
 roller_d_mm = {f(hk["roller_d_mm"], 0)}                   # 2 rouleaux trempés rectifiés h6 par vé, vé à 90°
 vee_axis_angle_deg = {json.dumps([round(v, 1) for v in kc["geometry"]["vee_axis_angle_deg"]])}   # axes des vés vers le barycentre
-preload_N = {f(hk["preload_N"], 0)}
+preload_N = {f(hk["preload_N"], 0)}                     # aucune : poids seul + butées anti-soulèvement (jeu 0,5 mm)
 hertz_pmax_GPa = {f(max(c["pmax_GPa"] for c in hk["contacts"]), 2)}
 k_support_N_per_um = {f(min(kc["stiffness"]["k_support_chain"]) / 1e6, 0)}
 
@@ -184,7 +184,7 @@ attachment_line_half_mm = 218.0     # axe des parois sur la face inférieure de 
 profile_system = "Bosch Rexroth rainure 10 (45×90 cadre supérieur et montants, 45×45 ceintures et écharpes)"
 profile_main_mm = 45
 top_ring_axis_half_mm = 250.0       # cadre 545×545 hors tout, 45×90 posé de chant
-ring_axis_height_mm = 775.0         # dessus de plaque ≈ 900 mm
+ring_axis_height_mm = 745.0         # dessus du cadre 790, dessus de plaque 900 mm
 bracing = "écharpes 45×45 sur 3 faces (arrière, gauche, droite)"
 f1_Hz = {f(ref_frame["f_Hz"][0], 0)}                     # assemblages semi-rigides ; sans écharpes : {f(fr["cases"][0]["f_Hz"][0], 0)} Hz
 mass_profiles_kg = {f(ref_frame["frame_mass_kg"], 1)}

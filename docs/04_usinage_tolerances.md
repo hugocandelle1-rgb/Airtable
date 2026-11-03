@@ -74,12 +74,12 @@ d'enlèvement : c'est acceptable en finition, avec une passe de 20 µm à vitess
 | 100 | **Finition de la face supérieure sur appuis de service** : plaque **avec son caisson monté** (ou un lest de 10 kg ±5 % réparti sur la ligne d'attache) posée sur 3 vés identiques aux vés de service (positions ±0,5 mm), sur rehausses de 300 mm. Fly-cut diamant : passes de 0,15 puis 0,02 mm. Plenum soufflé à 20–50 Pa pendant la coupe (les jets chassent les copeaux des orifices) | atelier à 20 ± 0,5 °C, plaque thermostatée 12 h avant. Voile final 1,00 ± 0,05 |
 | 110 | Contrôle (§ 5) puis protection | **pas d'anodisation** |
 
-**Pourquoi finir sur les appuis :** la flèche de poids propre (15,5 µrad sur le schéma
-retenu, 36 µrad avec les appuis au coin) est alors **usinée en négatif**. Il ne reste que :
+**Pourquoi finir sur les appuis :** la flèche de poids propre (15,7 µrad sur le schéma
+retenu, 26 µrad avec les appuis au coin) est alors **usinée en négatif**. Il ne reste que :
 
 - les écarts de position des appuis (±0,5 mm → 0,20 µrad) ;
 - le lest (±5 % → 0,2 µrad) ;
-- le frottement aux appuis (≤ 1,4 µrad).
+- le frottement aux appuis (≤ 1,7 µrad).
 
 Si le caisson est absent à la finition sans lest de remplacement, l'erreur est de
 **3,3 µrad** (35 mm).
@@ -150,10 +150,10 @@ haut, z = 0 sur la face inférieure. Cotes en mm.
 | Orifice | Ø0,40 ±0,01 (Ø0,30 au pas 2,94), depuis la face supérieure, longueur fonctionnelle (voile) 1,00 ±0,05 |
 | Lamage | Ø2,0 H11 depuis z = 0, foret 118°, sommet du cône à z = 34,00 (voile 1,00) |
 | Datums | A = face supérieure (zone 300 × 300) ; B = alésage Ø6 H7 débouchant en (−240 ; 0) ; C = lumière 6 H7 × 10 en (+240 ; 0), grand axe selon x |
-| Sièges des billes (face inférieure) | 3 inserts acier trempé Ø36 × 16 collés dans des lamages Ø36 H7 prof. 16, cône 90° pour bille Ø30 (centre de bille 3 mm sous la face inférieure), aux points (0 ; +242,5), (+242,5 ; −145,5), (−242,5 ; −145,5) ; ⌖ Ø0,2 \| B \| C |
+| Sièges des billes (face inférieure) | 3 logements Ø25,4 H8 prof. 10,7 pour billes Ø25,4 G10 collées (centre de bille 2,0 mm sous la face inférieure ; bord du logement à 4,8 mm du chant), aux points (0 ; +242,5), (+242,5 ; −145,5), (−242,5 ; −145,5) ; ⌖ Ø0,2 \| B \| C |
 | Attache du caisson (face inférieure) | parois 6 mm du caisson entre demi-côtés 215 et 221 (axe 218) appuyées sur un joint plat EPDM 6 × 2 (pas de gorge dans la plaque) ; cornière intérieure 15 × 15 × 3 ; 32 × M5 prof. 10 taraudés de bas en haut sur le carré de demi-côté **208** (8 par côté, pas 52, symétriques) |
 | Embases ADXL355 (face supérieure) | 4 × (3 × M4 prof. 8 sur Ø40 à 120°, un trou vers l'extérieur) centrées en (±220 ; ±220) ; zone sans perçage |
-| Tirants de précharge | 3 × Ø6,5 débouchant au centre des sièges (tige M6 de précharge 40 N à travers la bille percée Ø6,5) |
+| Butées anti-soulèvement | pas de précharge (poids 108–130 N par appui) ; 3 brides sur le cadre, jeu 0,5 mm au-dessus de la face supérieure, au droit des appuis (bande pleine, hors zone percée) |
 | Manutention | 4 × M10 prof. 20 sur les chants, au milieu de chaque côté |
 | Générale | ISO 2768-mK ; état de surface face A Ra ≤ 0,4 (diamant < 0,1) ; face inférieure Ra 1,6 |
 | Cotation face A (référence) | ⏥ 0,003 (360 × 360) ; ⏥ 0,001 / 100 × 100 ; pente locale (base 50) ≤ 30 µrad ; arêtes des orifices vives, sans bavure (ISO 13715 : −0,02/0) |

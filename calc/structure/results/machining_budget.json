@@ -204,17 +204,17 @@
     {
      "poste": "Poids propre : finition sur appuis de service (positions ±0,5 mm, lest ±5 %, frottement µ 0,15)",
      "allocation_urad": 10,
-     "prevu_urad": 1.4612131760627407
+     "prevu_urad": 1.6937745813834864
     },
     {
      "poste": "Pression 0 → 400 Pa (chemin B, e = 35, pas 4,82 ; pire pas 2,94 : 4.3)",
      "allocation_urad": 5,
-     "prevu_urad": 2.811274159613184
+     "prevu_urad": 2.8112741596131836
     },
     {
      "poste": "Thermique (écart air/plaque ≤ 1 K, transitoire)",
      "allocation_urad": 5,
-     "prevu_urad": 1.3472717376327732
+     "prevu_urad": 1.3915655470039279
     },
     {
      "poste": "Sol / bâtiment (non calculé, surveillé par les ADXL355)",
@@ -222,7 +222,7 @@
      "prevu_urad": 5.0
     }
    ],
-   "total_rss_urad": 30.64134803638348
+   "total_rss_urad": 30.655297281383643
   },
   "economique": {
    "rows": [
@@ -239,17 +239,17 @@
     {
      "poste": "Poids propre : surfaçage sur montage 3 appuis (sinon +16 µrad)",
      "allocation_urad": 10,
-     "prevu_urad": 1.4612131760627407
+     "prevu_urad": 1.6937745813834864
     },
     {
      "poste": "Pression (identique)",
      "allocation_urad": 5,
-     "prevu_urad": 2.811274159613184
+     "prevu_urad": 2.8112741596131836
     },
     {
      "poste": "Thermique (identique)",
      "allocation_urad": 5,
-     "prevu_urad": 1.3472717376327732
+     "prevu_urad": 1.3915655470039279
     },
     {
      "poste": "Sol / paillasse (non calculé)",
@@ -257,10 +257,10 @@
      "prevu_urad": 10.0
     }
    ],
-   "total_rss_urad": 251.09315458004775,
-   "after_compensation_urad": 11.473175001346805,
+   "total_rss_urad": 251.0948572131317,
+   "after_compensation_urad": 11.51034669189888,
    "map_uncertainty_urad": 10.0,
-   "without_fixture_G_urad": 15.539560093720533
+   "without_fixture_G_urad": 15.658353875430663
   }
  }
 }

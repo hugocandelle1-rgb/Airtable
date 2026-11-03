@@ -208,7 +208,7 @@ def build(kind="reference", bracing="3faces", joint_factor=0.25, k_sup=3.0e7):
     a = 0.25                                   # demi-côté de l'axe du cadre supérieur
     m_pl, sup = payload()
     if kind == "reference":
-        z_ring, z_low, z_shelf = 0.775, 0.15, 0.42
+        z_ring, z_low, z_shelf = 0.745, 0.15, 0.42
         top, leg, low = "45x90", "45x90", "45x45"
     else:
         z_ring, z_low, z_shelf = 0.30, None, None
@@ -347,7 +347,7 @@ def run(P=None, verbose=True):
     m_pl, sup = payload()
     for (x, y) in sup:
         a = 0.25
-        cand = [i for i, p in enumerate(fr.nodes) if abs(p[2] - 0.775) < 1e-6]
+        cand = [i for i, p in enumerate(fr.nodes) if abs(p[2] - 0.745) < 1e-6]
         xs, ys = (np.sign(x) * a, y) if abs(abs(x) - a) < abs(abs(y) - a) else (x, np.sign(y) * a)
         n = min(cand, key=lambda i: np.hypot(fr.nodes[i][0] - xs, fr.nodes[i][1] - ys))
         F = np.zeros(6 * len(fr.nodes)); F[6 * n + 2] = -1.0

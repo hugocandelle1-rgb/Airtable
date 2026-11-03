@@ -91,10 +91,12 @@ def run(P=None, verbose=True):
     out = dict(source=src, points_mm=(pts * 1e3).tolist(), reactions_N=R.tolist())
 
     # --- 1) Hertz -----------------------------------------------------------------
-    # bille Ø30 G10 (100Cr6), rouleaux Ø20 h6 trempés rectifiés (arbres de guidage) : p_max ≤ 1,5 GPa
-    # (≪ 4 GPa d'enfoncement permanent ; cible usuelle des couplages répétables 1–2 GPa)
-    R_ball, R_roll = 0.015, 0.010
-    preload = 40.0                          # N, ressort de maintien par tige à travers l'appui
+    # bille Ø25,4 G10 (100Cr6) collée dans un logement de la plaque (bord à 4,8 mm du chant),
+    # rouleaux Ø20 h6 trempés rectifiés (arbres de guidage) : p_max ≈ 1,5 GPa
+    # (≪ 4 GPa d'enfoncement permanent ; cible usuelle des couplages répétables 1–2 GPa).
+    # Pas de précharge : le poids (108–130 N par appui) suffit ; butées anti-soulèvement à 0,5 mm.
+    R_ball, R_roll = 0.0127, 0.010
+    preload = 0.0
     vee_half = np.deg2rad(45)
     hz = []
     for i, Ri in enumerate(R):
