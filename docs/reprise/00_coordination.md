@@ -44,6 +44,19 @@ repartir de son dossier (`calc/aero/`, `calc/structure/`, `firmware/`, `host/`, 
    course fine insuffisante pour ±0,25° ⇒ mécanisme porteur dédié (vis fine + réduction
    ou levier/coin) ; réglage grossier aux pieds du bâti.
 
+## Décisions de l'utilisateur depuis l'arrêt (à appliquer)
+
+1. **Inclinaison** : pas d'inclinomètre métrologique ; **3 à 4 accéléromètres ADXL355**
+   répartis sur la plaque (embase isotherme + TMP117 accolé, compensation thermique,
+   recalage par retournement 180° et par dérive des palets).
+2. **Perçage** : aucune contrainte sur le nombre de trous (l'utilisateur a retiré sa
+   remarque) ; optimisation selon le critère d'origine. Les pas « magiques » 4,23 / 4,82 mm
+   ne sont qu'une comparaison informative.
+3. **Coûts** : variante économique étudiée (finition 15–20 µm + carte de pente compensée
+   par le contrôle des robots, réglage manuel). Non tranchée : l'utilisateur n'a pas
+   encore dit si la compensation logicielle est acceptable ⇒ garder la conception
+   « précision » comme référence et documenter la variante économique.
+
 ## Prochaines étapes (ordre recommandé)
 
 1. Relire `aero.md` et `structure.md` ; finir les étapes restantes listées (relancer les
