@@ -244,7 +244,7 @@
     {
      "poste": "Thermique (écart air/plaque ≤ 1 K, transitoire)",
      "allocation_urad": 5,
-     "prevu_urad": 1.3672849311150794
+     "prevu_urad": 1.366707542773902
     },
     {
      "poste": "Sol / bâtiment (non calculé, surveillé par les ADXL355)",
@@ -252,7 +252,7 @@
      "prevu_urad": 5.0
     }
    ],
-   "total_rss_urad": 30.590863676909137
+   "total_rss_urad": 30.590837875479313
   },
   "economique": {
    "rows": [
@@ -279,7 +279,7 @@
     {
      "poste": "Thermique (identique)",
      "allocation_urad": 5,
-     "prevu_urad": 1.3672849311150794
+     "prevu_urad": 1.366707542773902
     },
     {
      "poste": "Sol / paillasse (non calculé)",
@@ -287,8 +287,8 @@
      "prevu_urad": 10.0
     }
    ],
-   "total_rss_urad": 251.08698715747093,
-   "after_compensation_urad": 11.487774279648669,
+   "total_rss_urad": 251.08698401398786,
+   "after_compensation_urad": 11.487705572688489,
    "map_uncertainty_urad": 10.0,
    "without_fixture_G_urad": 14.364990709089827
   }

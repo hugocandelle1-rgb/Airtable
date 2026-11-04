@@ -2,59 +2,71 @@
   "steps": [
     {
       "step": "orifice",
-      "seconds": 0.9991586208343506,
+      "seconds": 1.167175054550171,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "optimize",
-      "seconds": 70.55490636825562,
+      "seconds": 98.47447562217712,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "setpoints",
-      "seconds": 9.442744255065918,
+      "seconds": 13.605309247970581,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "cogging",
-      "seconds": 58.17948246002197,
+      "seconds": 92.83604717254639,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "montecarlo",
-      "seconds": 5.258127927780151,
+      "seconds": 7.933612823486328,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "dynamics",
-      "seconds": 4.846267223358154,
+      "seconds": 6.2793519496917725,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "network",
-      "seconds": 1.3130371570587158,
+      "seconds": 1.4064512252807617,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "jets",
-      "seconds": 0.9451658725738525,
+      "seconds": 1.0032567977905273,
       "returncode": 0,
       "over_limit": false
     },
     {
       "step": "thermal",
-      "seconds": 6.005174875259399,
+      "seconds": 7.295958757400513,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "drift_sim",
+      "seconds": 9.989226341247559,
+      "returncode": 0,
+      "over_limit": false
+    },
+    {
+      "step": "parasitic",
+      "seconds": 8.154159784317017,
       "returncode": 0,
       "over_limit": false
     }
   ],
   "ok": true,
-  "total_s": 157.5447907447815
+  "total_s": 248.14607691764832
 }
