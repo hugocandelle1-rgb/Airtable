@@ -113,13 +113,18 @@ def _cyl(x, y, z0, d, h, direction=(0, 0, 1)) -> cq.Shape:
     return cq.Solid.makeCylinder(d / 2.0, h, cq.Vector(x, y, z0), cq.Vector(*direction))
 
 
-def plate_blank(P: dict) -> cq.Workplane:
-    """Plaque chanfreinée avec sièges de billes, datums, taraudages, embases, manutention ;
-    SANS les trous du réseau."""
+def plate_box(P: dict) -> cq.Workplane:
+    """Plaque brute chamfreinée (sans aucun perçage)."""
     pl = P["plate"]
     t, L = pl["thickness_mm"], pl["outer_square_mm"]
     w = cq.Workplane("XY").workplane(offset=-t).rect(L, L).extrude(t)
-    w = w.faces(">Z or <Z").edges().chamfer(pl["chamfer_mm"])
+    return w.faces(">Z or <Z").edges().chamfer(pl["chamfer_mm"])
+
+
+def plate_feature_tools(P: dict) -> cq.Workplane:
+    """Outils (un seul composé) des éléments hors réseau : sièges de billes, datums B/C, 32 M5, 12 M4, 4 M10."""
+    pl = P["plate"]
+    t, L = pl["thickness_mm"], pl["outer_square_mm"]
     tools = []
     for s in support_points(P):                                         # sièges Ø25,4 H8 x 10,7
         tools.append(_cyl(s["x"], s["y"], -t, pl["ball_pocket_d_mm"], pl["ball_pocket_depth_mm"]))
@@ -133,13 +138,18 @@ def plate_blank(P: dict) -> cq.Workplane:
         n = (math.copysign(1.0, x), 0.0, 0.0) if abs(x) > abs(y) else (0.0, math.copysign(1.0, y), 0.0)
         px = math.copysign(L / 2 + 1.0, x) if abs(x) > abs(y) else x
         py = math.copysign(L / 2 + 1.0, y) if abs(y) >= abs(x) else y
-        tools.append(_cyl(px, py, -t / 2.0, pl["handling_d_mm"], pl["handling_depth_mm"] + 1.0,
-                          (-n[0], -n[1], 0.0)))
-    w = w.cut(cq.Workplane("XY").newObject([cq.Compound.makeCompound(tools)]))
+        tools.append(_cyl(px, py, -t / 2.0, pl["handling_d_mm"], pl["handling_depth_mm"] + 1.0, (-n[0], -n[1], 0.0)))
     cx, cy = pl["datum_C_mm"]                                           # datum C : lumière 6 x 10 selon x
     slot = (cq.Workplane("XY").workplane(offset=-t - 1.0).center(cx, cy)
-            .slot2D(pl["datum_C_len_mm"], pl["datum_d_mm"], 0).extrude(t + 2.0))
-    return w.cut(slot)
+            .slot2D(pl["datum_C_len_mm"], pl["datum_d_mm"], 0).extrude(t + 2.0)).val()
+    tools.append(slot)
+    return cq.Workplane("XY").newObject([cq.Compound.makeCompound(tools)])
+
+
+def plate_blank(P: dict) -> cq.Workplane:
+    """Plaque chanfreinée avec sièges de billes, datums, taraudages, embases, manutention ;
+    SANS les trous du réseau."""
+    return plate_box(P).cut(plate_feature_tools(P))
 
 
 def hole_comb(P: dict, pts) -> cq.Compound:
@@ -148,13 +158,14 @@ def hole_comb(P: dict, pts) -> cq.Compound:
 
 
 def build_plate(P: dict, mode: str = "light") -> cq.Workplane:
-    """mode = 'light' (trous témoins) ou 'full' (tous les trous : un seul booléen composé d'outils étagés
-    avec l'opérateur OBB de cadquery.occ_impl.shapes.cut)."""
+    """mode = 'light' (trous témoins) ou 'full' (tous les trous).
+    Complet : les 5935 outils étagés sont coupés d'abord dans la plaque brute (un seul `shapes.cut` avec OBB),
+    puis les éléments hors réseau (leur coupe avant le réseau multiplie le temps par > 10)."""
     from cadquery.occ_impl import shapes as S
 
-    blank = plate_blank(P)
     pts = hole_centers(P) if mode == "full" else witness_centers(P)
-    res = S.cut(blank.val(), hole_comb(P, pts))
+    res = S.cut(plate_box(P).val(), hole_comb(P, pts))
+    res = res.cut(plate_feature_tools(P).val())
     return cq.Workplane("XY").newObject([res])
 
 

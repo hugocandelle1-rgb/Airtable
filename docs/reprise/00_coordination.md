@@ -109,3 +109,17 @@ table sert à **caractériser** le mouvement qu'ils produisent. Conséquences :
   (questions listées dans `docs/08_electrostatique.md`).
 - Données attendues de l'utilisateur : ordre de grandeur de F_act (ou tension/géométrie
   des électrodes) et durée typique d'une mesure.
+
+## État au 2026-11-04 (3e arrêt quota, 83 %)
+
+- Terminés : aéraulique (forces parasites en erreur de mesure, option Ø0,25, `drift_sim` 10 s),
+  structure (budget par niveau : 50 µrad tenu, 30 réalisable, 20 limite, 5–10 hors d'atteinte ;
+  cahier des charges révisé), firmware, électrostatique reporté.
+- En cours à l'arrêt : CAO phase 2 (voir `cao.md`).
+- **Décisions attendues de l'utilisateur** : (1) F_act minimale à caractériser (fixe le niveau θ
+  et la finition) ; (2) soustraction a posteriori d'une carte de crantage étalonnée (oui/non) ;
+  (3) orifices Ø0,25 vs Ø0,30 (plaque d'essai bi-zone recommandée) ; (4) hypothèses de site.
+- Question posée hors architecture : plaque microporeuse + compresseur — plus favorable
+  (supprime le crantage) mais risques d'homogénéité, de taille/coût et de qualité d'air ;
+  essai d'échantillon recommandé. Aucune modification d'architecture.
+- Ensuite : fin CAO + mises en plan, vague 3 (nomenclature, revue, synthèse 01).
