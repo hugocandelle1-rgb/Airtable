@@ -155,26 +155,26 @@ def plan_vee(P: dict, png: bool = False) -> list[str]:
     mass = sum(p.mass(P) for p in vp) + 4 / 3 * math.pi * (S["ball_d_mm"] / 2) ** 3 * 7.85e-6
     bl, bw, bh = S["vee_block_mm"]
     zb, zr, zc = L["block_base"], L["roller_z"], L["ball_zc"]
-    s = Sheet("A3", "Appui en vé (bloc + 2 rouleaux + bille)", "TAB-APP-VEE", "Acier trempé (100Cr6 / 42CrMo4) - à confirmer",
-              mass, "2,5:1", TOL_GEN, "Couplage de Kelvin / Maxwell : bille Ø25,4 sur 2 rouleaux Ø20, vé à 90°",
+    s = Sheet("A3", "Appui en vé (bloc + 2 rouleaux + bille)", "TAB-APP-VEE", "Acier trempé (à confirmer)",
+              mass, "2:1", TOL_GEN, "Bille Ø25,4 sur 2 rouleaux Ø20, vé à 90° (appuis Maxwell)",
               rugosite="Ra 0,8 (portées) ; Ra 3,2 sinon")
-    sc = 2.5
-    vr = s.view(comp, "droite", (85, 190), sc)
-    vf = s.view(comp, "face", (205, 190), sc)
-    vd = s.view(comp, "dessus", (330, 190), sc)
-    s.label((85, 245), "VUE DE BOUT (profil du vé)")
-    s.label((205, 245), "VUE DE FACE")
-    s.label((330, 245), "VUE DE DESSUS")
+    sc = 2.0
+    vr = s.view(comp, "droite", (100, 205), sc)
+    vf = s.view(comp, "face", (240, 205), sc)
+    vd = s.view(comp, "dessus", (345, 205), sc)
+    s.label((100, 268), "VUE DE BOUT (profil du vé)")
+    s.label((240, 268), "VUE DE FACE")
+    s.label((345, 268), "VUE DE DESSUS")
     # profil
     vr.dim_x((-bw / 2, zb), (bw / 2, zb), -8, fmt(bw))
-    vr.dim_x((-hs, zr), (hs, zr), -48, fmt(2 * hs, 1) + " ±0,01 (entraxe)")
+    vr.dim_x((-hs, zr), (hs, zr), -34, fmt(2 * hs, 1) + " ±0,01 (entraxe)")
     vr.dim_y((-hs - 10, zb), (-hs - 10, zr), 6, "12")
     vr.dim_y((bw / 2, zb), (bw / 2, zb + bh), -8, fmt(bh))
     vr.dim_y((hs + 10, zr), (hs + 10, zc), -10, fmt(V["dz"], 2) + " (centre bille)")
-    vr.dia((hs, zr), S["roller_d_mm"] / 2, 20, "2 x Ø20 h6 (axes ∥ vé)", 10)
-    vr.dia((0, zc), S["ball_d_mm"] / 2, 120, "bille Ø25,4 G10", 12)
+    vr.dia((hs, zr), S["roller_d_mm"] / 2, -30, "2 x Ø20 h6", 10)
+    vr.dia((0, zc), S["ball_d_mm"] / 2, 60, "bille Ø25,4 G10", 12)
     vr.line((0, zb - 4), (0, zc + 16), 0.13, (0, (8, 1.5, 1.5, 1.5)))
-    s.text(vr.P(-hs - 34, zc + 8), "vé à 90° (contacts à 45°)", size=2.8)
+    s.text(vr.P(-hs - 30, zc + 16), "vé à 90° (contacts à 45°)", size=2.8)
     # face
     vf.dim_x((-bl / 2, zb), (bl / 2, zb), -8, fmt(bl))
     vf.dim_x((-S["roller_len_mm"] / 2, zr + S["roller_d_mm"] / 2), (S["roller_len_mm"] / 2, zr + S["roller_d_mm"] / 2), 14,
@@ -184,7 +184,7 @@ def plan_vee(P: dict, png: bool = False) -> list[str]:
     vd.dim_x((-bl / 2, -bw / 2), (bl / 2, -bw / 2), -8, fmt(bl))
     vd.dim_y((-bl / 2, -bw / 2), (-bl / 2, bw / 2), 8, fmt(bw))
     vd.dim_y((S["roller_len_mm"] / 2, -hs), (S["roller_len_mm"] / 2, hs), -10, fmt(2 * hs, 1))
-    s.block((30, 150), [
+    s.block((30, 118), [
         "1. Bloc 40 x 30 x 20 : sièges cylindriques usinés pour les rouleaux ; creux central dégageant la bille.",
         "2. Rouleaux Ø20 x 30 h6 trempés, axes parallèles à l'axe du vé ; entraxe 32,1 ; axes à 12 de la base du bloc.",
         "3. Centre de bille à 16,05 au-dessus des axes ; bille Ø25,4 G10 collée dans la plaque (siège Ø25,4 H8 ↧10,7).",
@@ -212,7 +212,7 @@ def plan_verin(P: dict, png: bool = False) -> list[str]:
     mx, my, mz = lv["nema17_mm"]
     u_m0 = hu / 2 + lv["coupling_len_mm"]
     vm = lv["motor_offset_v_mm"]
-    s = Sheet("A3", "Vérin à coin 1:5 (P1, P2)", "TAB-NIV-VERIN", "Acier (boîtier, coin, tête) ; NEMA17 du commerce", mass, "2:1",
+    s = Sheet("A3", "Vérin à coin 1:5 (P1, P2)", "TAB-NIV-VERIN", "Acier ; NEMA17 du commerce", mass, "2:1",
               TOL_GEN, "Course verticale ±2,43 mm, vis M6 x 0,25, 0,64 µrad/pas moteur",
               rugosite="Ra 0,8 (coin, tête) ; Ra 3,2 sinon")
     sc = 2.0
@@ -220,7 +220,7 @@ def plan_verin(P: dict, png: bool = False) -> list[str]:
     cut = _half(comp)
     vc = s.view(cut, "face", (190, 128), sc)
     s.label((190, 276), "VUE DE DESSUS (axe de vis selon x)")
-    s.label((190, 182), "COUPE LONGITUDINALE (plan y = 0)")
+    s.label((190, 180), "COUPE LONGITUDINALE (plan y = 0)")
     vd.dim_x((-hu / 2, -hv / 2), (hu / 2, -hv / 2), -8, fmt(hu))
     vd.dim_y((-hu / 2, -hv / 2), (-hu / 2, hv / 2), 10, fmt(hv))
     vd.dim_x((u_m0, my / 2 + vm), (u_m0 + mz, my / 2 + vm), 8, fmt(mz) + " (NEMA17)")
@@ -234,9 +234,9 @@ def plan_verin(P: dict, png: bool = False) -> list[str]:
     vc.dim_y((-wl / 2 - 2, z0 + lv["wedge_floor_mm"]), (-wl / 2 - 2, z0 + 24.0), 8, "24 (coin, extrémité mince)")
     vc.dim_y((hu / 2, z0), (hu / 2, z0 + my / 2), -8, "21 (axe de vis)")
     vc.dim_x((-wl / 2, z0 - 3), (wl / 2, z0 - 3), -4, fmt(wl) + " (coin)")
-    vc.note((10, z0 + 33), "coin pente 1:5, course ±12,1", 24, 30)
-    vc.note((0, z0 + 41), "tête guidée (2 lames 0,3 x 20 x 30), course ±2,43", -10, 36)
-    vc.note((hu / 2 + 4, z0 + 21), "vis M6 x 0,25 (écrou bronze rattrapé par ressort)", 16, -24)
+    vc.note((12, z0 + 31.5), "coin 1:5", 8, 12)
+    vc.note((-30, z0 + 38), "tête (±2,43)", -6, 8)
+    vc.note((hu / 2 - 2, z0 + 21), "vis M6 x 0,25", 8, -14)
     s.block((30, 70), [
         "1. Boîtier 90 x 30 x 45 (tête à mi-course), posé sur le cadre ; moteur en bout, posé sur le cadre.",
         "2. Coin 60 x 24, pente 1:5 (tan = 0,2), course ±12,1 mm -> tête ±2,43 mm ; cage à aiguilles entre coin et tête.",
@@ -261,7 +261,7 @@ def plan_adxl(P: dict, png: bool = False) -> list[str]:
     bx, by, bz = T["base_block_mm"]
     cw, cd, ch = T["capot_mm"]
     z = {k: (v.bbox()[2], v.bbox()[5]) for k, v in byn.items()}
-    s = Sheet("A3", "Embase isotherme ADXL355", "TAB-CAP-ADXL", "Socle et plateau : alliage d'aluminium ; capot : XPS 10 mm",
+    s = Sheet("A3", "Embase isotherme ADXL355", "TAB-CAP-ADXL", "Alliage d'alu (socle, plateau) ; capot XPS",
               mass, "2:1", TOL_GEN, "4 embases en (±220 ; ±220) ; plateau rotatif Ø50 : retournement 180° (3 billes / 6 vés)",
               rugosite="Ra 0,8 (vés, plateau) ; Ra 3,2 sinon")
     sc = 2.0
@@ -279,7 +279,7 @@ def plan_adxl(P: dict, png: bool = False) -> list[str]:
     for a in range(6):
         ang = math.radians(a * 60)
         vd.line((10 * math.cos(ang), 10 * math.sin(ang)), (23 * math.cos(ang), 23 * math.sin(ang)), 0.13, (0, (2, 2)))
-    s.text(vd.P(-38, -52), "6 vés radiaux à 60° (R18), lignes pointillées", size=2.4)
+    s.text((30, 126), "6 vés radiaux à 60° (R18) : traits pointillés dans la vue de dessus", size=2.4)
     vc.dim_y((-cw / 2, 0), (-cw / 2, ch), 8, fmt(ch))
     vc.dim_y((cw / 2, 0), (cw / 2, ch - T["capot_top_mm"]), -8, fmt(ch - T["capot_top_mm"]) + " (cavité)")
     vc.dim_y((cw / 2, ch - T["capot_top_mm"]), (cw / 2, ch), -20, fmt(T["capot_top_mm"]))
@@ -289,7 +289,7 @@ def plan_adxl(P: dict, png: bool = False) -> list[str]:
     vc.dim_y((T["plateau_d_mm"] / 2, z["plateau"][0]), (T["plateau_d_mm"] / 2, z["plateau"][1]), -26, fmt(T["plateau_t_mm"]) + " (plateau)")
     vc.dia((0, z["socle"][1]), 0.1, 130, "billes Ø4 dans les vés", 20)
     vc.note((8, z["carte"][1]), "carte ADXL355 + TMP117 20 x 20", 22, 20)
-    s.block((30, 108), [
+    s.block((30, 118), [
         "1. Capot XPS 80 x 80 x 45, parois 10, plafond 8 : posé sur la plaque, sans contact avec le socle (jeu 0,2).",
         "2. Socle 60 x 60 x 20 sur 3 pieds Ø8 x 12 (8 dans la plaque : M4 sur Ø40 à 120°, un trou vers l'extérieur).",
         "3. Plateau Ø50 x 6 sur 3 billes Ø4 (R18) dans 3 des 6 vés à 60° : indexation à 0° / 180°.",
@@ -309,9 +309,9 @@ def plan_caisson(P: dict, parts: list | None = None, png: bool = False) -> list[
     by = {p.name: p for p in pp}
     mass = by["caisson"].mass(P) + by["joint_plat"].mass(P) + by["corniere_caisson"].mass(P)
     ho, hi = L["box_half"], L["cav_half"]
-    s = Sheet("A2", "Caisson de plenum suspendu à la plaque", "TAB-PLN-001", "Tôle aluminium 6 mm soudée (nuance à confirmer)",
+    s = Sheet("A2", "Caisson de plenum suspendu à la plaque", "TAB-PLN-001", "Tôle alu 6 mm soudée (à confirmer)",
               mass, "1:2 ; 5:1", TOL_GEN, "Caisson 430 x 430 x 150 int., parois et fond 6, joint EPDM 6 x 2, cornière 15 x 15 x 3",
-              rugosite="Ra 3,2 ; face d'appui du joint Ra 1,6")
+              rugosite="Ra 3,2 ; appui joint Ra 1,6")
     sc = 0.5
     box = by["caisson"].shape
     vd = s.view(box, "dessus", (150, 285), sc)
@@ -337,13 +337,13 @@ def plan_caisson(P: dict, parts: list | None = None, png: bool = False) -> list[
     vc.note((60, L["baffle_top"]), "tôle inox ép. 1 (Ø2, pas 8) + média 10", 30, 16)
     # détail C : angle paroi / joint / cornière / plaque (5:1)
     x0, x1 = 192.0, 236.0
-    reg = cq.Workplane("XY").box(x1 - x0, 40, 60, centered=False).translate((x0, 0, L["plate_bot"] - 40))
+    reg = cq.Workplane("XY").box(x1 - x0, 40, 36, centered=False).translate((x0, 0, L["plate_bot"] - 30))
     plate_sl = plate_mod.plate_blank(P).intersect(reg)
     det = [by["caisson"].shape.intersect(reg), by["joint_plat"].shape.intersect(reg),
            by["corniere_caisson"].shape.intersect(reg), plate_sl]
     dcomp = cq.Workplane("XY").newObject([cq.Compound.makeCompound([d.val() for d in det])])
-    s.label((470, 395), "DÉTAIL C (5:1) : attache à la plaque")
-    vC = s.view(dcomp, "face", (470, 320), 5.0)
+    s.label((470, 402), "DÉTAIL C (5:1) : attache à la plaque")
+    vC = s.view(dcomp, "face", (470, 300), 5.0)
     zp = L["plate_bot"]
     gk_w, gk_t = pn["gasket_mm"]
     leg, te = pn["angle_mm"]
@@ -356,7 +356,7 @@ def plan_caisson(P: dict, parts: list | None = None, png: bool = False) -> list[
     vC.line((L["up_x_in"], zp - 40), (L["up_x_in"], zp + 10), 0.15, (0, (4, 1.5)))
     vC.line((P["plate"]["tap_half_mm"], zp - 20), (P["plate"]["tap_half_mm"], zp + 4), 0.15, (0, (8, 1.5, 1.5, 1.5)))
     vC.note((P["plate"]["tap_half_mm"], zp - 14), "M5 ↧10 dans la plaque (axe à 208)", -30, -16)
-    s.block((330, 240), [
+    s.block((330, 190), [
         "1. Caisson soudé : parois et fond 6, intérieur 430 x 430, hauteur intérieure 150 (jusqu'à la plaque).",
         "2. Joint plat EPDM 6 x 2 entre le chant des parois et la plaque (pas de gorge dans la plaque).",
         "3. Cornière intérieure 15 x 15 x 3 : 32 vis M5 (carré de demi-côté 208, pas 52) dans la plaque.",
@@ -382,22 +382,22 @@ def plan_aero(P: dict, png: bool = False) -> list[str]:
             .rotate((0, 0, 0), (1, 0, 0), -90))
     mass = sum(ap[k].mass(P) for k in ("diffuseur_conique", "adaptateur_rect_rond", "aspiration_buse"))
     s = Sheet("A3", "Pièces aérauliques imprimées : diffuseur, adaptateur, buse", "TAB-AER-001",
-              "Impression 3D (PA12 ou ABS, à choisir) ; masse CAO à 1240 kg/m³", mass, "0,7:1 ; 1,5:1 ; 1,5:1",
-              "ISO 2768-mK (usinage des brides) ; pièces brutes d'impression : ±0,3", "Diffuseur 2θ = 7° Ø50 -> Ø80 ; adaptateur ; buse col Ø30",
-              rugosite="Ra 6,3 (brut) ; portées de joint Ra 3,2")
+              "Impression 3D (PA12 ou ABS)", mass, "0,55:1 ; 1,5:1",
+              "ISO 2768-mK (brut : ±0,3)", "Diffuseur 2θ = 7° Ø50 -> Ø80 ; adaptateur ; buse col Ø30 (masse à 1240 kg/m³)",
+              rugosite="Ra 6,3 (brut) ; joints 3,2")
     ro, ri = D["d_out"] / 2, D["d_in"] / 2
     dw, ft = A["diffuser_wall_mm"], A["flange_t_mm"]
     fr = ro + A["flange_extra_mm"] / 2
     # diffuseur
-    s.label((130, 280), "DIFFUSEUR CONIQUE (coupe)")
-    vd = s.view(_half(dif), "face", (130, 190), 0.7)
+    s.label((130, 281), "DIFFUSEUR CONIQUE (coupe)")
+    vd = s.view(_half(dif), "face", (130, 185), 0.55)
     zt, zb = 0.0, -D["length"]
     vd.dim_y((fr, zb), (fr, zt), -10, fmt(D["length"], 1))
     vd.dim_x((-ri, zb), (ri, zb), -8, "Ø" + fmt(D["d_in"]) + " (int.)")
     vd.dim_x((-ro, zt - 1), (ro, zt - 1), 6, "Ø" + fmt(D["d_out"]) + " (int.)")
     vd.dim_x((-fr, zt), (fr, zt), 14, "Ø" + fmt(2 * fr) + " (bride)")
     vd.dim_y((-fr, zt - ft), (-fr, zt), 10, fmt(ft))
-    vd.note((ro + dw / 2, zt - 120), f"demi-angle {fmt(D['half_angle_deg'], 2)}°, paroi {fmt(dw)}", 12, -10)
+    vd.note((ro + dw / 2 + 3, zt - 120), f"demi-angle {fmt(D['half_angle_deg'], 2)}°, paroi {fmt(dw)}", 18, -10)
     # adaptateur
     ow, od = F["outlet_mm"]
     w = F["wall_mm"]
@@ -410,7 +410,7 @@ def plan_aero(P: dict, png: bool = False) -> list[str]:
     s.label((380, 280), "ADAPTATEUR (dessus)")
     vt = s.view(adp, "dessus", (380, 235), 1.5)
     vt.dim_y((-(ow + 2 * w) / 2, -(od + 2 * w) / 2), (-(ow + 2 * w) / 2, (od + 2 * w) / 2), 6, fmt(od + 2 * w))
-    vt.note((ow / 2, od / 2), f"sortie ventilateur {fmt(ow)} x {fmt(od)} (à confirmer fiche 9BMC)", 4, -22)
+    vt.note((-ow / 2, -od / 2), f"sortie ventilateur {fmt(ow)} x {fmt(od)} (à confirmer)", -4, -18)
     # buse
     rt, Rf, lip = 15.0, A["bell_flare_r_mm"], A["bell_lip_mm"]
     Lb = Rf + 6.0
@@ -421,8 +421,8 @@ def plan_aero(P: dict, png: bool = False) -> list[str]:
     vb.dim_x((-ro_b, Lb), (ro_b, Lb), 8, "Ø" + fmt(2 * ro_b) + " (collerette de bouche)")
     vb.dim_y((ro_b + 8, 0), (ro_b + 8, Lb), -8, fmt(Lb))
     vb.dim_x((-(ro_b + 8), 0), (ro_b + 8, 0), -22, "Ø" + fmt(2 * (ro_b + 8)) + " (bride)")
-    vb.note((rt + Rf * 0.3, Lb - Rf * 0.7), f"rayon R{fmt(Rf)} (profil ISO 5801 approché)", 10, 20)
-    s.block((30, 112), [
+    vb.note((-(rt + Rf * 0.3), Lb - Rf * 0.7), f"R{fmt(Rf)} (ISO 5801 approché)", -4, 18)
+    s.block((30, 80), [
         "1. Diffuseur : bride Ø110 x 4 côté plenum (face d'appui du joint), conicité 2θ = 7° (L = 245,2).",
         "2. Adaptateur : loft rectangle -> Ø50, parois 2 ; sortie rectangulaire du 9BMC à confirmer (fiche constructeur).",
         "3. Buse : col Ø30, bouche évasée R20, bride arrière Ø90 ; montée dans le caisson d'aspiration, alésage Ø30 du tube.",
