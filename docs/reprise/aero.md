@@ -1,58 +1,69 @@
-# Reprise — lot aéraulique (calc/aero) — arrêt propre (quota), 2026-11-03
+# Reprise — lot aéraulique (calc/aero) — état au 2026-11-04
 
-Aucun commit. `params/design.toml` non modifié par ce lot (fusion V3.1 faite par le coordinateur :
-hex 5, Ø0,30, L1,2, plaque 35 mm). Note complète : `docs/02_aeraulique.md` (état antérieur au
-complément « dérive passive » : sa section 11 « Compensation logicielle » est à requalifier).
+Aucun commit. `params/design.toml` est intact : la fusion V3.1 (hex 5, Ø0,30, L1,2,
+plaque 35 mm) a été faite par le coordinateur. La note complète est
+`docs/02_aeraulique.md` ; son § 11 a été réécrit le 2026-11-04.
 
 ## (a) Résultats acquis
-- Configuration : hex 5,00 / Ø0,30 ± 0,005 / L1,2 / perçage Ø2 ; h(m) = 130,2 − 24,8 ln m, [80 ; 140] µm.
-  Crantage 25–34 µrad RMS, crête 48–61 µrad (10 g). `run_all` passe (303 s). [V modèle]
-- Ventilateur 9BMC validé au point max ; vanne de décharge à deux états requise. [V]
+- Configuration : hex 5,00 / Ø0,30 ± 0,005 / L1,2 / perçage Ø2. Loi d'entrefer
+  h(m) = 130,2 − 24,8 ln m, bornée à [80 ; 140] µm.
+  - Crantage : 25–33 µrad RMS, crête 50–67 µrad à 10 g. [V modèle]
+  - Ventilateur : 9BMC validé au point max ; vanne de décharge à deux états requise. [V]
+- **Décisions utilisateur.** La table caractérise des actionneurs électrostatiques
+  radiaux, sans aucune compensation en ligne. Les forces parasites sont donc des erreurs
+  de mesure. Piste « piégeage volontaire » ANNULÉE.
+- Champ de crantage (`drift_sim.py`) [P, confiance moyenne] :
+  - Il est **conservatif à 95–97 %** et de moyenne nulle : pas de dérive par circulation.
+  - Ses puits sont peu profonds : barrière 0,3–0,5 µJ/kg, vitesse de capture 0,8–1 mm/s,
+    période 6,6 s, Q = 16–60.
+  - Maintien statique : 43 / 30 / 34 µrad, pire direction, pour 2 / 5 / 10 g.
+  - Re-capture d'un palet lâché à ≥ 1 mm/s : seulement si θ ≤ 0–5 µrad. Sinon il glisse à
+    g·θ·τ, soit 0,17 / 0,35 / 0,61 mm/s par µrad.
+  - **Correction** : le « seuil 5–15 µrad » du 2026-11-03 est un seuil de re-capture, pas
+    un seuil de maintien.
+- Bilan des forces parasites (`parasitic.py`) :
+  - Total RSS : 0,69 / 1,78 / 4,0 µN, soit 0,35–0,40 mm/s².
+  - Le crantage et la pente de plaque (30 µrad) dominent.
+  - Rapport signal/parasite de 10 pour F_act ≥ 7 / 18 / 40 µN.
+- Erreur de trajectoire :
+  - Crantage : erreur bornée de 1–4 mm à faible F_act. Elle tombe sous 0,5 mm dès
+    F_act ≥ 100 µN.
+  - Pente : erreur en ½ g θ T², soit 14 mm en 10 s pour 30 µrad.
+- Correction a posteriori par carte étalonnée : gain ≈ 2 (41 → 21 µrad à 10 g) avec un
+  recalage du réseau à 0,1 mm. Avec des mires à 0,05 mm : ≈ 12–14 µrad.
+- Levier de réduction : **Ø0,25 / L1,0 / hex 5** donne un crantage de −34 % (22 / 38 µrad
+  à 10 g, crête < 50 µrad pour toutes les masses, ps 310 Pa). La limite d ≥ 0,30 est à
+  lever avec l'usineur. h = 70 µm ne gagne que 8 %. Le pas et la maille sont sans levier.
 
-## (b) Dérive passive (`drift_sim.py`, exécuté une fois, 465 s) — confiance moyenne [P]
-Hypothèses : champ de crantage du modèle nominal (δ_min ×1), périodisé par Fourier ; Couette seul
-(τ = m h/μA = 18 / 35 / 63 s pour 2 / 5 / 10 g) ; pente uniforme θ0 ; bruit OU σ = 5 µrad, t_c = 2 s.
-- Champ **à 95–97 % conservatif** (rotationnel 3–5 %) ⇒ potentiel, piégeage possible, pas de dérive
-  moyenne à θ0 = 0 (vérifié : v ≈ 0).
-- Puits **peu profonds** : barrière ⇒ vitesse de capture 1,0 / 0,87 / 0,77 mm/s ; **seuil de
-  dépiégeage θ_dep ≈ 15 µrad (2 g), 5–10 µrad (5 et 10 g)** (résolution 5 µrad), bien inférieur à
-  la crête (50–68 µrad) : l'échappement passe par des cols.
-- Au-delà du seuil : régime glissant, v ≈ g θ0 τ (crantage ≈ sans effet) : 0,87 / 1,73 / 3,1 mm/s
-  pour 5 µrad. Bistabilité (piégé/glissant) près du seuil, faible amortissement.
-- Palet lancé (θ0 = 0) : parcourt ≈ v0 τ avant capture (10 mm/s → 17–58 cm ; 1 mm/s → 1–4 cm) ;
-  stabilisation en plusieurs τ (minutes).
-- Bruit 5 µrad (courants d'air) : 2 g reste piégé (96 %, errance 0,5 mm) ; 10 g dépiégé (8 %
-  piégés, errance ≈ 20 mm).
-- Critère « dérive ≤ 0,3 mm/s » en glissement ⇒ θ_eff ≤ 1,7 / 0,9 / 0,5 µrad (2 / 5 / 10 g) :
-  **hors d'atteinte** (budget actuel 50 µrad). Seule voie passive : rester piégé ⇒ pente totale
-  (réglage + planéité locale + balourd + courants d'air) ≤ ≈ 5 µrad (10 g) à 15 µrad (2 g).
-- Force de décrochage à vaincre par les actionneurs : 0,29 / 0,25 / 0,49 µN (= m g θ_dep),
-  négligeable ; le crantage **aide** (seul mécanisme de maintien) plus qu'il ne gêne.
-- Mitigation crête 10 g (cellule 16×16) : h 70 → 59 µrad, 90 → 75, 100 → 103 ; arrondi 0,2 mm → 59 ;
-  hex 2,94 → 54 ; aucune option ne passe sous 50 µrad dans les contraintes (h ≥ 80, d ≥ 0,3).
-  En fonctionnement passif, réduire le crantage **réduit** le piégeage : ne pas mitiger.
-
-## (c) État des fichiers
+## (b) État des fichiers
 | Fichier | État |
 |---|---|
-| `calc/aero/drift_sim.py` | fonctionnel mais **465 s (> 5 min)** ; résultats dans `results/drift_sim.json` + 3 figures `derive_*.png` |
-| autres scripts `calc/aero/*.py`, `run_all.py` | finis ; `drift_sim` pas encore dans `run_all` |
-| `docs/02_aeraulique.md` | section « Fonctionnement passif sans compensation » **non écrite** ; § 11 à requalifier |
+| `calc/aero/trap.py` | nouveau : carte périodique (Fourier + interpolation), Helmholtz, puits, seuil statique |
+| `calc/aero/drift_sim.py` | réécrit, ≈ 10 s : maintien, capture, bruit → `results/drift_sim.json`, figures `derive_*.png` |
+| `calc/aero/parasitic.py` | nouveau, ≈ 8 s : bilan µN / mm/s², erreur de trajectoire vs F_act et T, correction, leviers |
+| `calc/aero/run_all.py` | + drift_sim et parasitic ; chaîne complète 248 s, toutes les étapes < 5 min |
+| `calc/aero/results/recommended_params.toml` | + `[aero.passive]`, `[aero.option_d025]` |
+| `docs/02_aeraulique.md` | § 11 « Fonctionnement passif sans compensation » ; § 0, 3, 13, 14, 15 et historique mis à jour |
+| figures obsolètes | `derive_potentiel_trajectoires.png`, `derive_mitigation_10g.png` supprimées (ancienne version) |
 
-## (d) Étapes restantes
-1. Accélérer `drift_sim.py` (< 5 min) : `keep=1e-2` dans `PeriodicField` (526 → ~100 modes),
-   THETA0 = (0, 2.5, 5, 7.5, 10, 15, 20, 30, 50), T = max(6τ, 120 s), illustration `drift_th30` ;
-   affiner le seuil (pas 1 µrad) ; ajouter variante « piégeage renforcé » (Ø0,40/L1,0, 10 g) et
-   variantes δ_min ×0,5/×2 (le seuil dépend du modèle). L'ajouter à `run_all.py`.
-2. Écrire la section « Fonctionnement passif sans compensation » dans `docs/02_aeraulique.md`
-   (résultats § b), requalifier le § 11 (compensation exclue : garder seulement la nature
-   déterministe/aléatoire), mettre à jour la synthèse et les risques.
-3. Remonter au coordinateur : le critère passif impose ≈ 5 µrad de pente totale (×10 plus
-   sévère que le budget) ou un mécanisme de maintien (piégeage renforcé, amortissement accru).
+## (c) Étapes restantes
+1. Plaque d'essai : deux zones Ø0,30 et Ø0,25. Y mesurer Cd, ps(m) et le crantage réel
+   (oscillations libres, dérive) pour recaler le terme de quantité de mouvement.
+2. Arbitrage du coordinateur et de l'utilisateur :
+   - Ø0,25 ou non : passer la clé `[aero.option_d025]` dans design.toml si oui, puis
+     relancer `run_all` (optimize borne d ≥ 0,30 : modifier `D_MIN`) ;
+   - pente de plaque ≤ 10 µrad ;
+   - mires de recalage du réseau en CAO.
+3. Réviser le cahier des charges : y exprimer l'exigence en force parasite (µN) ou en
+   erreur de trajectoire, plutôt qu'en pente seule.
+4. Monte-Carlo de dispersion à Ø0,25 (non fait ; estimé à ≈ 10 µrad RMS).
 
-## (e) Commandes
+## (d) Commandes
 ```bash
 cd /home/user/Airtable
-python3 -m calc.aero.run_all            # ≈ 5 min
-python3 -m calc.aero.drift_sim          # ≈ 8 min avant accélération
+python3 -m calc.aero.run_all               # ≈ 4–5 min (optimize ≈ 100–190 s)
+python3 -m calc.aero.run_all --skip-optimize
+python3 -m calc.aero.drift_sim             # ≈ 10 s
+python3 -m calc.aero.parasitic             # ≈ 8 s
 ```
+`OPENBLAS_NUM_THREADS=1` est forcé par `calc/aero/__init__.py`.

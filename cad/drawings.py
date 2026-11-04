@@ -102,7 +102,7 @@ def plan_plaque(P: dict, m_full_kg: float | None = None, png: bool = False) -> l
     vc = s.view(cut, "face", (215, 118), 0.7)
     vc.dim_x((-260, -t), (260, -t), -8, "520")
     vc.dim_y((260, -t), (260, 0), -8, "35")
-    vc.note((-259.5, -0.5), "chanfrein 1 x 45°", 10, 10)
+    vc.note((259.5, -0.5), "chanfrein 1 x 45°", -10, 10)
     s.datum(vc.P(120, 0), "A", (0, 1))
     # --- détail de l'orifice (20:1) ------------------------------------------------------------------------------------------
     sd = 16.0
@@ -443,3 +443,9 @@ def make_all(P: dict, m_plate_kg: float | None = None, png: bool = False) -> dic
         except Exception as e:  # pragma: no cover
             out[name] = {"erreur": repr(e)}
     return out
+
+
+if __name__ == "__main__":
+    from cad.common import get_params
+    import json
+    print(json.dumps(make_all(get_params(), None, png=False), indent=1, ensure_ascii=False))

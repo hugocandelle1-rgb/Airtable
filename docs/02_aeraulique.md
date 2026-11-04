@@ -1,6 +1,6 @@
 # 02 — Aéraulique : perçage, film d'air, crantage, chaîne ventilateur → plaque
 
-> Lot aéraulique, version du 2026-11-03. Calculs : `calc/aero/` (chaîne complète
+> Lot aéraulique, version du 2026-11-04. Calculs : `calc/aero/` (chaîne complète
 > `python3 -m calc.aero.run_all`, ≈ 6 min sur 4 cœurs, chaque étape < 5 min).
 > Résultats : `calc/aero/results/*.json` ; valeurs à fusionner :
 > `calc/aero/results/recommended_params.toml` (`params/design.toml` n'est pas modifié).
@@ -25,8 +25,9 @@ Points clés :
 
 1. **Le crantage est le terme dominant du budget de pente côté aéraulique.** Avec la
    configuration retenue il vaut ≈ 33 µrad RMS (57 µrad crête) pour le palet de 10 g,
-   25–29 µrad RMS pour 2–7,5 g. Il est **périodique, de moyenne nulle et déterministe** :
-   il peut être cartographié et compensé par le contrôle des robots (§ 11).
+   25–29 µrad RMS pour 2–7,5 g. Il est **périodique, de moyenne nulle et conservatif à
+   95 %**. La table caractérise les palets sans compensation en ligne ; c'est donc une
+   **erreur de mesure** de 0,5–3 µN RMS (§ 11), corrigeable seulement a posteriori (gain ≈ 2).
 2. Le passage de Ø0,40 à **Ø0,30 mm** et l'**entrefer cible dépendant de la masse** (les
    palets lourds volent plus bas, car la poussée de quantité de mouvement du film croît
    comme q²) divisent le crantage par ≈ 2,7 par rapport à la baseline, à nombre de trous égal.
@@ -109,7 +110,7 @@ DF −166,1 / linéarisé −165,9 µrad (10 g).
 
 **Balourd** : k_θ/W = 0,52–0,58 m ⇒ **0,86–0,96 µrad de pente équivalente par µm de
 décentrage du centre de gravité** (10 g → 2 g). Un décentrage de 0,1 mm vaut ≈ 90 µrad :
-les palets doivent être équilibrés (≤ 5 µm) ou leur balourd étalonné et compensé (§ 11).
+les palets doivent être équilibrés (≤ 5 µm), ou leur balourd étalonné et retranché en post-traitement (§ 11.4).
 
 ## 4. Crantage : mécanismes (`film.py`, `cogging.py`)
 
@@ -372,33 +373,150 @@ palet proche du bord de la zone de travail (nul au centre par symétrie) **[P]**
 
 ![thermique](../calc/aero/figures/thermique_plaque.png)
 
-## 11. Compensation logicielle : efforts déterministes et aléatoires
+## 11. Fonctionnement passif sans compensation : les forces parasites comme erreur de mesure
 
-Les efforts parasites dans le plan se rangent en deux familles. Les **déterministes et
-cartographiables** peuvent être soustraits par le contrôle des robots (anticipation) ou
-intégrés à une carte d'efforts ; les **aléatoires** forment le plancher irréductible.
+> Décisions de l'utilisateur (2026-11-03/04) : les palets portent des **actionneurs
+> électrostatiques radiaux** et la table sert à **caractériser** le mouvement qu'ils
+> produisent. Les palets ne sont pas pilotés en position et **aucune compensation en ligne**
+> n'est admise. Toute force dans le plan qui dépend de la position ou du temps est donc une
+> **erreur de mesure** : il faut la minimiser et la chiffrer. La piste « piégeage volontaire »
+> (puits de crantage plus profonds) est **abandonnée**.
+> Scripts : `calc/aero/drift_sim.py` (≈ 10 s), `calc/aero/parasitic.py` (≈ 8 s),
+> bibliothèque `calc/aero/trap.py`.
 
-| Effort | Amplitude (pente équiv.) | Nature | Cartographie / compensation |
+### 11.1 Nature du champ de crantage (`drift_sim.py`, `trap.py`) [P]
+
+Le champ s(x) est calculé sur une grille 24 × 24 de la cellule, périodisé par série de
+Fourier, puis interpolé. Il est **conservatif à 95–97 %** (décomposition de Helmholtz) et sa
+**moyenne est nulle** : il dérive d'un potentiel périodique. Il n'y a donc pas de
+circulation qui entraînerait une dérive systématique. Ses puits sont peu profonds :
+
+| Masse | crantage RMS / crête (µrad) | barrière (µJ/kg) | vitesse de capture | oscillation (période ; Q = ωτ) | τ = m h/(μA) | maintien statique (pire / meilleure direction) |
+|---|---|---|---|---|---|---|
+| 2 g | 24,5 / 50,5 | 0,50 | 1,0 mm/s | 6,7 s ; 16 | 18 s | 43 / 51 µrad (0,85 µN) |
+| 5 g | 26,2 / 57,4 | 0,37 | 0,86 mm/s | 6,6 s ; 34 | 35 s | 30 / 50 µrad (1,5 µN) |
+| 10 g | 32,1 / 67,3 | 0,30 | 0,77 mm/s | 6,5 s ; 60 | 63 s | 34 / 56 µrad (3,3 µN) |
+
+- Un palet **posé sans vitesse** au fond d'un puits y reste tant que la pente lente reste
+  sous 30–43 µrad. Il oscille alors autour du fond, avec un amortissement très faible
+  (temps 2τ = 35–125 s).
+- Un palet **en mouvement**, actionneurs coupés à v0 ≥ 1 mm/s, n'est re-capturé que si la
+  pente résiduelle est ≤ 0–5 µrad. Au-delà, il glisse indéfiniment à v ≈ g θ τ, soit
+  0,17 / 0,35 / 0,61 mm/s par µrad (2 / 5 / 10 g). L'amortissement de Couette est le seul
+  frein : il est très faible (Q = 16–60).
+- Une force aléatoire de 0,1 µN (courant d'air de 17 mm/s sous l'écran) ne fait pas sortir
+  un palet de son puits. Le palet erre de 0,06 à 0,15 mm.
+- La version du 2026-11-03 donnait un « seuil » de 5–15 µrad. Il venait de palets lâchés en
+  position quelconque, donc chargés d'énergie potentielle. Ce chiffre correspond au seuil de
+  **re-capture**, pas au seuil de maintien.
+
+**Pour une table de caractérisation, ces puits sont une erreur et non une aide** : ils
+retiennent un palet faiblement actionné et l'empêchent de démarrer. La force à vaincre est
+de 0,9 / 1,5 / 3,3 µN (2 / 5 / 10 g, pire direction). Ils modulent ensuite le mouvement à
+la fréquence v/p.
+
+![dérive](../calc/aero/figures/derive_vitesse_vs_pente.png)
+![potentiel](../calc/aero/figures/derive_potentiel.png)
+
+### 11.2 Bilan des forces parasites (`parasitic.py`)
+
+Les forces sont exprimées en pente équivalente, en µN et en accélération parasite
+(g × pente ; 10 µrad = 0,098 mm/s², quelle que soit la masse).
+
+| Terme (RMS / crête) | 2 g (µN) | 5 g (µN) | 10 g (µN) | nature |
+|---|---|---|---|---|
+| crantage (basculement + quantité de mouvement) | 0,48 / 0,99 | 1,29 / 2,81 | 3,15 / 6,6 | déterministe, périodique (p = 5 mm), moyenne nulle |
+| jets de bord (ordre de grandeur) | 0,18 / 0,44 | 0,50 / 1,26 | 1,18 / 2,9 | déterministe, périodique |
+| dispersion des orifices ±0,005 mm | 0,17 / 0,30 | 0,32 / 0,56 | 0,51 / 0,88 | statique, aléatoire de trou à trou |
+| pente résiduelle de plaque (budget structure 30 µrad) | 0,42 / 0,59 | 1,04 / 1,47 | 2,1 / 2,9 | statique, basse fréquence spatiale |
+| courants d'air résiduels sous écran | 0,10 / 0,20 | 0,10 / 0,20 | 0,10 / 0,20 | aléatoire, instationnaire |
+| balourd du palet (5 µm) | 0,09 | 0,22 | 0,42 | déterministe, tourne avec le palet |
+| **total RSS (RMS)** | **0,69 µN** | **1,78 µN** | **4,0 µN** | — |
+| accélération parasite RMS | 0,35 mm/s² | 0,36 mm/s² | 0,40 mm/s² | — |
+
+**Rapport signal / parasite** = F_act / F_par. Sans correction, il faut F_act ≥ 7 / 18 /
+40 µN pour un rapport de 10 (2 / 5 / 10 g) et ≥ 70 / 180 / 400 µN pour un rapport de 100.
+Le crantage et la pente de plaque dominent, à parts comparables.
+
+### 11.3 Erreur de trajectoire sur une fenêtre de mesure
+
+Le calcul suit 48 palets partant du repos en position et en direction aléatoires, sous
+F_act constante. On les compare à la trajectoire idéale (Couette seul). Le tableau donne
+l'erreur RMS en mm et, entre parenthèses, le déplacement idéal. « — » signale qu'un palet
+sortirait de la zone de 300 mm.
+
+| 10 g | T = 1 s | T = 5 s | T = 10 s | T = 30 s |
+|---|---|---|---|---|
+| F = 1 µN, crantage seul | 0,15 (0,0) | 1,6 (1,2) | 4,0 (4,7) | 25 (39) |
+| F = 1 µN, crantage + pente 30 µrad | 0,22 | 3,5 | 12,4 | 102 |
+| F = 10 µN, crantage seul | 0,15 (0,5) | 1,6 (12) | 3,8 (48) | — |
+| F = 100 µN, crantage seul | 0,08 (5) | 0,5 (122) | — | — |
+| F = 1 mN, crantage seul | 0,06 (50) | — | — | — |
+| pente 30 µrad seule (toute F) | 0,15 | 3,6 | 14,0 | 114 |
+
+(2 g et 5 g : même ordre de grandeur, voir `parasitic.json` et la figure.)
+
+- Le **crantage** donne une erreur **bornée**, de 1 à 4 mm, quand le palet est lent :
+  oscillation dans les puits. Elle tombe sous 0,1–0,5 mm dès que le palet traverse vite
+  les cellules (F ≥ 100 µN), car le champ de moyenne nulle se moyenne alors.
+- La **pente** donne une erreur qui croît comme ½ g θ T² (T ≪ τ) : 14 mm en 10 s pour
+  30 µrad. Pour les fenêtres longues, elle domine.
+
+![erreur](../calc/aero/figures/parasite_erreur_trajectoire.png)
+![bilan](../calc/aero/figures/parasite_bilan.png)
+
+### 11.4 Correction a posteriori par une carte de forces étalonnée (post-traitement)
+
+Une correction a posteriori est envisageable, sans aucun pilotage : on retranche des
+trajectoires mesurées une carte de forces F_par(x, m) étalonnée.
+
+- **Pente de plaque** : statique et lisse. Elle s'étalonne par la dérive de palets non
+  actionnés (moyennée sur plusieurs cellules) et par les ADXL355. Incertitude ≈ 2–3 µrad.
+- **Crantage et jets de bord** : périodiques, de moyenne nulle et identiques sur toute la
+  zone. On les représente par une série de Fourier (2–3 anneaux) par masse, étalonnée sur
+  quelques cellules (oscillations libres dans les puits, ou palets à faible F_act connue).
+  La limite est le **recalage du réseau de trous** dans le repère de mesure. Le crantage
+  résiduel vaut 6 / 8 / 10 µrad pour un recalage δ = 0,05 mm, 12 / 15 / 18 µrad pour
+  0,1 mm et 17 / 22 / 28 µrad pour 0,2 mm (2 / 5 / 10 g). Une erreur d'amplitude de ±10 %
+  y ajoute 1 µrad.
+- **Balourd** : 2 paramètres par palet, dans son repère.
+- **Non cartographiables** : la dispersion des orifices (5–8,5 µrad) et les courants d'air.
+- Bilan avec δ = 0,1 mm : 35 → 17 µrad (2 g), 36 → 18 (5 g), 41 → 21 µrad (10 g), soit un
+  **gain d'environ 2**. Avec δ = 0,05 mm (mires gravées dans la plaque, repérées par la
+  caméra), le résultat est d'environ 12–14 µrad. L'incertitude du modèle de quantité de
+  mouvement (facteur 2) est absorbée par l'étalonnage.
+
+### 11.5 Réduction à la source (leviers évalués à 10 g, h = 80 µm)
+
+| Variante | crantage RMS / crête (µrad) | ps (Pa) | commentaire |
 |---|---|---|---|
-| **Crantage périodique** (basculement + quantité de mouvement + jets de bord) | 25–34 µrad RMS, 48–61 crête | déterministe, **périodique sur la maille hex, moyenne nulle**, fonction de (x mod réseau, m, ps) | carte unique valable sur toute la zone : 2–3 premiers anneaux du réseau réciproque (≈ 6–18 coefficients complexes par masse), interpolés en masse. Modèle `cogging.json` (cartes 16 × 16) **à recaler** sur une mesure (incertitude ×2 du terme de quantité de mouvement). Exige la position du palet dans le repère du réseau à ≈ p/20 = 0,25 mm (recaler l'origine du réseau à ±0,1 mm). Résidu attendu après recalage : 5–10 µrad. |
-| Ondulation d'entrefer (2–2,5 µm c-à-c) | — | déterministe, périodique | sans effet latéral direct ; utile pour les capteurs d'entrefer |
-| **Pente de la plaque** (réglage, planéité, flèche poids propre) | budget structure | déterministe, statique, basse fréquence spatiale | carte de pente (dérive de palets, ADXL355) ; la flèche sous pression varie avec ps ⇒ carte paramétrée par ps (linéaire) |
-| Dérive thermique / sol | ≤ 5 µrad | lente, quasi déterministe | suivi par les ADXL355 + TMP117, recalage périodique |
-| **Balourd du palet** | 0,86–0,96 µrad/µm | déterministe, **propre à chaque palet, tourne avec son cap** | 2 paramètres par palet (e_x, e_y dans son repère), étalonnés par dérive à 2–4 caps |
-| Traînée visqueuse de Couette | c = μA/h (τ = 18–62 s) | déterministe, ∝ vitesse | anticipation en vitesse (h connu par la table) |
-| Entraînement de bord de zone | 3–4 µrad près du bord | déterministe en moyenne, fluctuant | carte en bordure de zone, ou marge supplémentaire |
-| Décalage systématique de Ø (lot) | Δh ±3–4 µm | déterministe | absorbé par l'étalonnage de la table ps(m) |
-| **Dispersion des Ø d'orifice** | 5–8,5 µrad RMS (±0,005) | statique mais **aléatoire de trou à trou** | théoriquement cartographiable (pas ≤ 0,3 mm sur toute la zone), **impraticable** ⇒ traité comme aléatoire |
-| Courants d'air résiduels sous écran | ≤ 5 µrad visé | aléatoire, instationnaire | non compensable : écran |
-| Fluctuations de pression (±0,3 Pa) | Δh ±0,1–0,4 µm | aléatoire | sans effet latéral notable |
-| Colmatage / poussière | jusqu'à 160 µrad (trou bouché) | aléatoire, évolutif | filtration ePM1, inspection, re-cartographie périodique |
+| retenu : hex 5, Ø0,30, L1,2 | 33 / 57 | 266 | — |
+| h = 70 µm | 30 / 54 | 243 | gain de 8 % ; demande h_min = 70 µm au cahier des charges |
+| **Ø0,25, L1,0, hex 5** | **22 / 38** | 310 | **−34 %** ; 2 g : 22 / 38 ; 5 g : 21 / 36 ; débit max ≈ 15 m³/h |
+| Ø0,25, L1,0, hex 4 | 40 / 75 | 251 | plus mauvais |
+| hex 2,94, Ø0,30 | 33 / 72 | 192 | sans gain |
+| hex 3,5, Ø0,30 | 38 / 83 | 208 | sans gain |
 
-Conséquence pour le budget : si la compensation logicielle du crantage est acceptée, le terme
-aéraulique résiduel (dispersion des orifices 8,5 µrad RMS + crantage résiduel ≈ 5–10 µrad
-+ courants d'air ≤ 5 µrad) reste ≈ 12–14 µrad RMS ; sans compensation, le crantage seul
-(33 µrad RMS, 57 µrad crête à 10 g) dépasse l'objectif de 20 µrad et le budget crête de 50 µrad
-pour les palets lourds. **Décision utilisateur requise** (cf. variante économique de
-`docs/reprise/00_coordination.md`).
+Le pas, la maille et l'entrefer sont déjà optimisés (§ 5). **Le seul levier significatif
+est un orifice plus fin**, contre la limite d'usinabilité d ≥ 0,30 mm retenue jusqu'ici.
+Avec Ø0,25 ± 0,005 mm, la part aléatoire de la dispersion passe d'environ 8,5 à environ
+10 µrad RMS (estimation par mise à l'échelle). L'orifice est aussi plus sensible au
+colmatage. La plaque, la pente, le balourd et l'écran restent les autres postes.
+
+### 11.6 Recommandation
+
+1. **Garder la maille hex 5 mm** (configuration fusionnée dans `design.toml`).
+2. **Percer sur la plaque d'essai deux zones, Ø0,30 / L1,2 et Ø0,25 / L1,0**, puis mesurer
+   le crantage réel en dérive libre et en oscillation dans les puits. Adopter Ø0,25 si
+   l'usineur tient ±0,005 mm : −34 % de crantage, et crête < 50 µrad pour toutes les masses.
+3. Exiger de la structure une pente résiduelle de plaque ≤ 10 µrad après réglage et
+   cartographier la pente. Pour les fenêtres de mesure ≥ 5 s, la pente domine l'erreur
+   de trajectoire.
+4. Prévoir dès la CAO des **mires de recalage du réseau** (repérage du réseau à ±0,05 mm).
+   Elles rendent la correction a posteriori efficace (gain ≈ 2–3).
+5. Choisir F_act et la fenêtre de mesure à l'aide du § 11.3. Sans correction, l'erreur
+   relative de trajectoire reste sous 1 % pour F_act ≳ 100 µN avec T ≤ 1–5 s. Pour
+   F_act ≲ 10 µN, la correction a posteriori et des fenêtres courtes sont indispensables.
 
 ## 12. Recommandations de fabrication et d'essai
 
@@ -436,6 +554,8 @@ pour les palets lourds. **Décision utilisateur requise** (cf. variante économi
 | Aspiration | caisson 320 × 320 × 220, filtre ePM1 287 × 287 × 48, **buse col Ø30** profil ISO 5801 |
 | Prises de pression | plenum : 4 piquages Ø4 en chambre de tranquillisation (milieu des parois) + 1 centre ; buse : col et caisson |
 | Écran | parois 120 mm PMMA/verre 4–6 mm au bord de la zone percée, couvercle nid d'abeille alu cellule 3–6 × 20 mm |
+| Mires de recalage du réseau | ≥ 3 mires gravées en face supérieure, hors zone de travail, cotées par rapport au réseau de trous à ±0,02 mm : recalage caméra ±0,05 mm pour la correction a posteriori (§ 11.4) |
+| Plaque d'essai | 100 × 100, hex 5, deux zones Ø0,30/L1,2 et Ø0,25/L1,0 (choix de l'orifice, § 11.6) |
 
 ## 14. Données pour le firmware
 
@@ -453,15 +573,19 @@ pour les palets lourds. **Décision utilisateur requise** (cf. variante économi
 - **Vanne de décharge** : ouverte pour ps < 223 Pa, fermée pour ps > 253 Pa (hystérésis
   autour de 238 Pa) ; commutation à débit de palet nul de préférence (saut de vitesse).
 - **Débit** (buse col Ø30, α = 0,98) : Q = α·π·0,03²/4·√(2 Δp_col/ρ) ; 4–39 Pa sur la plage.
-- **Compensation** (logiciel hôte) : carte de crantage périodique (`cogging.json`, `maps`),
-  balourd par palet, traînée de Couette c = μ·A/h(m) (τ = 18–62 s), carte de pente.
+- **Pas de compensation en ligne** (décision utilisateur). Le logiciel hôte peut corriger
+  a posteriori les trajectoires (§ 11.4) avec la carte de crantage périodique
+  (`cogging.json`, `drift_sim.json`), le balourd par palet, la traînée de Couette
+  c = μ·A/h(m) (τ = 18–63 s) et la carte de pente.
 
 ## 15. Limites et risques ouverts
 
 1. **Modèle de quantité de mouvement du film** (régularisation δ_min) : facteur ≈ 2 sur le
    terme dominant à 10 g ⇒ crantage 27–62 µrad RMS. Seule une mesure tranche (§ 12.3).
-2. **Compensation logicielle non tranchée** par l'utilisateur : sans elle, les palets lourds
-   (≥ 7,5 g) dépassent l'objectif de 20 µrad RMS et frôlent/dépassent le budget crête.
+2. **Pas de compensation en ligne** (table de caractérisation) : les forces parasites
+   (0,7 / 1,8 / 4,0 µN RMS pour 2 / 5 / 10 g) bornent la plus petite F_act mesurable
+   (§ 11.2–11.3). La correction a posteriori dépend du recalage du réseau (±0,05–0,1 mm).
+   Le levier Ø0,25 reste à valider à l'usinage.
 3. Tolérance Ø0,30 ± 0,005 mm et ébavurage de l'entrée côté perçage borgne : exigeants ;
    à valider avec l'usineur sur la plaque d'essai.
 4. Vitesse minimale réelle du 9BMC (et du 9BMB) sous 20 % PWM non documentée ; la vanne de
@@ -480,3 +604,8 @@ pour les palets lourds. **Décision utilisateur requise** (cf. variante économi
   Ø0,30 / L1,2 (J = 32,7 µrad) retenu selon le critère d'origine ; hex 2,94 équivalent en
   crantage mais dominé en débit et en nombre de trous ; pas magiques en comparaison
   informative ; Monte-Carlo, jets, thermique, validation ventilateur, compensation logicielle.
+- 2026-11-04 : compensation exclue (table de caractérisation, actionneurs électrostatiques).
+  § 11 réécrit : champ de crantage conservatif, puits, erreur de mesure (µN, mm/s²,
+  erreur de trajectoire vs F_act et T), correction a posteriori, levier Ø0,25 (−34 %).
+  Nouveaux scripts `trap.py`, `drift_sim.py` (accéléré, ≈ 10 s) et `parasitic.py`,
+  intégrés à `run_all` (248 s).

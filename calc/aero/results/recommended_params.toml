@@ -7,7 +7,7 @@
 
 [meta]
 status = "verified"                 # chaîne complète exécutée (python3 -m calc.aero.run_all)
-date = "2026-11-03"
+date = "2026-11-04"
 source = "calc/aero/*.py ; optimisation : results/optimization.json ; table : results/setpoints.json"
 
 [plate]
@@ -53,3 +53,22 @@ screen_height_mm = 120.0
 gap_ripple_pp_um = 2.5              # ondulation d'entrefer sur la cellule (10 g)
 dh_dps_um_per_Pa = [1.32, 0.71, 0.37]   # 2 / 5 / 10 g ⇒ ±0,3 Pa = ±0,4 µm (2 g)
 plate_thermal_tau_min = 14
+
+[aero.passive]                      # table de caractérisation, sans compensation (docs/02 § 11)
+cogging_field_conservative_frac = [0.97, 0.95, 0.95]      # 2 / 5 / 10 g
+hold_threshold_urad = [43, 30, 34]  # maintien statique, pire direction (puits de crantage)
+capture_velocity_mm_s = [1.0, 0.86, 0.77]
+drift_per_urad_mm_s = [0.17, 0.35, 0.61]                   # g·τ, palet glissant
+parasitic_force_rms_uN = [0.69, 1.78, 4.0]                 # total RSS (crantage, jets, orifices, pente 30 µrad, air, balourd)
+parasitic_acc_rms_mm_s2 = [0.35, 0.36, 0.40]
+after_post_correction_rms_uN = [0.33, 0.89, 2.07]          # recalage du réseau ±0,1 mm
+lattice_registration_mm = 0.05      # mires de recalage recommandées
+plate_slope_target_urad = 10.0      # pente résiduelle de plaque souhaitée (erreur ∝ ½ g θ T²)
+
+[aero.option_d025]                  # levier de réduction du crantage, à valider sur plaque d'essai
+orifice_d_mm = 0.25
+orifice_length_mm = 1.0
+pitch_mm = 5.0
+cogging_rms_peak_urad_10g = [22, 38]   # vs 33 / 57 pour Ø0,30
+ps_10g_Pa = 310
+Q_max_m3h = 15

@@ -83,6 +83,7 @@ def main(argv=None) -> dict:
     ap.add_argument("--full", action="store_true", help="génère aussi la plaque complète (≈5700 trous)")
     ap.add_argument("--full-timeout", type=float, default=600.0, help="délai max plaque complète (s)")
     ap.add_argument("--no-svg", action="store_true")
+    ap.add_argument("--no-plans", action="store_true", help="sans les mises en plan 2D (SVG/PDF)")
     ap.add_argument("--out", default=None, help="dossier de sortie (défaut cad/export)")
     ap.add_argument("--no-interference", action="store_true")
     ap.add_argument("--set", action="append", default=[], metavar="section.cle=valeur")
@@ -257,6 +258,15 @@ def main(argv=None) -> dict:
     }
     caisson_relief = byname["caisson"].note
 
+    # ---- mises en plan 2D cotées (SVG + PDF) ---------------------------------------------------------------------------
+    plans_report = None
+    if not args.no_plans:
+        from cad import drawings
+        t = time.time()
+        drawings.PLANS = OUT / "plans"
+        plans_report = drawings.make_all(P, m_full, png=False)
+        T["plans_s"] = round(time.time() - t, 2)
+
     # ---- plaque complète (option) ----------------------------------------------------------------------------------
     full = None
     if args.full:
@@ -272,6 +282,7 @@ def main(argv=None) -> dict:
         "plaque": plate_report,
         "plaque_complete": full,
         "tole_perforee": baffle_report,
+        "plans": plans_report,
         "jeu_moteur_caisson_mm": None if jeu_moteur is None else round(jeu_moteur, 2),
         "caisson_note": caisson_relief,
         "masses_par_groupe_kg": {k: round(v, 3) for k, v in sorted(gm.items())},
