@@ -542,6 +542,8 @@ def _oriented(shape: cq.Workplane, view: str) -> cq.Workplane:
         return shape
     if view == "dessous":       # caméra en -Z (image miroir en Y)
         return shape.rotate((0, 0, 0), (1, 0, 0), 180)
+    if view == "droite":        # caméra en +X, Z vers le haut (raw = (y, z))
+        return shape.rotate((0, 0, 0), (0, 0, 1), -90).rotate((0, 0, 0), (1, 0, 0), -90)
     if view == "face":          # caméra en -Y, Z vers le haut de l'écran
         return shape.rotate((0, 0, 0), (1, 0, 0), -90)
     if view == "iso":           # caméra en (+X, -Y, +Z), élévation ~35 deg

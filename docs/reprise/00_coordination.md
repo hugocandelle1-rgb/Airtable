@@ -104,8 +104,8 @@ table sert à **caractériser** le mouvement qu'ils produisent. Conséquences :
 - toute force dans le plan dépendant de la position (pente, crantage, poussée de bord,
   balourd) est une **erreur de mesure** ⇒ minimiser, ne jamais « piéger » volontairement ;
 - critère = accélération parasite admissible vs F_act sur une fenêtre de mesure T ;
-- nouveau lot **compatibilité électrostatique** (`docs/08_electrostatique.md`) : forces
-  d'image de la plaque conductrice, charge des palets, potentiel/traitement de surface,
-  écran antistatique, humidité.
+- compatibilité électrostatique **reportée** par l'utilisateur : hypothèse « aucune
+  interaction palet/plaque » ; matériaux alternatifs de plaque à étudier plus tard
+  (questions listées dans `docs/08_electrostatique.md`).
 - Données attendues de l'utilisateur : ordre de grandeur de F_act (ou tension/géométrie
   des électrodes) et durée typique d'une mesure.

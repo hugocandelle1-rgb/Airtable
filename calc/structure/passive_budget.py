@@ -1,40 +1,47 @@
-"""Budget de pente « passif » (sans compensation logicielle).
+"""Budget de force parasite dans le plan (table de caractérisation).
 
-Décision utilisateur (2026-11-03) : les palets ne sont pas pilotés dans le plan et ne
-doivent pas dériver passivement. Résultat aéro (`calc/aero/drift_sim.py`) : un palet
-reste piégé dans les puits de crantage tant que la pente LOCALE totale, à l'échelle de
-plusieurs mailles, reste sous un seuil θ_dep. Valeurs actuelles : 15 µrad à 2 g,
-5–10 µrad à 5–10 g ; le lot aéro cherche à les porter à 30–50 µrad.
+Correction de l'utilisateur (2026-11-04) : les palets portent des actionneurs
+électrostatiques radiaux. La table sert à **caractériser** le mouvement dans le plan
+que produit cet actionnement. Toute force parasite dans le plan est donc une
+**erreur de mesure** et doit rester ≪ F_act. Les sources de force parasite sont la
+pente locale, le crantage, le balourd et les courants d'air.
 
-Pour θ_dep ∈ {5, 10, 15, 20, 30, 50} µrad, le script :
-  1. alloue le budget entre les postes ;
-  2. en déduit les exigences de fabrication et d'exploitation ;
-  3. dit si le seuil est réalisable, et à quel coût relatif.
+Le paramètre principal est l'accélération parasite admissible a_par, exprimée en
+pente équivalente θ = a_par/g. Les niveaux étudiés sont 5, 10, 20, 30 et 50 µrad.
+Pour chaque niveau, le script donne :
+  1. la répartition du budget entre les postes (somme quadratique ≤ θ) ;
+  2. les exigences déduites : planéité et procédé, thermique, recalage,
+     équilibrage des palets, tolérance des orifices, courants d'air ;
+  3. l'erreur de position sur une fenêtre de mesure T = 1 / 5 / 10 / 30 s ;
+  4. le rapport F_par/F_act pour m = 2…10 g et F_act = 0,1 µN … 1 mN ;
+  5. la faisabilité et le coût relatif.
 
-Règle de cumul. Les termes sont indépendants : on fait leur somme quadratique, avec
-une marge de 20 % pour la bistabilité près du seuil (RSS ≤ 0,8·θ_dep). La somme
-arithmétique est donnée en contrôle ; c'est le pire cas où tous les termes sont
-alignés au même point.
+Erreur de position. Le calcul balistique ½·a·T² est celui demandé. La valeur
+amortie a·τ·[T − τ(1 − e^(−T/τ))] tient compte du frottement de Couette
+(τ = m·h/(μA), soit 18 s à 2 g et 63 s à 10 g) ; elle est plus petite quand T est
+de l'ordre de τ.
 
-Répartition. Chaque poste reçoit une part fixe de la variance (`SHARE`). Un poste qui
-ne peut pas descendre sous son plancher technique (`FLOOR`) est fixé au plancher, et
-la variance restante est redistribuée entre les autres. Le seuil est déclaré non
-réalisable si la somme quadratique des planchers dépasse 0,8·θ_dep.
+Répartition. Les postes d'exploitation (réglage, stabilité, sol, poids propre,
+pression, thermique) gardent la valeur de la conception actuelle. Ils ne sont
+réduits vers leur plancher que si nécessaire. Le reste de la variance va aux postes
+coûteux (planéité, crantage, dispersion des orifices, balourd, courants d'air), au
+prorata de `DRIVERS` et chacun au moins à son plancher. Un niveau est non
+réalisable si la somme quadratique des planchers dépasse θ.
+
+Crantage (lot aéro). Il vaut 25–34 µrad RMS brut, comme force périodique de
+moyenne nulle. Seule une correction a posteriori de la mesure, par une carte de
+crantage étalonnée, le ramène à 5–10 µrad. Un niveau qui exige moins que le
+crantage brut suppose donc cette correction : c'est **une décision utilisateur à
+prendre** (ce n'est pas un pilotage des palets).
 
 Sources des sensibilités :
-  - planéité : `machining.py` (forme cylindrique ; ondulation λ = 100 mm filtrée par
-    le palet) ;
+  - planéité : `machining.py` ;
   - poids propre, frottement, pression : `support_study.json` ;
   - thermique : `thermal.json` ;
-  - réglage : `kinematic_coupling.json` et `thermal.json` (embase ADXL355) ;
-  - balourd : 0,9 µrad/µm (`docs/02_aeraulique.md` § 3) ;
-  - dispersion des orifices : 8,5 µrad RMS pour ±0,005 mm (2 g, pire masse),
-    proportionnelle à la tolérance (`docs/02_aeraulique.md` § 7) ;
-  - courants d'air : 5 µrad pour 17 mm/s (2 g), pente ∝ v² (`docs/02_aeraulique.md`
-    § 10).
-
-Les deux derniers postes relèvent du lot aéro. Ils figurent ici parce qu'ils consomment
-le même seuil.
+  - réglage : `kinematic_coupling.json` ;
+  - lot aéro (`docs/02_aeraulique.md`) : balourd 0,9 µrad/µm, dispersion des
+    orifices 8,5 µrad RMS pour ±0,005 mm, courants d'air 5 µrad pour 17 mm/s,
+    crantage 33 µrad RMS (10 g).
 
     python3 -m calc.structure.passive_budget
 """
@@ -55,8 +62,14 @@ from calc.structure.machining import puck_filter
 RES = REPO_ROOT / "calc" / "structure" / "results"
 FIG = REPO_ROOT / "calc" / "structure" / "figures"
 
-THRESHOLDS_URAD = (5, 10, 15, 20, 30, 50)
-MARGIN = 0.8                       # RSS ≤ 0,8 θ_dep (bistabilité près du seuil)
+LEVELS_URAD = (5, 10, 20, 30, 50)  # pente équivalente admissible θ = a_par/g
+THRESHOLDS_URAD = LEVELS_URAD
+MARGIN = 1.0                       # somme quadratique ≤ θ
+WINDOWS_S = (1, 5, 10, 30)
+MASSES_G = (2, 5, 10)
+TAU_S = {2: 18.0, 5: 35.0, 10: 63.0}   # amortissement de Couette (lot aéro)
+F_ACT_N = (1e-7, 1e-6, 1e-5, 1e-4, 1e-3)
+COGGING_RAW, COGGING_CORR = 33.0, 7.5  # µrad RMS : brut (10 g) / après correction a posteriori (5–10)
 
 # Hypothèses d'exploitation (à confirmer sur site)
 FRAME_TILT_PER_K_ROOM = 3.6        # µrad par K de variation du local : gradient latéral du bâti = 10 % de la variation, montants de 0,79 m sur 0,5 m
@@ -67,7 +80,7 @@ AIR_REF = (5.0, 17.0)              # 5 µrad pour 17 mm/s (2 g) ; pente ∝ v²
 
 # Parts de variance (somme = 1) et planchers techniques (µrad)
 SHARE = {
-    "planeite": 0.30, "dispersion_orifices": 0.20, "balourd": 0.10, "courants_air": 0.10,
+    "planeite": 0.30, "crantage": 0.15, "dispersion_orifices": 0.15, "balourd": 0.08, "courants_air": 0.08,
     "reglage": 0.06, "stabilite_bati": 0.06, "sol": 0.06, "poids_propre": 0.04,
     "pression": 0.04, "thermique": 0.04,
 }
@@ -81,6 +94,7 @@ LABELS = {
     "thermique": "Thermique de la plaque (écart air/plaque, rampe du local)",
     "balourd": "Balourd des palets (0,9 µrad/µm)",
     "dispersion_orifices": "Dispersion des orifices (lot aéro)",
+    "crantage": "Crantage (lot aéro ; < 33 µrad ⇒ correction a posteriori)",
     "courants_air": "Courants d'air résiduels (lot aéro)",
 }
 
@@ -119,19 +133,20 @@ def floors_and_nominal(P):
         "balourd": UNBALANCE_URAD_PER_UM * 2.0,                       # équilibrage à 2 µm
         "dispersion_orifices": DISPERSION_URAD_PER_UM * 2.0,          # ±0,002 mm (électroérosion / tri des forets)
         "courants_air": 1.0,                                          # enceinte fermée, v ≈ 8 mm/s
+        "crantage": COGGING_CORR,                                     # carte étalonnée et soustraite de la mesure
     }
     nominal = {
         "reglage": 1.4, "stabilite_bati": FRAME_TILT_PER_K_ROOM * 0.5, "sol": FLOOR_DRIFT_URAD_H * 1.0,
         "planeite": slope_per_um * 2.8, "poids_propre": float(np.hypot(pos, fric)), "pression": p_full,
         "thermique": therm_tr, "balourd": UNBALANCE_URAD_PER_UM * 10, "dispersion_orifices": 8.5,
-        "courants_air": 5.0,
+        "courants_air": 5.0, "crantage": COGGING_RAW,
     }
     sens = dict(slope_per_um=slope_per_um, a=a, s=s, therm_tr=therm_tr, therm_ramp=therm_ramp,
                 step=step, emb=emb, p_full=p_full, p_mid=p_mid, fric=fric, pos=pos)
     return floor, nominal, sens
 
 
-DRIVERS = {"planeite": 0.45, "dispersion_orifices": 0.25, "balourd": 0.15, "courants_air": 0.15}
+DRIVERS = {"planeite": 0.35, "crantage": 0.25, "dispersion_orifices": 0.15, "balourd": 0.125, "courants_air": 0.125}
 
 
 def allocate(target, floor, nominal):
@@ -233,7 +248,9 @@ def requirements(alloc, sens):
     e_um = alloc["balourd"] / UNBALANCE_URAD_PER_UM
     tol_um = alloc["dispersion_orifices"] / DISPERSION_URAD_PER_UM
     v_air = AIR_REF[1] * np.sqrt(alloc["courants_air"] / AIR_REF[0])
-    return dict(flatness_360_um=delta, flatness_100_um=d100, process=proc, suppliers=suppliers,
+    cog = ("brut acceptable" if alloc["crantage"] >= COGGING_RAW - 1e-9 else
+           f"correction a posteriori requise (résidu ≤ {alloc['crantage']:.0f} µrad RMS)")
+    return dict(cogging=cog, flatness_360_um=delta, flatness_100_um=d100, process=proc, suppliers=suppliers,
                 averaging_s=T_avg, reversal_every_h=rev_h, room_dT_between_recal_K=dT_room,
                 recal_interval_h=dt_recal_h, room_ramp_K_h=ramp, air_minus_plate_K=dT_air,
                 deadweight=pp_req, pressure=pr_req, puck_unbalance_um=e_um, orifice_tol_um=tol_um,
