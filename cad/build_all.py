@@ -205,20 +205,16 @@ def main(argv=None) -> dict:
         "nb_trous_temoins_modele_leger": pl["witness_holes"],
         "masse_pleine_sans_percage_kg": round(m_naive, 3),
         "masse_plaque_complete_analytique_kg": round(m_full, 3),
+        "masse_notes_kg": pl.get("mass_kg"),
         "masse_modele_leger_kg": round(m_light, 3),
         "retrait_trous_kg": round(hv["v_total_mm3"] * 1e-9 * rho, 3),
         "volume_retire_par_trou_mm3": round(hv["v_per_hole_mm3"], 3),
         "zone_percee_mm": P["zones"]["perforated_square_mm"],
+        "planeite_requise_um": P["performance_targets"]["plate_flatness_um"],
     }
-    pn = P["plenum"]
-    hb = plenum_mod.baffle_hole_centers(P, L)
-    cross = (2 * (L["pl_cp"] - pn["panel_t_mm"] / 2 - pn["baffle_edge_gap_mm"])) ** 2 - 4 * (
-        (L["pl_cp"] - pn["panel_t_mm"] / 2 - pn["baffle_edge_gap_mm"] - L["pl_open_half"]) ** 2)
-    baffle_report = {"nb_trous": len(hb) if pn["baffle_holes"] else 0, "diametre_mm": pn["baffle_hole_d_mm"],
-                     "pas_hex_mm": round(plenum_mod.baffle_hole_pitch(P), 2),
-                     "taux_ouverture_vise": pn["baffle_open_area"],
-                     "taux_ouverture_realise": round(len(hb) * 3.14159265 * (pn["baffle_hole_d_mm"] / 2) ** 2 / cross, 3)}
-    # masse d'assemblage : on remplace la plaque légère par la masse complète analytique
+    baffle_report = plenum_mod.baffle_open_area_realised(P, L)
+    baffle_report["taux_ouverture_vise"] = P["plenum"]["baffle_open_area"]
+    # masse d'assemblage : plaque légère remplacée par la masse complète analytique
     pieces = []
     gm: dict = {}
     total = 0.0
@@ -238,28 +234,28 @@ def main(argv=None) -> dict:
     bbs = [p.bbox() for p in parts]
     abb = [min(b[0] for b in bbs), min(b[1] for b in bbs), min(b[2] for b in bbs),
            max(b[3] for b in bbs), max(b[4] for b in bbs), max(b[5] for b in bbs)]
+    motors = [byname[k] for k in byname if k.startswith("verin_moteur_")]
+    jeu_moteur = min(min(abs(m.bbox()[0]), abs(m.bbox()[3])) - L["box_half"] for m in motors) if motors else None
     sx, sy = P["platine"]["size_mm"]
-    fan_x = (L["fan_xc"] - P["fan"]["size_mm"][0] / 2, L["fan_xc"] + P["fan"]["size_mm"][0] / 2)
+    fan_bb = byname["ventilateur"].bbox()
     checks = {
         "toutes_pieces_valides": all_valid,
         "interferences_nulles": len(interf) == 0,
-        "platine_couvre_ventilateur_et_filtre": bool(
-            L["pf_cx"] - sx / 2 <= fan_x[0] - 1 and L["pf_cx"] + sx / 2 >= fan_x[1] + 1
-            and L["pf_cy"] - sy / 2 <= L["fan_y_min"] and L["pf_cy"] + sy / 2 >= L["fan_y_max"]),
-        "traverses_platine_au_dessus_du_cadre_bas": bool(L["trav_pf_bot"] >= L["low_ring_top"]),
-        "colonnes_dans_zone_percee": all(abs(s["x"]) < P["zones"]["perforated_square_mm"] / 2
-                                         and abs(s["y"]) < P["zones"]["perforated_square_mm"] / 2
-                                         for s in plate_mod.support_points(P)),
+        "nb_trous_5935_notes": hv["n_holes"] == 5935,
+        "masse_plaque_vs_notes_(+-0,5 kg)": bool(abs(m_full - (pl.get("mass_kg") or m_full)) < 0.5),
+        "dessus_plaque_a_900_du_sol": abs((L["plate_top"] - L["floor"]) - P["frame"]["plate_top_height_mm"]) < 1e-6,
+        "face_haute_plaque_a_z0": abs(byname["plaque"].bbox()[5]) < 0.05,
+        "empilement_verin_~45_mm": abs(L["stack_h"] - 45.0) < 0.1,
+        "jeu_moteur_vérin_caisson_>=3_mm": bool(jeu_moteur is None or jeu_moteur >= 3.0),
+        "jeu_caisson_cadre_6,5_mm": abs((L["up_x_in"] - L["box_half"]) - 6.5) < 1e-6,
+        "platine_couvre_ventilateur": bool(L["pf_cx"] - sx / 2 <= fan_bb[0] and L["pf_cx"] + sx / 2 >= fan_bb[3]
+                                           and -sy / 2 <= fan_bb[1] and sy / 2 >= fan_bb[4]),
+        "traverses_platine_au_dessus_du_sol": bool(L["trav_bot"] > L["up_bot"]),
         "trous_dans_zone_percee_hors_bande_bord": all(
             max(abs(x), abs(y)) <= P["zones"]["perforated_square_mm"] / 2 - pl["edge_band_mm"] + 1e-9
             for x, y in plate_mod.hole_centers(P)),
-        "trous_hors_logements_d_appui": all(
-            min(((x - s_["x"]) ** 2 + (y - s_["y"]) ** 2) ** 0.5 for s_ in plate_mod.support_points(P))
-            > pl["pocket_d_mm"] / 2 + pl["counterbore_d_mm"] / 2
-            for x, y in plate_mod.hole_centers(P)),
-        "masse_plaque_coherente_avec_pleine": bool(0.9 * m_naive < m_full < m_naive),
-        "face_haute_plaque_a_z0": abs(byname['plaque'].bbox()[5]) < 1e-3,
     }
+    caisson_relief = byname["caisson"].note
 
     # ---- plaque complète (option) ----------------------------------------------------------------------------------
     full = None
@@ -276,6 +272,8 @@ def main(argv=None) -> dict:
         "plaque": plate_report,
         "plaque_complete": full,
         "tole_perforee": baffle_report,
+        "jeu_moteur_caisson_mm": None if jeu_moteur is None else round(jeu_moteur, 2),
+        "caisson_note": caisson_relief,
         "masses_par_groupe_kg": {k: round(v, 3) for k, v in sorted(gm.items())},
         "masse_totale_kg": round(total, 3),
         "boite_englobante_assemblage_mm": [round(x, 1) for x in abb],

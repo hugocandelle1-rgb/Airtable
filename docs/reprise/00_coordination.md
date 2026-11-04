@@ -96,3 +96,16 @@ Branche de travail : `claude/air-cushion-table-design-clodgs` (tout est commité
    « fonctionnement passif » de `docs/02_aeraulique.md`.
 3. Finir la CAO phase 2 (`docs/reprise/cao.md`) + mises en plan cotées.
 4. Vague 3 : nomenclature chiffrée, revue de cohérence, synthèse `docs/01_architecture.md`.
+
+## Décision utilisateur du 2026-11-04 — finalité de mesure
+
+Les palets portent des **actionneurs électrostatiques radiaux** (forces dans le plan) ; la
+table sert à **caractériser** le mouvement qu'ils produisent. Conséquences :
+- toute force dans le plan dépendant de la position (pente, crantage, poussée de bord,
+  balourd) est une **erreur de mesure** ⇒ minimiser, ne jamais « piéger » volontairement ;
+- critère = accélération parasite admissible vs F_act sur une fenêtre de mesure T ;
+- nouveau lot **compatibilité électrostatique** (`docs/08_electrostatique.md`) : forces
+  d'image de la plaque conductrice, charge des palets, potentiel/traitement de surface,
+  écran antistatique, humidité.
+- Données attendues de l'utilisateur : ordre de grandeur de F_act (ou tension/géométrie
+  des électrodes) et durée typique d'une mesure.

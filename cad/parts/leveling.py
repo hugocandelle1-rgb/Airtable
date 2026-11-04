@@ -83,8 +83,9 @@ def jack_parts(P: dict, sp: dict, L: dict) -> list[PartSpec]:
     cpl = _cyl_u(hu / 2, hu / 2 + lv["coupling_len_mm"], 0, z0 + w_ax, 10.0)
     mx, my, mz = lv["nema17_mm"]
     u_m0 = hu / 2 + lv["coupling_len_mm"]
-    motor = _box(u_m0, u_m0 + mz, -mx / 2, mx / 2, z0, z0 + my)
-    knob = _cyl_u(u_m0 + mz, u_m0 + mz + lv["knob_t_mm"], 0, z0 + w_ax, lv["knob_d_mm"])
+    vm = lv["motor_offset_v_mm"] * (1.0 if sp["x"] >= 0 else -1.0)   # décalage radial vers le cadre (jeu >= 3 mm avec le caisson)
+    motor = _box(u_m0, u_m0 + mz, -mx / 2 + vm, mx / 2 + vm, z0, z0 + my)
+    knob = _cyl_u(u_m0 + mz, u_m0 + mz + lv["knob_t_mm"], vm, z0 + w_ax, lv["knob_d_mm"])
     # motorisation vers le coin de cadre le plus proche : u local -> -y global
     ang = -90.0
     pl = lambda s: _place(s, sp["x"], sp["y"], ang)

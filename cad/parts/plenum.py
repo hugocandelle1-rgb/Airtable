@@ -65,9 +65,24 @@ def build(P: dict) -> list[PartSpec]:
                                           cq.Vector(sx * (h_i - 1), sy * (h_i - 1), L["tap_z"]),
                                           cq.Vector(sx, sy, 0)))
     box = box.cut(cq.Workplane("XY").newObject([cq.Compound.makeCompound(taps)]))
+    # dégagements locaux de la paroi face aux blocs de vé P1/P2 (leur emprise déborde dans la paroi 215-221)
+    from cad.parts import leveling as lev_mod
+    reliefs = []
+    for sp in __import__("cad.common", fromlist=["support_points"]).support_points(P):
+        vp = lev_mod.vee_parts(P, sp, L)
+        bbs = [q.bbox() for q in vp]
+        x0, y0 = min(b[0] for b in bbs) - 1.0, min(b[1] for b in bbs) - 1.0
+        x1, y1 = max(b[3] for b in bbs) + 1.0, max(b[4] for b in bbs) + 1.0
+        z0 = min(b[2] for b in bbs) - 1.0
+        relief = _box(x0, x1, y0, y1, z0, L["wall_top"] + 1.0)
+        inter = box.intersect(relief).val().Volume()
+        if inter > 1.0:
+            box = box.cut(relief)
+            reliefs.append({"appui": sp["index"], "volume_mm3": round(inter, 1)})
     parts.append(PartSpec("caisson", box, COLORS["panneau"], pn["wall_material"], "plenum", formats=("step",),
                           note=f"caisson {2 * h_i:.0f} x {2 * h_i:.0f} int., parois/fond {pn['wall_mm']:.0f} mm, "
-                               f"entrée Ø{d_in:.0f}, 4 piquages Ø{pn['tap_d_mm']:.0f}"))
+                               f"entrée Ø{d_in:.0f}, 4 piquages Ø{pn['tap_d_mm']:.0f} ; dégagements locaux "
+                               f"de paroi face aux vés {[r['appui'] for r in reliefs]} (CONFLIT notes [03]/[05], à arbitrer)"))
 
     # ---- joint plat EPDM 6 x 2 ------------------------------------------------------------------------------------------
     gk_w, gk_t = pn["gasket_mm"]

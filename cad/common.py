@@ -89,6 +89,7 @@ DEFAULTS: dict = {
         "knob_d_mm": 40.0,               # [05] bouton gradué Ø40, 100 divisions
         "knob_t_mm": 12.0,
         "coupling_len_mm": 10.0,
+        "motor_offset_v_mm": 3.0,        # moteur + bouton décalés vers le cadre : jeu caisson >= 3 mm (Oldham)
         "wedge_floor_mm": 6.0,           # fond de la cavité du boîtier
     },
     "tilt_sensors": {
