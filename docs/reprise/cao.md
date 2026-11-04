@@ -11,10 +11,14 @@
 - Arbitrages appliqués : sortie 9BMC non documentée (`docs/research/ventilateurs.md`) → boîte 42×30 « à confirmer » ;
   moteur NEMA17 + bouton décalés de 3 mm (jeu 3,5) ; M10 de l'axe x à y = −100.
 
-## Plaque `--full`
-Outil étagé unique + `occ_impl.shapes.cut` (OBB). Phase 1 : coupe ≈ 226–294 s. Dans `build_all`, la version précédente (coupe + STEP
-dans le même délai) a été abandonnée à 600 s puis 900 s ; le worker envoie maintenant un message par étape (coupe, STL, STEP).
-Voir le champ `plaque_complete` de `cad/export/rapport_cao.json` ou de la dernière exécution `--full` (état noté dans le README / ci-dessous).
+## Plaque `--full` : NON obtenue (état)
+- Outil étagé unique (lamage Ø2, cône 118°, orifice Ø0,30) + `occ_impl.shapes.cut` (OBB). Mesures : plaque brute seule + 5935 outils
+  fond plat = 80 s ; phase 1 (5739 trous, blank simple) = 226 s ; mais avec le blank complet (sièges, M5, M4, M10, datums) la coupe a
+  dépassé 900 s, 1200 s (fond plat) et 1500 s (cône) : abandon.
+- Correctif appliqué en fin de session (`plate.build_plate` : réseau coupé d'abord dans la plaque brute chamfreinée, éléments hors
+  réseau ensuite) : essai `--full --full-timeout 1500` lancé puis interrompu sur quota, **résultat inconnu**. Le worker de
+  `build_all` envoie un message par étape (coupe, STL, STEP). Option `plate.full_cone=False` (fond plat) disponible.
+- Le modèle léger (19 trous témoins) + masse analytique (23,43 kg) et les DXF/CSV (5935 centres) restent la référence.
 
 ## Points ouverts à arbitrer (structure)
 1. **Conflit notes 03/05** : les blocs de vé P1/P2 débordent de 3–4 mm dans la paroi du caisson (215–221) ; dégagement local dans `caisson`
@@ -26,7 +30,7 @@ Voir le champ `plaque_complete` de `cad/export/rapport_cao.json` ou de la derni�
 
 ## Étapes restantes
 - Valider/ajuster les plans avec le sous-traitant (hachures de coupe, dimensions complémentaires) ; plan du bloc de vé P0 (rehausse).
-- Rejouer `python3 -m cad.build_all --full --full-timeout 1500` hors charge pour consigner les temps coupe/STL/STEP.
+- Rejouer `python3 -m cad.build_all --no-svg --no-plans --full --full-timeout 2400` seul (sans autre charge) et consigner coupe/STL/STEP ; sinon tuiler.
 - Si le TOML resserre la planéité plaque : relancer `python3 -m cad.drawings` (les plans la relisent).
 
 ## Commandes

@@ -6,14 +6,14 @@
     "cadquery": "2.8.0"
   },
   "temps_generation_s": {
-    "construction_pieces_s": 3.97,
-    "csv_dxf_plaque_s": 0.56,
-    "step_stl_pieces_s": 1.42,
-    "assemblage_step_s": 1.24,
-    "svg_s": 27.74,
-    "interferences_s": 1.48,
-    "plans_s": 5.45,
-    "total_s": 42.6
+    "construction_pieces_s": 4.12,
+    "csv_dxf_plaque_s": 0.57,
+    "step_stl_pieces_s": 1.25,
+    "assemblage_step_s": 0.99,
+    "svg_s": 0.0,
+    "interferences_s": 1.34,
+    "plans_s": 5.46,
+    "total_s": 15.0
   },
   "plaque": {
     "nb_trous_reseau": 5935,
@@ -108,32 +108,8 @@
   "exports": {
     "step_pieces_et_barres": 101,
     "stl": 6,
-    "svg": [
-      "plaque_dessus.svg",
-      "plaque_face.svg",
-      "plaque_iso.svg",
-      "plaque_dessous.svg",
-      "plenum_dessus.svg",
-      "plenum_face.svg",
-      "plenum_iso.svg",
-      "aero_dessus.svg",
-      "aero_face.svg",
-      "aero_iso.svg",
-      "bati_dessus.svg",
-      "bati_face.svg",
-      "bati_iso.svg",
-      "assemblage_dessus.svg",
-      "assemblage_face.svg",
-      "assemblage_iso.svg",
-      "plenum_coupe_y0.svg",
-      "assemblage_coupe_y0.svg"
-    ],
-    "png": [
-      "assemblage_coupe_y0.png",
-      "assemblage_dessus.png",
-      "assemblage_face.png",
-      "assemblage_iso.png"
-    ],
+    "svg": [],
+    "png": [],
     "dxf": "plaque_trous.dxf",
     "csv_trous": "plaque_centres_trous.csv",
     "liste_debit": "liste_debit_profiles.csv",
@@ -414,6 +390,7 @@
     "plate.datum_C_mm",
     "plate.datum_d_mm",
     "plate.edge_band_mm",
+    "plate.full_cone",
     "plate.handling_d_mm",
     "plate.handling_depth_mm",
     "plate.handling_positions_mm",
