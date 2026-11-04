@@ -1,4 +1,4 @@
-# Reprise — lot structure (état au 2026-11-03)
+# Reprise — lot structure (état au 2026-11-04)
 
 Aucun commit git n'a été fait par ce lot, et `params/design.toml` n'a pas été modifié.
 **Les étapes 1 à 8 de la reprise précédente sont terminées.**
@@ -7,7 +7,7 @@ Aucun commit git n'a été fait par ce lot, et `params/design.toml` n'a pas ét�
 
 | Commande | Effet |
 |---|---|
-| `OPENBLAS_NUM_THREADS=1 python3 -m calc.structure.run_all` | chaîne complète, ≈ 2,3 min. Ordre : plate_fe → homogenization --quick → support_study (≈ 2,1 min) → thermal → materials → frame → kinematic_coupling → machining. Écrit ensuite `results/recommended_params.toml` (syntaxe vérifiée) |
+| `OPENBLAS_NUM_THREADS=1 python3 -m calc.structure.run_all` | chaîne complète, ≈ 2,3 min. Ordre : plate_fe → homogenization --quick → support_study (≈ 2,1 min) → thermal → materials → frame → kinematic_coupling → machining → passive_budget. Écrit ensuite `results/recommended_params.toml` (syntaxe vérifiée) |
 | `python3 -m calc.structure.run_all --full` | ajoute les cellules 3D d'homogénéisation (+70 s) |
 | `python3 -m calc.structure.run_all --params-only` | réécrit seulement le TOML |
 
@@ -55,14 +55,67 @@ Notes : `docs/03_structure_plaque.md`, `docs/04_usinage_tolerances.md`,
   - **20 h** machine pour 5 935 trous (pas 5,00, retenu) ;
   - 51 h pour 17 131 trous (pas 2,94).
 - **Budget de référence :** 30,6 µrad, mais **seulement si ⏥ 2,8 µm** est atteint.
-- **Variante économique** (surfaçage 15–20 µm) : 205–251 µrad, ramenés à ≈ 12 µrad après
-  cartographie et compensation.
+- **Variante économique** : non applicable (supposait une compensation).
 
-## Points ouverts (à arbitrer par le coordinateur)
+## Révision du 2026-11-04 : budget de force parasite
 
-1. **Le CdC est incohérent.** 6 µm de planéité donnent 56 µrad pour une allocation de
-   30. Il faut soit ⏥ 2,8 µm (fly-cut diamant ultra-précis, prestataire non trouvé),
-   soit une carte de pente compensée, y compris pour la référence.
+**Décisions de l'utilisateur :**
+
+- aucune compensation logicielle ;
+- les palets portent des actionneurs électrostatiques radiaux, et la table sert à
+  **caractériser** leur mouvement. Toute force parasite dans le plan est une erreur de
+  mesure.
+
+L'hypothèse retenue pour l'instant est l'absence d'interaction électrostatique entre
+palet et plaque. L'exigence « plaque = référence de potentiel » a été retirée, et le lot
+électrostatique est reporté.
+
+**`calc/structure/passive_budget.py`** (dans `run_all`). Paramètre : θ = a_par/g, aux
+niveaux 5 / 10 / 20 / 30 / 50 µrad.
+
+- Critère : somme quadratique de tous les postes ≤ θ. Les postes sont la structure, le
+  crantage, la dispersion des orifices, le balourd (0,9 µrad/µm) et les courants d'air.
+- Sorties :
+  - répartition et exigences par niveau ;
+  - erreur ½aT² pour T = 1 / 5 / 10 / 30 s, et sa valeur amortie (τ Couette) ;
+  - rapport F_par/F_act pour m = 2 / 5 / 10 g et F_act = 0,1 µN … 1 mN.
+- Fichiers produits : `passive_budget.json`, `passive_budget_table.md`,
+  `figures/passive_budget.png` ; section `[parasitic_budget]` du TOML.
+
+**Résultats :**
+
+- planchers techniques : **10,1 µrad** ⇒ θ = 5 et 10 sont non réalisables. Sans
+  correction a posteriori du crantage, le minimum est de 33,7 µrad ;
+- conception actuelle : **47 µrad** (planéité 2,8 µm, crantage brut 33, orifices ±5 µm,
+  balourd 10 µm) ⇒ θ = 50 est tenu, coût relatif ≈ 1,3 ;
+- θ = 30 : ⏥ 1,6 µm (tournage diamant ultra-précis), correction du crantage, coût ≈ 3 ;
+- θ = 20 : ⏥ 1,1 µm (finition optique de pointe), coût ≈ 9, à la limite ;
+- exploitation : recalage d'inclinaison automatique toutes les heures, local ±0,5 K
+  entre recalages, rampe ≤ 2,2 K/h, écart air/plaque ≤ 0,7 K ;
+- F_par = 0,98 µN (2 g) à 4,9 µN (10 g) à θ = 50. Pour 1 % d'erreur, il faut
+  F_act ≥ 100–500 µN.
+
+**Documents mis à jour :**
+
+- `docs/00_cahier_des_charges.md` § 3 réécrit (ancienne version en note) ; exigence 11
+  « équilibrage des palets » ajoutée ;
+- docs 03, 04 et 05 : variante économique **non applicable** ; `04` § 6 donne les
+  exigences de planéité par niveau.
+
+**Points ouverts :**
+
+1. Le niveau θ à viser dépend de la plus petite F_act à caractériser. **C'est une donnée
+   à obtenir de l'utilisateur.**
+2. Correction a posteriori du crantage (carte étalonnée, soustraite de la mesure) :
+   à décider par l'utilisateur pour tout niveau < 34 µrad.
+3. Hypothèses d'exploitation à confirmer sur site : sol 1 µrad/h, gradient du bâti égal
+   à 10 % de la variation du local.
+4. Le crantage brut (33 µrad RMS) reste le poste dominant (lot aéro).
+
+## Points ouverts antérieurs (à arbitrer par le coordinateur)
+
+1. **Planéité ⏥ 2,8 µm ferme** (pas de compensation). Le prestataire n'est toujours pas
+   trouvé ; θ = 30 demanderait 1,6 µm.
 2. **Fusion dans `params/design.toml`.** Clés touchées :
    - `plate.thickness_mm` : 35 ; `plate.orifice_length_mm` : 1,20 et `plate.orifice_d_mm` : 0,30 (lot aéro) ;
    - `support.scheme` ;

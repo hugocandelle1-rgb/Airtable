@@ -6,7 +6,8 @@ results/recommended_params.toml à partir des résultats.
     python3 -m calc.structure.run_all --params-only   (réécrit seulement le TOML)
 
 Ordre : plate_fe (validation) → homogenization → support_study → thermal →
-materials → frame → kinematic_coupling → machining (budget).
+materials → frame → kinematic_coupling → machining → passive_budget (budget de
+force parasite par niveau θ = a_par/g).
 """
 from __future__ import annotations
 
@@ -33,6 +34,7 @@ STEPS = [
     ("calc.structure.frame", []),
     ("calc.structure.kinematic_coupling", []),
     ("calc.structure.machining", []),
+    ("calc.structure.passive_budget", []),
 ]
 
 
@@ -151,7 +153,7 @@ lever_pitch_mm = {f(kc["geometry"]["L_pitch_mm"], 0)}
 lever_roll_mm = {f(kc["geometry"]["L_roll_mm"], 0)}
 coarse = "4 pieds M16×2 sous le bâti (≈ 4 mrad/tour)"
 
-[leveling.economique]
+[leveling.economique]               # variante économique NON APPLICABLE (compensation exclue) ; gardé pour mémoire
 mechanism = "même coin 1:5 entraîné par ajusteur différentiel du commerce (type Thorlabs DAS110)"
 resolution_urad_per_rev_fine = {f(wd["eco_differentiel_fin"]["urad_per_rev"], 1)}
 resolution_urad_per_div = {f(wd["eco_differentiel_fin"]["urad_per_div"], 2)}
@@ -189,7 +191,7 @@ ring_axis_height_mm = 745.0         # dessus du cadre 790, dessus de plaque 900 
 bracing = "écharpes 45×45 sur 3 faces (arrière, gauche, droite)"
 f1_Hz = {f(ref_frame["f_Hz"][0], 0)}                     # assemblages semi-rigides ; sans écharpes : {f(fr["cases"][0]["f_Hz"][0], 0)} Hz
 mass_profiles_kg = {f(ref_frame["frame_mass_kg"], 1)}
-economique = "paillasse : cadre 45×45, montants 300 mm, écharpes 3 faces, posé sur table existante"
+economique = "NON APPLICABLE — pour mémoire : paillasse, cadre 45×45, montants 300 mm, écharpes 3 faces"
 economique_f1_Hz = {f(eco_frame["f_Hz"][0], 0)}           # bâti seul ; la table support domine
 
 [machining]
@@ -197,16 +199,36 @@ finish_reference = "surfaçage diamant mono-pointe sur appuis de service (lest d
 flatness_perforated_um_required = {f(tol["reference"]["flatness_perforated_um"], 1)}   # pour 30 µrad (85 % forme)
 flatness_100_um_required = {f(tol["reference"]["flatness_100_um"], 2)}
 cdc_6um_gives_urad = {f(tol["reference"]["cdc_6um_cylinder_urad"], 0)}             # incohérence du CdC à arbitrer
-finish_economique = "surfaçage fraise sur CN de précision, sur montage 3 appuis, 15–20 µm"
+finish_economique = "NON APPLICABLE (supposait une compensation logicielle, exclue le 2026-11-03)"
 economique_slope_urad = [{f(tol["economique"][0]["total_urad"], 0)}, {f(tol["economique"][1]["total_urad"], 0)}]   # 15 / 20 µm, avant compensation
 drilling_hours_5935_holes = {f(drill[(5.0, True)]["hours"], 0)}
 drilling_hours_17131_holes = {f(drill[(2.94, True)]["hours"], 0)}
 
 [budget]
-reference_rss_urad = {f(bud["reference"]["total_rss_urad"], 1)}
-economique_rss_urad = {f(bud["economique"]["total_rss_urad"], 0)}
-economique_after_compensation_urad = {f(bud["economique"]["after_compensation_urad"], 0)}
+reference_rss_urad = {f(bud["reference"]["total_rss_urad"], 1)}   # ancien budget (structure seule, sans crantage ni balourd) ; voir [parasitic_budget]
+economique_rss_urad_non_applicable = {f(bud["economique"]["total_rss_urad"], 0)}
+economique_after_compensation_urad_non_applicable = {f(bud["economique"]["after_compensation_urad"], 0)}
 '''
+    pb = j("passive_budget.json")
+    lines += f'''
+[parasitic_budget]                  # table de caractérisation : force parasite dans le plan = erreur de mesure
+criterion = "somme quadratique des pentes équivalentes ≤ θ = a_par/g (aucune compensation des palets)"
+min_theta_urad = {f(pb["floor_rss_urad"], 1)}             # tous postes au plancher, crantage corrigé a posteriori
+min_theta_without_cogging_correction_urad = {f(pb["min_theta_without_cogging_correction_urad"], 1)}
+current_design_rss_urad = {f(pb["nominal_rss_urad"], 1)}   # conception actuelle, crantage brut compris
+'''
+    for r in pb["rows"]:
+        q = r["requirements"]
+        t = r["theta_urad"]
+        if not r["feasible"]:
+            lines += f'level_{t}urad = {{ feasible = false }}\n'
+            continue
+        lines += (f'level_{t}urad = {{ feasible = true, cogging_correction = {str(not r["feasible_without_cogging_correction"]).lower()}, '
+                  f'a_par_um_s2 = {r["measurement"]["a_par_um_s2"]:.0f}, flatness_um = {q["flatness_360_um"]:.1f}, '
+                  f'flatness_100_um = {q["flatness_100_um"]:.2f}, puck_unbalance_um = {q["puck_unbalance_um"]:.1f}, '
+                  f'orifice_tol_um = {q["orifice_tol_um"]:.1f}, air_speed_mm_s = {q["air_speed_mm_s"]:.0f}, '
+                  f'air_minus_plate_K = {q["air_minus_plate_K"]:.2f}, room_ramp_K_h = {q["room_ramp_K_h"]:.2f}, '
+                  f'recal_interval_h = {q["recal_interval_h"]:.1f}, cost_index = {r["cost_index"]:.1f} }}\n')
     (RES / "recommended_params.toml").write_text(lines)
     import tomllib
     tomllib.loads(lines)   # contrôle de syntaxe

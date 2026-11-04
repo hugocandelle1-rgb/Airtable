@@ -87,7 +87,11 @@ L'inclinaison résiduelle prévue est de **1,4 µrad** :
 
 L'allocation est de 5 µrad.
 
-## 4. Variante économique (manuelle, composants du commerce)
+## 4. Variante économique (manuelle, composants du commerce) — NON APPLICABLE, pour mémoire
+
+La variante économique complète est abandonnée, car elle supposait une compensation
+logicielle. L'actionneur différentiel du commerce reste une option de **réglage manuel
+de secours**, sans changer le budget.
 
 | Élément | Choix |
 |---|---|
@@ -155,9 +159,11 @@ plus de 0,2 K.
 4. **Boucle fine.** Moyenne des 4 capteurs sur 100 s, puis correction du tangage (P1 et
    P2 ensemble) et du roulis (P1 − P2), en approche montante. Répéter jusqu'à moins de
    2 µrad, puis couper les moteurs.
-5. **Contrôle par palet témoin.** Dérive sur 10 s au centre et aux 4 coins. Avec la carte
-   de pente (variante économique), le contrôle des robots compense le résidu.
-6. **Surveillance continue.** Moyenne des ADXL355 et TMP117. Alarme si la pente dérive
+5. **Contrôle par palet témoin.** Dérive sur 10 s au centre et aux 4 coins : contrôle de
+   recette et de réglage global seulement. Aucune compensation n'est appliquée aux palets.
+6. **Recalage automatique** toutes les heures (budget de force parasite,
+   `00_cahier_des_charges.md` § 3) ; local stable à ±0,5 K entre deux recalages.
+7. **Surveillance continue.** Moyenne des ADXL355 et TMP117. Alarme si la pente dérive
    de plus de 3 µrad ou si l'écart air/plaque dépasse 1 K.
 
 ## 7. Données pour la CAO

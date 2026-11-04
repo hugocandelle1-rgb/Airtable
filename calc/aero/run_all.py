@@ -1,6 +1,7 @@
 """Chaîne complète des calculs aérauliques (ordre imposé par les dépendances).
 
 orifice → optimize → setpoints → cogging → montecarlo → dynamics → network → jets → thermal
+→ drift_sim → parasitic
 
 - optimize écrit results/recommended_hole.json (configuration de perçage) ;
 - setpoints écrit results/setpoints.json (loi h(m), table ps(m), enveloppe) lu
@@ -21,7 +22,7 @@ import time
 from calc.aero.common import REPO_ROOT, save_json
 
 STEPS = ["orifice", "optimize", "setpoints", "cogging", "montecarlo", "dynamics", "network",
-         "jets", "thermal"]
+         "jets", "thermal", "drift_sim", "parasitic"]
 LIMIT_S = 300.0
 
 

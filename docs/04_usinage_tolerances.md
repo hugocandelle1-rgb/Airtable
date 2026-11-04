@@ -40,18 +40,19 @@ ultra-précise, ou en rodage.
 **Proposition :** prendre comme critère de réception la **pente locale mesurée** :
 au niveau électronique, base 50 mm, après retrait du plan, ≤ 30 µrad crête sur la zone
 300 × 300. Garder ⏥ 0,003 / 0,001 par 100 × 100 comme spécification géométrique
-associée. Si le prestataire ne garantit que 6 µm, il faut **cartographier puis compenser**
-les pentes (voir § 6). Cette décision revient au coordinateur et à l'utilisateur.
+associée. La compensation logicielle étant exclue (décision du 2026-11-03), un prestataire
+qui ne garantit que 6 µm **ne convient pas**. Les exigences de planéité par niveau d'erreur
+admissible θ sont au § 6.
 
 ## 2. Procédés et capabilité
 
 | Procédé | Planéité sur ~500 mm (alu) | Compatible orifices Ø0,3–0,4 ? | Compatible « finition sur appuis de service » ? | Usage |
 |---|---|---|---|---|
 | Fraisage CN standard | 20–50 µm | oui | oui | ébauche |
-| Surfaçage à la fraise (plaquettes PCD) sur CN de précision, montage 3 appuis | 10–20 µm | oui (pas d'abrasif) | **oui** | **variante économique** |
+| Surfaçage à la fraise (plaquettes PCD) sur CN de précision, montage 3 appuis | 10–20 µm | oui (pas d'abrasif) | **oui** | semi-finition seulement (variante économique non applicable) |
 | Rectification plane (plateau à dépression) | 5–10 µm | risque de grains dans les orifices | non (plateau ≠ appuis) | non retenu |
 | **Surfaçage diamant mono-pointe (fly-cut), machine ultra-précise** | **2–5 µm** | **oui** (efforts < 5 N, brouillard) | **oui** | **référence** |
-| Rodage | 1–3 µm | non (abrasif dans 6 000–17 000 orifices) | non (face retournée sur le rodoir) | repli seulement, avec carte |
+| Rodage | 1–3 µm | non (abrasif dans 6 000–17 000 orifices) | non (face retournée sur le rodoir) | exclu |
 
 **Effort de coupe :** sur ses 3 appuis, la plaque de 35 mm fléchit de **0,06 µm/N** au pire
 point (0,10 µm/N pour 30 mm). Un fly-cut à 2–5 N donne donc ≤ 0,3 µm d'erreur
@@ -116,9 +117,31 @@ Le lamage Ø1,5 (ligament 1,44 mm) est plus sûr mais demande un foret de 23×D.
 | Voile (longueur d'orifice) | endoscope ou coupe sur éprouvette ; palpeur sur la face inférieure | ±0,02 mm | 1 sur 200 |
 | Bavures de sortie (face supérieure) | binoculaire ×20 | — | 1 sur 50, 100 % après finition |
 | Position des sièges de billes | MMT | ±0,02 mm | 100 % |
-| Validation fonctionnelle | **dérive de palets** (carte de pente) | ≈ 2–5 µrad | grille de 10 mm |
+| Validation fonctionnelle | **dérive de palets** (carte de pente, recette seulement) | ≈ 2–5 µrad | grille de 10 mm |
 
-## 6. Variante économique (surfaçage 15–20 µm, sans rectification)
+## 6. Exigences de planéité par niveau d'erreur admissible (budget de force parasite)
+
+Calcul : `calc/structure/passive_budget.py` (`00_cahier_des_charges.md` § 3). θ = a_par/g
+est l'accélération parasite admissible en pente équivalente. Elle comprend tous les
+postes : structure, crantage, orifices, balourd, courants d'air.
+
+| θ (µrad) | Part allouée à la planéité | ⏥ zone percée | ⏥ / 100 × 100 | Procédé capable | Prestataires plausibles (non contactés) | Faisabilité |
+|---|---|---|---|---|---|---|
+| 5 / 10 | — | — | — | — | — | **non réalisable** : la somme quadratique des planchers vaut 10,1 µrad (planéité 0,5 µm, crantage corrigé, orifices ±2 µm, balourd 2 µm) |
+| 20 | 11,6 µrad | **1,1 µm** | 0,21 µm | tournage diamant optique + passes de correction sur carte mesurée. Polissage exclu (abrasif dans les orifices, arrondi des arêtes) | grands opticiens (Safran Reosc, Winlight, Fraunhofer IOF) | à la limite, coût relatif ≈ 9 ; correction du crantage requise |
+| 30 | 17,6 µrad | **1,6 µm** | 0,31 µm | tournage / fly-cut diamant mono-pointe sur machine ultra-précise, sur appuis de service | ateliers d'optique métallique (Fraunhofer IOF/IPT, fabricants de miroirs aluminium) | réalisable, coût relatif ≈ 3 ; correction du crantage requise |
+| 50 | 30,5 µrad | **2,8 µm** | 0,54 µm | fly-cut diamant de précision sur appuis de service (gamme du § 3) | ateliers de surfaçage de précision | **réalisable avec la conception actuelle**, coût relatif ≈ 1,3 |
+
+La cotation du § 7 reste celle de la référence : ⏥ 0,003 et 0,001 par 100 × 100,
+cohérente avec θ = 50. Pour θ = 30, il faut ⏥ 0,0016 / 0,0003 par 100 × 100, et un
+contrôle interférométrique ou déflectométrique (incertitude ≤ 0,2 µm).
+
+## 6 bis. Variante économique — NON APPLICABLE (pour mémoire)
+
+Elle supposait une carte de pente compensée par le contrôle des robots. Cette
+compensation a été exclue par l'utilisateur le 2026-11-03. La table caractérise des
+actionneurs : les palets ne sont pas pilotés dans le plan. Les chiffres ci-dessous sont
+conservés pour l'historique.
 
 - **Procédé :** surfaçage à la fraise PCD Ø100 sur centre d'usinage de précision, plaque
   sur un montage 3 appuis aux positions de service, bridée seulement au droit des appuis
@@ -158,10 +181,12 @@ haut, z = 0 sur la face inférieure. Cotes en mm.
 | Manutention | 4 × M10 prof. 20 sur les chants, au milieu de chaque côté |
 | Générale | ISO 2768-mK ; état de surface face A Ra ≤ 0,4 (diamant < 0,1) ; face inférieure Ra 1,6 |
 | Cotation face A (référence) | ⏥ 0,003 (360 × 360) ; ⏥ 0,001 / 100 × 100 ; pente locale (base 50) ≤ 30 µrad ; arêtes des orifices vives, sans bavure (ISO 13715 : −0,02/0) |
-| Cotation face A (économique) | ⏥ 0,020 (360 × 360) ; ⏥ 0,005 / 100 × 100 ; Ra 0,8 ; carte de pente fournie |
+| Cotation face A (économique) | non applicable (pour mémoire : ⏥ 0,020 ; ⏥ 0,005 / 100 × 100) |
 | Orifices | ⌖ Ø0,05 \| A \| B \| C ; lamages ⌖ Ø0,2 \| A \| B \| C |
 
 ## Historique
 
 - 2026-11-03 : création (perçage recalé sur la configuration aéro retenue : hex 5,00, Ø0,30 ±0,005, voile 1,20). Gamme de finition sur appuis de service, incohérence 6 µm ↔ 30 µrad
   signalée, temps de perçage pour 6 000 et 17 000 trous, variante économique chiffrée.
+- 2026-11-04 : variante économique déclarée non applicable (pas de compensation) ;
+  exigences de planéité par niveau θ = a_par/g (§ 6).

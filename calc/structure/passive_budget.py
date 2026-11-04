@@ -137,7 +137,7 @@ def floors_and_nominal(P):
     }
     nominal = {
         "reglage": 1.4, "stabilite_bati": FRAME_TILT_PER_K_ROOM * 0.5, "sol": FLOOR_DRIFT_URAD_H * 1.0,
-        "planeite": slope_per_um * 2.8, "poids_propre": float(np.hypot(pos, fric)), "pression": p_full,
+        "planeite": slope_per_um * 2.8 / 0.85, "poids_propre": float(np.hypot(pos, fric)), "pression": p_full,
         "thermique": therm_tr, "balourd": UNBALANCE_URAD_PER_UM * 10, "dispersion_orifices": 8.5,
         "courants_air": 5.0, "crantage": COGGING_RAW,
     }
@@ -268,6 +268,21 @@ def cost_index(req):
     return c
 
 
+def measurement_error(theta_urad):
+    """Erreur de position et rapport F_par/F_act pour une pente équivalente θ."""
+    a = 9.81 * theta_urad * 1e-6
+    pos = {}
+    for T in WINDOWS_S:
+        damped = {m: a * TAU_S[m] * (T - TAU_S[m] * (1 - np.exp(-T / TAU_S[m]))) for m in MASSES_G}
+        pos[str(T)] = dict(ballistic_um=0.5 * a * T**2 * 1e6, damped_um={str(m): v * 1e6 for m, v in damped.items()})
+    force = {}
+    for m in MASSES_G:
+        Fp = m * 1e-3 * a
+        force[str(m)] = dict(F_par_N=Fp, ratio={f"{F:.0e}": Fp / F for F in F_ACT_N},
+                             F_act_min_1pct_N=100 * Fp, F_act_min_10pct_N=10 * Fp)
+    return dict(a_par_um_s2=a * 1e6, position=pos, force=force)
+
+
 def run(P=None, verbose=True):
     P = P or load_params()
     floor, nominal, sens = floors_and_nominal(P)
@@ -276,7 +291,15 @@ def run(P=None, verbose=True):
     rows = []
     for th in THRESHOLDS_URAD:
         target = MARGIN * th
-        alloc = allocate(target, floor, nominal)
+        # d'abord sans correction du crantage (plancher = crantage brut), sinon avec correction
+        floor_nc = dict(floor, crantage=COGGING_RAW)
+        if nominal_rss <= target:                       # la conception actuelle suffit
+            alloc = dict(nominal, _ops_reduction=0.0)
+        else:
+            alloc = allocate(target, floor_nc, nominal)
+        no_correction = alloc is not None
+        if alloc is None:
+            alloc = allocate(target, floor, nominal)
         feasible = alloc is not None
         ops_red = alloc.pop("_ops_reduction") if feasible else None
         if not feasible:
@@ -290,19 +313,24 @@ def run(P=None, verbose=True):
         tight = [k for k in DRIVERS if alloc[k] < nominal[k] - 1e-9]
         if not feasible:
             verdict = "non réalisable"
-        elif req["cost_finishing"] <= 1 and not tight:
-            verdict = "réalisable avec la conception actuelle"
+        elif not tight:
+            verdict = f"réalisable avec la conception actuelle (somme quadratique {nominal_rss:.0f} µrad)"
         elif req["cost_finishing"] <= 1:
             verdict = "réalisable : palets, orifices et écran à resserrer"
         elif req["cost_finishing"] <= 3 and (ops_red or 0) == 0:
             verdict = "réalisable : finition optique (classe 1,5–2,8 µm)"
         else:
             verdict = "à la limite : finition optique de pointe, postes près du plancher"
-        rows.append(dict(theta_dep_urad=th, target_rss_urad=target, feasible=feasible, verdict=verdict,
+        if feasible and alloc["crantage"] < COGGING_RAW - 1e-9:
+            verdict += " ; suppose la correction a posteriori du crantage"
+        rows.append(dict(theta_dep_urad=th, theta_urad=th, measurement=measurement_error(th),
+                         feasible_without_cogging_correction=bool(no_correction), target_rss_urad=target, feasible=feasible, verdict=verdict,
                          ops_reduction=ops_red,
                          alloc_urad=alloc, rss_urad=rss, arithmetic_urad=arith,
                          requirements=req, cost_index=cost))
-    out = dict(margin=MARGIN, floor_urad=floor, floor_rss_urad=floor_rss, nominal_urad=nominal,
+    floor_nc_rss = float(np.sqrt(sum(v**2 for v in dict(floor, crantage=COGGING_RAW).values())))
+    out = dict(margin=MARGIN, floor_urad=floor, floor_rss_urad=floor_rss,
+               min_theta_without_cogging_correction_urad=floor_nc_rss, nominal_urad=nominal,
                nominal_rss_urad=nominal_rss, min_feasible_theta_urad=floor_rss / MARGIN,
                hypotheses=dict(frame_tilt_per_K_room=FRAME_TILT_PER_K_ROOM, floor_drift_urad_h=FLOOR_DRIFT_URAD_H,
                                unbalance_urad_per_um=UNBALANCE_URAD_PER_UM,
@@ -313,22 +341,24 @@ def run(P=None, verbose=True):
 
     # tableau markdown
     keys = list(SHARE)
-    head = "| Poste | Plancher | Conception actuelle | " + " | ".join(f"θ_dep = {t}" for t in THRESHOLDS_URAD) + " |"
+    head = "| Poste | Plancher | Conception actuelle | " + " | ".join(f"θ = {t} µrad" for t in THRESHOLDS_URAD) + " |"
     lines = [head, "|---" * (3 + len(THRESHOLDS_URAD)) + "|"]
     for k in keys:
         lines.append(f"| {LABELS[k]} | {floor[k]:.1f} | {nominal[k]:.1f} | " +
                      " | ".join((f"{r['alloc_urad'][k]:.1f}" if r["feasible"] else "—") for r in rows) + " |")
-    lines.append(f"| **Somme quadratique** (cible 0,8·θ) | {floor_rss:.1f} | {nominal_rss:.1f} | " +
+    lines.append(f"| **Somme quadratique** (cible θ) | {floor_rss:.1f} | {nominal_rss:.1f} | " +
                  " | ".join((f"{r['rss_urad']:.1f}" if r["feasible"] else "**NR**") for r in rows) + " |")
     lines.append("")
-    lines.append("| Exigence | " + " | ".join(f"θ_dep = {t}" for t in THRESHOLDS_URAD) + " |")
+    lines.append("| Exigence | " + " | ".join(f"θ = {t} µrad" for t in THRESHOLDS_URAD) + " |")
     lines.append("|---" * (1 + len(THRESHOLDS_URAD)) + "|")
 
     def rq(name, fmt):
         return f"| {name} | " + " | ".join((fmt(r["requirements"]) if r["feasible"] else "—") for r in rows) + " |"
-    lines += [rq("Planéité zone percée (µm)", lambda q: f"{q['flatness_360_um']:.1f}"),
+    lines += [rq("Crantage", lambda q: q["cogging"]),
+              rq("Planéité zone percée (µm)", lambda q: f"{q['flatness_360_um']:.1f}"),
               rq("Planéité par 100 × 100 (µm)", lambda q: f"{q['flatness_100_um']:.2f}"),
               rq("Procédé de finition", lambda q: q["process"].split(",")[0].split(";")[0].split("(")[0].strip()),
+              rq("Procédé — prestataires plausibles", lambda q: q["suppliers"]),
               rq("Équilibrage des palets (µm)", lambda q: f"≤ {q['puck_unbalance_um']:.1f}"),
               rq("Tolérance Ø orifices (± µm)", lambda q: f"{q['orifice_tol_um']:.1f}"),
               rq("Vitesse d'air au niveau des palets (mm/s)", lambda q: f"≤ {q['air_speed_mm_s']:.0f}"),
@@ -341,20 +371,36 @@ def run(P=None, verbose=True):
               "| Verdict | " + " | ".join(r["verdict"] for r in rows) + " |",
               "| Coût relatif (finition + palets + installation ; référence 1) | " +
               " | ".join((f"{r['cost_index']:.1f}" if r["feasible"] else "∞") for r in rows) + " |"]
+    # erreurs de mesure
+    lines += ["", "| θ (µrad) | a_par (µm/s²) | " + " | ".join(f"½aT², T = {T} s (µm)" for T in WINDOWS_S) +
+              " | amorti 2 g / 10 g, T = 30 s (µm) |", "|---" * (3 + len(WINDOWS_S)) + "|"]
+    for r in rows:
+        me = r["measurement"]
+        lines.append(f"| {r['theta_urad']} | {me['a_par_um_s2']:.0f} | " +
+                     " | ".join(f"{me['position'][str(T)]['ballistic_um']:.1f}" for T in WINDOWS_S) +
+                     f" | {me['position']['30']['damped_um']['2']:.0f} / {me['position']['30']['damped_um']['10']:.0f} |")
+    lines += ["", "| θ (µrad) | m (g) | F_par (µN) | " + " | ".join(f"F_par/F_act, F_act = {F*1e6:g} µN" for F in F_ACT_N) +
+              " | F_act min. pour 1 % (µN) |", "|---" * (4 + len(F_ACT_N)) + "|"]
+    for r in rows:
+        for m in MASSES_G:
+            fo = r["measurement"]["force"][str(m)]
+            lines.append(f"| {r['theta_urad']} | {m} | {fo['F_par_N']*1e6:.3f} | " +
+                         " | ".join(f"{fo['ratio'][f'{F:.0e}']:.2g}" for F in F_ACT_N) +
+                         f" | {fo['F_act_min_1pct_N']*1e6:.1f} |")
     (RES / "passive_budget_table.md").write_text("\n".join(lines) + "\n")
 
     if verbose:
-        print(f"Planchers techniques : somme quadratique {floor_rss:.1f} µrad ⇒ θ_dep minimal réalisable ≈ "
-              f"{floor_rss/MARGIN:.1f} µrad ; conception actuelle : {nominal_rss:.1f} µrad (⇒ θ_dep ≥ {nominal_rss/MARGIN:.0f})")
+        print(f"Planchers techniques : somme quadratique {floor_rss:.1f} µrad ⇒ θ minimal réalisable ≈ "
+              f"{floor_rss/MARGIN:.1f} µrad ; conception actuelle (crantage brut compris) : {nominal_rss:.1f} µrad")
         for r in rows:
             q = r["requirements"]
             if r["feasible"]:
-                print(f"θ_dep {r['theta_dep_urad']:2d} : {r['verdict']} ; RSS {r['rss_urad']:.1f} (arith. {r['arithmetic_urad']:.1f}) ; "
+                print(f"θ {r['theta_dep_urad']:2d} µrad (a_par {r['measurement']['a_par_um_s2']:.0f} µm/s², ½aT² à 10 s : {r['measurement']['position']['10']['ballistic_um']:.0f} µm) : {r['verdict']} ; RSS {r['rss_urad']:.1f} (arith. {r['arithmetic_urad']:.1f}) ; "
                       f"planéité {q['flatness_360_um']:.1f} µm ({q['flatness_100_um']:.2f}/100) ; balourd ≤ {q['puck_unbalance_um']:.1f} µm ; "
                       f"orifices ±{q['orifice_tol_um']:.1f} µm ; air ≤ {q['air_speed_mm_s']:.0f} mm/s ; ΔT air/plaque ≤ {q['air_minus_plate_K']:.2f} K ; "
                       f"local ≤ {q['room_ramp_K_h']:.2f} K/h ; recalage toutes les {q['recal_interval_h']:.1f} h ; coût ×{r['cost_index']:.1f}")
             else:
-                print(f"θ_dep {r['theta_dep_urad']:2d} : {r['verdict']}")
+                print(f"θ {r['theta_dep_urad']:2d} µrad : {r['verdict']}")
         print("→ results/passive_budget.json, results/passive_budget_table.md, figures/passive_budget.png")
 
     import matplotlib
@@ -369,10 +415,10 @@ def run(P=None, verbose=True):
         ax.bar(x, v, bottom=bottom, label=LABELS[k], width=0.6)
         bottom += v
     ax.set_xticks(x)
-    ax.set_xticklabels([f"θ_dep = {r['theta_dep_urad']}" for r in feas])
+    ax.set_xticklabels([f"θ = {r['theta_dep_urad']} µrad" for r in feas])
     ax.set_ylabel("variance allouée (µrad²)")
     ax.set_yscale("log")
-    ax.set_title(f"Budget passif : répartition de (0,8·θ_dep)² ; planchers : {floor_rss:.1f} µrad RSS", fontsize=10)
+    ax.set_title(f"Budget de force parasite : répartition de θ² ; planchers : {floor_rss:.1f} µrad RSS", fontsize=10)
     ax.legend(fontsize=7, loc="upper left")
     ax.grid(alpha=0.3, which="both", axis="y")
     fig.tight_layout()

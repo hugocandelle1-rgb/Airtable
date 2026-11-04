@@ -29,13 +29,13 @@
 | Poids propre | 15,5 µrad bruts (budget 10) ⇒ **finition de la face supérieure sur appuis de service**, caisson monté ⇒ résidu **1,7 µrad** (dont 1,7 µrad de frottement) | § 3 |
 | Inclinomètres | 4 × ADXL355 en (±220 ; ±220), face supérieure, bande pleine | la moyenne des 4 annule le dôme de pression et le bombé thermique (§ 6) |
 | Bâti | Bosch Rexroth rainure 10 : cadre 45×90, montants 45×90, ceintures et écharpes 45×45 sur 3 faces ; 1er mode **49 Hz** | > 30 Hz ; 26 Hz sans écharpes (§ 7) |
-| Variante économique | même plaque et mêmes appuis ; surfaçage 15–20 µm sur montage 3 appuis ; bâti « paillasse » | 205–251 µrad avant compensation, ≈ 11 µrad après (`04` § 6) |
+| Variante économique | **NON APPLICABLE** : elle supposait une compensation logicielle des pentes, exclue par l'utilisateur le 2026-11-03. Conservée pour mémoire (`04` § 6) | 205–251 µrad sans compensation |
 
 Les calculs de pression sont faits à 400 Pa (`design.toml`). Le lot aéro annonce
 57–297 Pa en service (375 Pa au maximum) : la pente de pression réelle est donc
 ≤ 2,6 µrad, et 2,0 µrad à 297 Pa.
 
-**Budget de pente (référence)**, somme quadratique **30,6 µrad** :
+**Budget de pente de la structure seule** (ancienne présentation), somme quadratique **30,6 µrad** :
 
 | Poste | Valeur |
 |---|---|
@@ -46,7 +46,22 @@ Les calculs de pression sont faits à 400 Pa (`design.toml`). Le lot aéro annon
 | Thermique | 1,4 µrad |
 | Sol | 5 µrad |
 
-Ce total ne tient **que si la face supérieure atteint ⏥ 2,8 µm**. Avec les 6 µm du CdC, le
+Ce total ne tient **que si la face supérieure atteint ⏥ 2,8 µm**.
+
+**Budget révisé (2026-11-04).** La table caractérise des actionneurs électrostatiques :
+toute force parasite dans le plan est une erreur de mesure, sans compensation.
+`passive_budget.py` cumule tous les postes en pente équivalente : structure, crantage,
+dispersion des orifices, balourd des palets, courants d'air. Résultats :
+
+- la conception actuelle donne **47 µrad** (crantage brut compris), soit
+  a_par ≈ 0,46 mm/s² ;
+- le niveau **θ = 50 µrad est tenu** ;
+- θ = 30 µrad exige une finition optique de 1,6 µm et la correction a posteriori du
+  crantage ;
+- θ = 20 µrad est à la limite (1,1 µm) ;
+- θ = 5–10 µrad ne sont pas réalisables (planchers techniques : 10,1 µrad).
+
+Détails dans `00_cahier_des_charges.md` § 3 et `04` § 6. Avec les 6 µm du CdC, le
 poste usinage vaut à lui seul 56 µrad (`04` § 1).
 
 ## 1. Homogénéisation de la zone percée, en fonction du pas
@@ -284,7 +299,7 @@ Le modèle EF utilise des poutres 3D, des assemblages semi-rigides (tronçons de
 | **Référence** | **écharpes 45×45 sur 3 faces (arrière, gauche, droite)** | **49** (torsion) / 63 / 92 Hz | 31,1 kg |
 | Référence | 4 faces | 63 / 77 / 96 Hz | 32,3 kg |
 | Référence, assemblages rigides (borne haute) | 3 faces | 55 / 68 / 97 Hz | 31,1 kg |
-| Paillasse (variante économique, montants de 300 mm) | aucun | 28 / 28 / 44 Hz | 5,1 kg |
+| Paillasse (variante économique **non applicable**, pour mémoire) | aucun | 28 / 28 / 44 Hz | 5,1 kg |
 | Paillasse | 3 faces | 86 / 104 / 155 Hz | 7,9 kg |
 
 - La face avant reste ouverte pour l'accès.

@@ -7,7 +7,7 @@
 
 [meta]
 status = "verified"                 # chaîne complète exécutée (run_all)
-date = "2026-11-03"
+date = "2026-11-04"
 source = "calc/structure/*.py (plate_fe vérifié Navier ; homogénéisation vérifiée cellule 2D/3D)"
 
 [plate]
@@ -72,7 +72,7 @@ lever_pitch_mm = 380
 lever_roll_mm = 475
 coarse = "4 pieds M16×2 sous le bâti (≈ 4 mrad/tour)"
 
-[leveling.economique]
+[leveling.economique]               # variante économique NON APPLICABLE (compensation exclue) ; gardé pour mémoire
 mechanism = "même coin 1:5 entraîné par ajusteur différentiel du commerce (type Thorlabs DAS110)"
 resolution_urad_per_rev_fine = 13.2
 resolution_urad_per_div = 0.26
@@ -110,7 +110,7 @@ ring_axis_height_mm = 745.0         # dessus du cadre 790, dessus de plaque 900 
 bracing = "écharpes 45×45 sur 3 faces (arrière, gauche, droite)"
 f1_Hz = 49                     # assemblages semi-rigides ; sans écharpes : 26 Hz
 mass_profiles_kg = 31.1
-economique = "paillasse : cadre 45×45, montants 300 mm, écharpes 3 faces, posé sur table existante"
+economique = "NON APPLICABLE — pour mémoire : paillasse, cadre 45×45, montants 300 mm, écharpes 3 faces"
 economique_f1_Hz = 86           # bâti seul ; la table support domine
 
 [machining]
@@ -118,12 +118,23 @@ finish_reference = "surfaçage diamant mono-pointe sur appuis de service (lest d
 flatness_perforated_um_required = 2.8   # pour 30 µrad (85 % forme)
 flatness_100_um_required = 0.53
 cdc_6um_gives_urad = 56             # incohérence du CdC à arbitrer
-finish_economique = "surfaçage fraise sur CN de précision, sur montage 3 appuis, 15–20 µm"
+finish_economique = "NON APPLICABLE (supposait une compensation logicielle, exclue le 2026-11-03)"
 economique_slope_urad = [205, 251]   # 15 / 20 µm, avant compensation
 drilling_hours_5935_holes = 20
 drilling_hours_17131_holes = 51
 
 [budget]
-reference_rss_urad = 30.6
-economique_rss_urad = 251
-economique_after_compensation_urad = 11
+reference_rss_urad = 30.6   # ancien budget (structure seule, sans crantage ni balourd) ; voir [parasitic_budget]
+economique_rss_urad_non_applicable = 251
+economique_after_compensation_urad_non_applicable = 11
+
+[parasitic_budget]                  # table de caractérisation : force parasite dans le plan = erreur de mesure
+criterion = "somme quadratique des pentes équivalentes ≤ θ = a_par/g (aucune compensation des palets)"
+min_theta_urad = 10.1             # tous postes au plancher, crantage corrigé a posteriori
+min_theta_without_cogging_correction_urad = 33.7
+current_design_rss_urad = 47.0   # conception actuelle, crantage brut compris
+level_5urad = { feasible = false }
+level_10urad = { feasible = false }
+level_20urad = { feasible = true, cogging_correction = true, a_par_um_s2 = 196, flatness_um = 1.1, flatness_100_um = 0.21, puck_unbalance_um = 7.7, orifice_tol_um = 4.5, air_speed_mm_s = 20, air_minus_plate_K = 0.71, room_ramp_K_h = 2.25, recal_interval_h = 1.0, cost_index = 9.3 }
+level_30urad = { feasible = true, cogging_correction = true, a_par_um_s2 = 294, flatness_um = 1.6, flatness_100_um = 0.31, puck_unbalance_um = 11.7, orifice_tol_um = 6.8, air_speed_mm_s = 25, air_minus_plate_K = 0.71, room_ramp_K_h = 2.25, recal_interval_h = 1.0, cost_index = 3.3 }
+level_50urad = { feasible = true, cogging_correction = false, a_par_um_s2 = 490, flatness_um = 2.8, flatness_100_um = 0.54, puck_unbalance_um = 10.0, orifice_tol_um = 5.0, air_speed_mm_s = 17, air_minus_plate_K = 0.71, room_ramp_K_h = 2.25, recal_interval_h = 1.0, cost_index = 1.3 }
