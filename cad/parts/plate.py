@@ -96,7 +96,10 @@ def hole_tool(P: dict) -> cq.Shape:
     r1, r2 = pl["counterbore_d_mm"] / 2.0, pl["orifice_d_mm"] / 2.0
     k = 1.0 / math.tan(math.radians(pl["cone_angle_deg"] / 2.0))      # hauteur du cône par unité de rayon
     z_apex = -v                                                        # sommet théorique du cône
-    prof = [(0.0, -t), (r1, -t), (r1, z_apex - r1 * k), (r2, z_apex - r2 * k), (r2, 0.5), (0.0, 0.5)]
+    if pl.get("full_cone", True):
+        prof = [(0.0, -t), (r1, -t), (r1, z_apex - r1 * k), (r2, z_apex - r2 * k), (r2, 0.5), (0.0, 0.5)]
+    else:                                                              # variante : fond plat à z = -voile (cône 118 deg omis)
+        prof = [(0.0, -t), (r1, -t), (r1, -v), (r2, -v), (r2, 0.5), (0.0, 0.5)]
     return cq.Workplane("XZ").polyline(prof).close().revolve(360, (0, 0, 0), (0, 1, 0)).val()
 
 

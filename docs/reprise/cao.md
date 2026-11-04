@@ -1,40 +1,35 @@
-# Reprise CAO (phase 2 interrompue sur quota) — aucun commit, TOML inchangé
+# Reprise CAO (phase 2 — état au 2026-11-04) — aucun commit, params/design.toml inchangé
 
-## État : phase 2 À MOITIÉ — `python3 -m cad.build_all` NE FONCTIONNE PLUS (frame/assembly/build_all périmés)
+## Fait (`python3 -m cad.build_all` fonctionne : 46 s avec SVG et plans, 12 s sans)
+- 117 pièces valides, **0 interférence** (84 paires testées), masse totale 84,5 kg (plaque complète analytique 23,43 kg ;
+  notes 23,5). 5935 trous = notes. Contrôles du rapport (`cad/export/rapport_cao.json`) tous vrais : validité,
+  interférences, dessus de plaque à 900 du sol, empilement vérin 44,95 (≈45), jeu caisson/cadre 6,5, jeu moteur/caisson ≥ 3 mm.
+- Modules : `common.py` (DEFAULTS sourcés [02]-[05], `levels`), `parts/{plate,plenum,leveling,aero,frame}.py`,
+  `assembly.py`, `build_all.py`, `drafting.py` (moteur de plan), `drawings.py` (6 plans), `README.md` à jour.
+- Plans 2D cotés SVG+PDF dans `cad/export/plans/` : plaque (A2, cotation ISO GPS de [04], planéité lue dans le TOML), vé/rouleaux,
+  vérin à coin, embase ADXL355, caisson + détail joint/cornière, diffuseur/adaptateur/buse (A3) ; cartouche ISO 2768-mK.
+- Arbitrages appliqués : sortie 9BMC non documentée (`docs/research/ventilateurs.md`) → boîte 42×30 « à confirmer » ;
+  moteur NEMA17 + bouton décalés de 3 mm (jeu 3,5) ; M10 de l'axe x à y = −100.
 
-### Fini et testé (pièces valides, 0 interférence dans leur groupe)
-- `cad/common.py` : DEFAULTS phase 2 (chaque cote cite sa note [02]/[03]/[04]/[05]), `support_points`
-  (3 vés du TOML), `vee_geometry`, `levels(P)` (z_CAD = z_notes − 900 ; cadre, appuis, caisson, chaîne, platine).
-  Profilés 45x45 / 45x90 / 40x40 / 40x80 et `bar(...)` conservés (inchangés).
-- `cad/parts/plate.py` : plaque 520x520x35, 5935 trous (outil étagé Ø2 / cône 118° / Ø0,30, comb + `shapes.cut` OBB),
-  sièges de billes Ø25,4, datums B/C, 32 M5, 12 M4 ADXL, 4 M10 (conflit [04] : x décalés à y=−100), chanfreins ;
-  masse plaque complète ≈ 23,4 kg (notes : 23,5). Billes Ø25,4. CSV/DXF mis à jour (non rejoués).
-- `cad/parts/plenum.py` : caisson suspendu 430 / parois 6, joint EPDM, cornière, tôle Ø2 pas 8 (5,5 %), média, déflecteur. Membrane supprimée.
-- `cad/parts/leveling.py` : blocs de vé + rouleaux, vérins à coin (boîtier, coin 1:5, tête, vis, moteur, bouton),
-  rehausse P0, étriers + patins PTFE, 4 embases ADXL355 (socle, plateau, billes, carte, capot).
-- `cad/parts/aero.py` : ventilateur 9BMC, manchon L100, adaptateur, diffuseur Ø50→Ø80 L245, conduit + vanne,
-  aspiration déportée (caisson 320x220x320, filtre, buse Ø30, tube). Sortie du ventilateur (42x30) NON documentée.
+## Plaque `--full`
+Outil étagé unique + `occ_impl.shapes.cut` (OBB). Phase 1 : coupe ≈ 226–294 s. Dans `build_all`, la version précédente (coupe + STEP
+dans le même délai) a été abandonnée à 600 s puis 900 s ; le worker envoie maintenant un message par étape (coupe, STL, STEP).
+Voir le champ `plaque_complete` de `cad/export/rapport_cao.json` ou de la dernière exécution `--full` (état noté dans le README / ci-dessous).
 
-### Non fait / périmé
-- `cad/parts/frame.py` : ANCIEN bâti (phase 1), incompatible avec le nouveau `levels` → à réécrire :
-  montants 45x90 en (±250 ; ±227,5), cadre 45x90 (x-poutres ±227,5, y-poutres ±182,5), ceintures 45x45
-  (z=150, 420 → CAD −750, −480), écharpes en 2 étages (rear/gauche/droite, mitrées par intersection), 4 pieds Ø80,
-  platine [200x440] + 4 plots, traverses à y=±200, écran PMMA 5 mm (parois à 0,5 du bord de zone, |x|,|y|≤179,5),
-  couvercle nid d'abeille, portique libre à x=±325.
-- `assembly.py`, `build_all.py` : à adapter (anciens appels plate/plenum, nouvelle liste de modules, groupes `appuis`, `capteurs`).
-- Plaque `--full` : mesure en cours interrompue (outil étagé + OBB : coupe ≈ 226 s en phase 1) ; STEP/STL non mesurés.
-- Mises en plan 2D cotées : NON COMMENCÉES (prévu : `cad/drafting.py` matplotlib SVG+PDF, A2 plaque/caisson, A3 autres,
-  cartouche ISO 2768-mK, GD&T de [04] §7).
-- Contrôles masses vs notes, `rapport_cao.json`, `cad/README.md` : à refaire après le bâti.
+## Points ouverts à arbitrer (structure)
+1. **Conflit notes 03/05** : les blocs de vé P1/P2 débordent de 3–4 mm dans la paroi du caisson (215–221) ; dégagement local dans `caisson`
+   (paroi ramenée à ~1 mm sur ~50 mm de long). Option : décaler les vés, ou une cornière de renfort.
+2. Écharpes en deux étages (étagère z = 420) ; coupes d'extrémité mitrées par intersection (à ajuster en atelier).
+3. Caisson d'aspiration 320×220×320 déporté devant le bâti (ne tient pas dans le cadre) ; portique caméra libre.
+4. Tolérances de planéité/parallélisme des plans vé, vérin, embase, caisson : non chiffrées dans les notes (valeurs « à valider »).
+5. Masse des profilés = masse linéique estimée non sourcée (docs/research/profiles_alu_et_mecanique.md à confirmer).
 
-## Étapes restantes (ordre)
-1. Réécrire `frame.py` ; adapter `assembly.py`/`build_all.py` ; lancer `python3 -m cad.build_all --no-svg` ; corriger interférences.
-2. Rejouer `--full` (timeout 900 s) et noter les temps ; mettre à jour README.
-3. Écrire `cad/drafting.py` + `cad/drawings.py` (plaque, vé, vérin, embase ADXL, caisson/cornière, aéro) ; exports PDF/SVG.
-4. Contrôles (isValid, interférences, masses vs notes : plaque 23,5 kg), `rapport_cao.json`, mise à jour de ce fichier.
-5. Points à arbitrer : jeu moteur NEMA/caisson 0,5 mm, M10 vs datums, sortie du 9BMC, implantation du caisson d'aspiration.
+## Étapes restantes
+- Valider/ajuster les plans avec le sous-traitant (hachures de coupe, dimensions complémentaires) ; plan du bloc de vé P0 (rehausse).
+- Rejouer `python3 -m cad.build_all --full --full-timeout 1500` hors charge pour consigner les temps coupe/STL/STEP.
+- Si le TOML resserre la planéité plaque : relancer `python3 -m cad.drawings` (les plans la relisent).
 
 ## Commandes
-    python3 -m cad.parts.plate          # plaque légère (OK)
-    python3 -c "from cad.common import *; from cad.parts import plenum,leveling,aero; P=get_params(); print(len(plenum.build(P)+leveling.build(P)+aero.build(P)))"
-    python3 -m cad.build_all --no-svg   # CASSÉ tant que frame/assembly/build_all ne sont pas adaptés
+    python3 -m cad.build_all [--no-svg] [--no-plans] [--full --full-timeout 1500] [--out DIR] [--set sec.cle=val]
+    python3 -m cad.drawings          # plans seuls
+    python3 -m cad.parts.plate       # test plaque

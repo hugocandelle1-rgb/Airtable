@@ -46,18 +46,20 @@ def _parse_overrides(items: list[str]) -> dict:
 
 
 def _full_plate_worker(overrides: dict, out_dir: str, q) -> None:
-    """Sous-processus : plaque complète -> STEP/STL (permet un délai maximal)."""
+    """Sous-processus : plaque complète. Envoie un message par étape (coupe, STL, STEP) pour que le
+    parent connaisse l'avancement même si le délai est dépassé pendant l'export."""
     t0 = time.time()
     try:
         P = get_params(overrides)
         w = plate_mod.build_plate(P, "full")
         v = w.val()
-        res = {"ok": True, "valid": bool(v.isValid()), "volume_mm3": v.Volume(), "t_build_s": time.time() - t0}
+        q.put({"etape": "coupe", "valide": bool(v.isValid()), "volume_mm3": v.Volume(), "t_s": round(time.time() - t0, 1)})
+        cq.exporters.export(w, str(Path(out_dir) / "plaque_full.stl"), tolerance=0.05, angularTolerance=0.3)
+        q.put({"etape": "stl", "t_s": round(time.time() - t0, 1)})
         cq.exporters.export(w, str(Path(out_dir) / "plaque_full.step"))
-        res["t_step_s"] = time.time() - t0
-        q.put(res)
+        q.put({"etape": "step", "t_s": round(time.time() - t0, 1)})
     except Exception as e:  # pragma: no cover
-        q.put({"ok": False, "erreur": repr(e), "t_s": time.time() - t0})
+        q.put({"etape": "erreur", "erreur": repr(e), "t_s": round(time.time() - t0, 1)})
 
 
 def build_full_plate(overrides: dict, timeout_s: float, out_dir: Path) -> dict:
@@ -65,16 +67,29 @@ def build_full_plate(overrides: dict, timeout_s: float, out_dir: Path) -> dict:
     pr = mp.Process(target=_full_plate_worker, args=(overrides, str(out_dir), q))
     t0 = time.time()
     pr.start()
-    pr.join(timeout_s)
-    if pr.is_alive():
+    steps: dict = {}
+    while time.time() - t0 < timeout_s:
+        try:
+            m = q.get(timeout=2.0)
+            steps[m.pop("etape")] = m
+            if "step" in steps or "erreur" in steps:
+                break
+        except Exception:
+            if not pr.is_alive() and q.empty():
+                break
+    abandoned = pr.is_alive()
+    if abandoned:
         pr.terminate()
-        pr.join()
-        return {"ok": False, "abandonne": True, "delai_s": timeout_s,
-                "note": "génération complète abandonnée (> délai) : le modèle léger est conservé"}
-    res = q.get() if not q.empty() else {"ok": False, "erreur": "pas de résultat"}
-    res["t_total_s"] = round(time.time() - t0, 1)
-    if res.get("ok"):
-        res["masse_cad_kg"] = round(res["volume_mm3"] * 1e-9 * get_params(overrides)["plate"]["rho"], 3)
+    pr.join()
+    res = {"etapes": steps, "abandonne": abandoned, "delai_s": timeout_s, "t_total_s": round(time.time() - t0, 1),
+           "ok": "step" in steps}
+    if "coupe" in steps:
+        rho = get_params(overrides)["plate"]["rho"]
+        res["valide"] = steps["coupe"]["valide"]
+        res["masse_cad_kg"] = round(steps["coupe"]["volume_mm3"] * 1e-9 * rho, 3)
+    if abandoned:
+        res["note"] = ("export abandonné au-delà du délai ; étapes terminées : " + ", ".join(steps) +
+                       " (modèle léger conservé pour l'assemblage)")
     return res
 
 

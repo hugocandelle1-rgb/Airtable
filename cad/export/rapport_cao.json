@@ -6,13 +6,14 @@
     "cadquery": "2.8.0"
   },
   "temps_generation_s": {
-    "construction_pieces_s": 3.92,
-    "csv_dxf_plaque_s": 0.54,
-    "step_stl_pieces_s": 1.4,
-    "assemblage_step_s": 1.45,
-    "svg_s": 28.99,
-    "interferences_s": 1.32,
-    "total_s": 38.5
+    "construction_pieces_s": 3.97,
+    "csv_dxf_plaque_s": 0.56,
+    "step_stl_pieces_s": 1.42,
+    "assemblage_step_s": 1.24,
+    "svg_s": 27.74,
+    "interferences_s": 1.48,
+    "plans_s": 5.45,
+    "total_s": 42.6
   },
   "plaque": {
     "nb_trous_reseau": 5935,
@@ -33,6 +34,32 @@
     "taux_ouverture": 0.05493122363005561,
     "volume_retire_mm3": 10062.521269448107,
     "taux_ouverture_vise": 0.057
+  },
+  "plans": {
+    "plaque": [
+      "plan_plaque.svg",
+      "plan_plaque.pdf"
+    ],
+    "vee": [
+      "plan_vee.svg",
+      "plan_vee.pdf"
+    ],
+    "verin": [
+      "plan_verin.svg",
+      "plan_verin.pdf"
+    ],
+    "adxl": [
+      "plan_adxl.svg",
+      "plan_adxl.pdf"
+    ],
+    "caisson": [
+      "plan_caisson.svg",
+      "plan_caisson.pdf"
+    ],
+    "aero": [
+      "plan_aero.svg",
+      "plan_aero.pdf"
+    ]
   },
   "jeu_moteur_caisson_mm": 3.5,
   "caisson_note": "caisson 430 x 430 int., parois/fond 6 mm, entrée Ø80, 4 piquages Ø4 ; dégagements locaux de paroi face aux vés [1, 2] (CONFLIT notes [03]/[05], à arbitrer)",

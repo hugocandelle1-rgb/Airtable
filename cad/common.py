@@ -46,6 +46,7 @@ DEFAULTS: dict = {
         "edge_band_mm": 1.0,             # [04] trous à >= 1 mm du bord de zone -> 5 935 trous
         "chamfer_mm": 1.0,               # [04] chanfreins 1 x 45 deg
         "cone_angle_deg": 118.0,         # [02] fond conique du lamage
+        "full_cone": True,               # False : modèle complet à fond plat (génération beaucoup plus rapide ?)
         "witness_holes": 19,             # modèle léger : amas central de trous témoins
         "datum_B_mm": [-240.0, 0.0],     # [04] alésage Ø6 H7 débouchant
         "datum_C_mm": [240.0, 0.0],      # [04] lumière 6 H7 x 10, grand axe selon x
